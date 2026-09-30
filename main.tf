@@ -58,3 +58,57 @@ resource "azurerm_subnet" "snet_pep" {
   address_prefixes                  = ["192.168.14.0/27"]
   private_endpoint_network_policies = "Enabled"
 }
+
+resource "azurerm_application_security_group" "asg_proxy" {
+  name                = "asg-proxy"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+resource "azurerm_application_security_group" "asg_vpn" {
+  name                = "asg-vpn"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+resource "azurerm_application_security_group" "asg_portal" {
+  name                = "asg-portal"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+resource "azurerm_application_security_group" "asg_website" {
+  name                = "asg-website"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+resource "azurerm_application_security_group" "asg_media" {
+  name                = "asg-media"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+resource "azurerm_application_security_group" "asg_ftp" {
+  name                = "asg-ftp"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+resource "azurerm_application_security_group" "asg_app" {
+  name                = "asg-app"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+resource "azurerm_application_security_group" "asg_fs" {
+  name                = "asg-fs"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
+
+resource "azurerm_application_security_group" "asg_mgmt" {
+  name                = "asg-mgmt"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+}
