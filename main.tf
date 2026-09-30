@@ -114,3 +114,57 @@ resource "azurerm_application_security_group" "asg_mgmt" {
   resource_group_name = data.azurerm_resource_group.rg.name
 }
 
+resource "azurerm_network_security_group" "nsg_edge" {
+  name                = "nsg-edge"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  security_rule {
+    name                                       = "allow-openvpn"
+    priority                                   = 100
+    direction                                  = "Inbound"
+    access                                     = "Allow"
+    protocol                                   = "Udp"
+    source_port_range                          = "*"
+    destination_port_range                     = "1194"
+    source_address_prefix                      = "Internet"
+    destination_application_security_group_ids = [azurerm_application_security_group.asg_vpn.id]
+  }
+
+  security_rule {
+    name                                       = "allow-https"
+    priority                                   = 110
+    direction                                  = "Inbound"
+    access                                     = "Allow"
+    protocol                                   = "Tcp"
+    source_port_range                          = "*"
+    destination_port_range                     = "443"
+    source_address_prefix                      = "Internet"
+    destination_application_security_group_ids = [azurerm_application_security_group.asg_proxy.id]
+  }
+
+  security_rule {
+    name                   = "allow-sftp-partners"
+    priority               = 120
+    direction              = "Inbound"
+    access                 = "Allow"
+    protocol               = "Tcp"
+    source_port_range      = "*"
+    destination_port_range = "22"
+    # Deze reeks wordt later vervangen (TEST-NET-3), vervang met parnter IP-ranges
+    source_address_prefix                      = "203.0.113.0/24"
+    destination_application_security_group_ids = [azurerm_application_security_group.asg_proxy.id]
+  }
+
+  security_rule {
+    name                       = "deny-all-inbound"
+    priority                   = 4096
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
