@@ -1,0 +1,38 @@
+# Local provider plugins and modules (recreated with `terraform init`)
+.terraform/
+
+# State files contain secrets in plain text; never commit them
+*.tfstate
+*.tfstate.*
+
+# Saved plans
+*.tfplan
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Variable files that may contain passwords or secrets
+*.tfvars
+*.tfvars.json
+
+# Local overrides meant only for the individual developer
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Personal Terraform CLI configuration
+.terraformrc
+terraform.rc
+
+# macOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Note: .terraform.lock.hcl is intentionally NOT ignored;
+# commit it so the whole team uses the same provider versions.
