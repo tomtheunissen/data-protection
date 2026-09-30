@@ -10,6 +10,7 @@ terraform {
 provider "azurerm" {
   features {}
   resource_provider_registrations = "none"
+  subscription_id                 = "91760767-8ba3-4fab-9b01-fe9df3819f4b"
 }
 
 data "azurerm_resource_group" "rg" {
@@ -112,3 +113,4 @@ resource "azurerm_application_security_group" "asg_mgmt" {
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
 }
+
