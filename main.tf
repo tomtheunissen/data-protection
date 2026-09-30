@@ -151,7 +151,7 @@ resource "azurerm_network_security_group" "nsg_edge" {
     protocol               = "Tcp"
     source_port_range      = "*"
     destination_port_range = "22"
-    # Deze reeks wordt later vervangen (TEST-NET-3), vervang met parnter IP-ranges
+    # Deze reeks wordt later vervangen (TEST-NET-3), vervang met partner IP-ranges
     source_address_prefix                      = "203.0.113.0/24"
     destination_application_security_group_ids = [azurerm_application_security_group.asg_proxy.id]
   }
@@ -167,4 +167,9 @@ resource "azurerm_network_security_group" "nsg_edge" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+}
+
+resource "azurerm_subnet_network_security_group_association" "nsg_assoc_edge" {
+  subnet_id                 = azurerm_subnet.snet_edge.id
+  network_security_group_id = azurerm_network_security_group.nsg_edge.id
 }
