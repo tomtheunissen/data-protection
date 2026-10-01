@@ -438,3 +438,18 @@ resource "azurerm_route_table" "rt_vpn" {
     next_hop_in_ip_address = local.vpn_ip
   }
 }
+
+resource "azurerm_subnet_route_table_association" "rt_assoc_backend" {
+  subnet_id      = azurerm_subnet.snet_backend.id
+  route_table_id = azurerm_route_table.rt_vpn.id
+}
+
+resource "azurerm_subnet_route_table_association" "rt_assoc_mgmt" {
+  subnet_id      = azurerm_subnet.snet_mgmt.id
+  route_table_id = azurerm_route_table.rt_vpn.id
+}
+
+resource "azurerm_subnet_route_table_association" "rt_assoc_pep" {
+  subnet_id      = azurerm_subnet.snet_pep.id
+  route_table_id = azurerm_route_table.rt_vpn.id
+}
