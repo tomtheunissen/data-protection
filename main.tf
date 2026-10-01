@@ -166,6 +166,18 @@ resource "azurerm_network_security_group" "nsg_edge" {
   }
 
   security_rule {
+    name                                  = "allow-mgmt"
+    priority                              = 130
+    direction                             = "Inbound"
+    access                                = "Allow"
+    protocol                              = "Tcp"
+    source_port_range                     = "*"
+    destination_port_range                = "22"
+    source_application_security_group_ids = [azurerm_application_security_group.asg_mgmt.id]
+    destination_address_prefix            = azurerm_subnet.snet_edge.address_prefixes[0]
+  }
+
+  security_rule {
     name                       = "deny-all-inbound"
     priority                   = 4096
     direction                  = "Inbound"
@@ -231,7 +243,7 @@ resource "azurerm_network_security_group" "nsg_frontend" {
     access                                = "Allow"
     protocol                              = "Tcp"
     source_port_range                     = "*"
-    destination_port_ranges               = ["3389", "22"]
+    destination_port_range                = "22"
     source_application_security_group_ids = [azurerm_application_security_group.asg_mgmt.id]
     destination_address_prefix            = azurerm_subnet.snet_frontend.address_prefixes[0]
   }
@@ -290,7 +302,7 @@ resource "azurerm_network_security_group" "nsg_backend" {
     access                                = "Allow"
     protocol                              = "Tcp"
     source_port_range                     = "*"
-    destination_port_ranges               = ["3389", "22"]
+    destination_port_range                = "22"
     source_application_security_group_ids = [azurerm_application_security_group.asg_mgmt.id]
     destination_address_prefix            = azurerm_subnet.snet_backend.address_prefixes[0]
   }
@@ -325,7 +337,7 @@ resource "azurerm_network_security_group" "nsg_mgmt" {
     access                                     = "Allow"
     protocol                                   = "Tcp"
     source_port_range                          = "*"
-    destination_port_ranges                    = ["3389", "22"]
+    destination_port_range                     = "22"
     source_address_prefix                      = local.admin_pool
     destination_application_security_group_ids = [azurerm_application_security_group.asg_mgmt.id]
   }
@@ -452,4 +464,20 @@ resource "azurerm_subnet_route_table_association" "rt_assoc_mgmt" {
 resource "azurerm_subnet_route_table_association" "rt_assoc_pep" {
   subnet_id      = azurerm_subnet.snet_pep.id
   route_table_id = azurerm_route_table.rt_vpn.id
+}
+
+resource "azurerm_public_ip" "pip_proxy" {
+  name                = "pip-proxy-01"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_public_ip" "pip_vpn" {
+  name                = "pip-vpn-01"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
 }
