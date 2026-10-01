@@ -23,6 +23,7 @@ locals {
   pep_sensitivedata_ip = "192.168.14.4"
   pep_sql_ip           = "192.168.14.5"
   pep_webapp_ip        = "192.168.14.6"
+  vpn_ip               = "192.168.1.5"
 }
 
 resource "azurerm_virtual_network" "vnet" {
@@ -416,4 +417,24 @@ resource "azurerm_network_security_group" "nsg_pep" {
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_pep" {
   subnet_id                 = azurerm_subnet.snet_pep.id
   network_security_group_id = azurerm_network_security_group.nsg_pep.id
+}
+
+resource "azurerm_route_table" "rt_vpn" {
+  name                = "rt-vpn"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+
+  route {
+    name                   = "to-employee-pool"
+    address_prefix         = local.employee_pool
+    next_hop_type          = "VirtualAppliance"
+    next_hop_in_ip_address = local.vpn_ip
+  }
+
+  route {
+    name                   = "to-admin-pool"
+    address_prefix         = local.admin_pool
+    next_hop_type          = "VirtualAppliance"
+    next_hop_in_ip_address = local.vpn_ip
+  }
 }
