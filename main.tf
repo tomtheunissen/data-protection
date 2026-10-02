@@ -24,6 +24,7 @@ locals {
   pep_sql_ip           = "192.168.14.5"
   pep_webapp_ip        = "192.168.14.6"
   vpn_ip               = "192.168.1.5"
+  admin_username       = "azureadmin"
 
   vms = {
     proxy-01 = {
@@ -33,6 +34,7 @@ locals {
       ip_forwarding = false
       has_asg       = true
       asg_id        = azurerm_application_security_group.asg_proxy.id
+      size          = "Standard_B2s"
     }
     vpn-01 = {
       subnet_id     = azurerm_subnet.snet_edge.id
@@ -41,6 +43,7 @@ locals {
       ip_forwarding = true
       has_asg       = true
       asg_id        = azurerm_application_security_group.asg_vpn.id
+      size          = "Standard_B2s"
     }
     web-01 = {
       subnet_id     = azurerm_subnet.snet_frontend.id
@@ -49,6 +52,7 @@ locals {
       ip_forwarding = false
       has_asg       = true
       asg_id        = azurerm_application_security_group.asg_portal.id
+      size          = "Standard_B1s"
     }
     web-02 = {
       subnet_id     = azurerm_subnet.snet_frontend.id
@@ -57,6 +61,7 @@ locals {
       ip_forwarding = false
       has_asg       = true
       asg_id        = azurerm_application_security_group.asg_website.id
+      size          = "Standard_B1s"
     }
     media-01 = {
       subnet_id     = azurerm_subnet.snet_frontend.id
@@ -65,6 +70,7 @@ locals {
       ip_forwarding = false
       has_asg       = true
       asg_id        = azurerm_application_security_group.asg_media.id
+      size          = "Standard_B2s"
     }
     ftp-01 = {
       subnet_id     = azurerm_subnet.snet_frontend.id
@@ -73,6 +79,7 @@ locals {
       ip_forwarding = false
       has_asg       = true
       asg_id        = azurerm_application_security_group.asg_ftp.id
+      size          = "Standard_B1s"
     }
     app-01 = {
       subnet_id     = azurerm_subnet.snet_backend.id
@@ -81,6 +88,7 @@ locals {
       ip_forwarding = false
       has_asg       = true
       asg_id        = azurerm_application_security_group.asg_app.id
+      size          = "Standard_B1s"
     }
     fs-01 = {
       subnet_id     = azurerm_subnet.snet_backend.id
@@ -89,6 +97,7 @@ locals {
       ip_forwarding = false
       has_asg       = true
       asg_id        = azurerm_application_security_group.asg_fs.id
+      size          = "Standard_B1s"
     }
     mgmt-01 = {
       subnet_id     = azurerm_subnet.snet_mgmt.id
@@ -97,6 +106,7 @@ locals {
       ip_forwarding = false
       has_asg       = true
       asg_id        = azurerm_application_security_group.asg_mgmt.id
+      size          = "Standard_B1s"
     }
     ids-01 = {
       subnet_id     = azurerm_subnet.snet_mgmt.id
@@ -105,6 +115,7 @@ locals {
       ip_forwarding = false
       has_asg       = false
       asg_id        = null
+      size          = "Standard_B2s"
     }
   }
 }
@@ -585,4 +596,31 @@ resource "azurerm_network_interface_application_security_group_association" "nic
   for_each                      = { for k, v in local.vms : k => v if v.has_asg }
   network_interface_id          = azurerm_network_interface.nic[each.key].id
   application_security_group_id = each.value.asg_id
+}
+
+resource "azurerm_linux_virtual_machine" "vm" {
+  for_each              = local.vms
+  name                  = "vm-${each.key}"
+  location              = data.azurerm_resource_group.rg.location
+  resource_group_name   = data.azurerm_resource_group.rg.name
+  size                  = each.value.size
+  admin_username        = local.admin_username
+  network_interface_ids = [azurerm_network_interface.nic[each.key].id]
+
+  admin_ssh_key {
+    username   = local.admin_username
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "ubuntu-24_04-lts"
+    sku       = "server"
+    version   = "latest"
+  }
 }
