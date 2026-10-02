@@ -31,6 +31,7 @@ locals {
       ip            = "192.168.1.4"
       pip_id        = azurerm_public_ip.pip_proxy.id
       ip_forwarding = false
+      has_asg       = true
       asg_id        = azurerm_application_security_group.asg_proxy.id
     }
     vpn-01 = {
@@ -38,6 +39,7 @@ locals {
       ip            = local.vpn_ip
       pip_id        = azurerm_public_ip.pip_vpn.id
       ip_forwarding = true
+      has_asg       = true
       asg_id        = azurerm_application_security_group.asg_vpn.id
     }
     web-01 = {
@@ -45,6 +47,7 @@ locals {
       ip            = "192.168.4.4"
       pip_id        = null
       ip_forwarding = false
+      has_asg       = true
       asg_id        = azurerm_application_security_group.asg_portal.id
     }
     web-02 = {
@@ -52,6 +55,7 @@ locals {
       ip            = "192.168.4.5"
       pip_id        = null
       ip_forwarding = false
+      has_asg       = true
       asg_id        = azurerm_application_security_group.asg_website.id
     }
     media-01 = {
@@ -59,6 +63,7 @@ locals {
       ip            = "192.168.4.6"
       pip_id        = null
       ip_forwarding = false
+      has_asg       = true
       asg_id        = azurerm_application_security_group.asg_media.id
     }
     ftp-01 = {
@@ -66,6 +71,7 @@ locals {
       ip            = "192.168.4.7"
       pip_id        = null
       ip_forwarding = false
+      has_asg       = true
       asg_id        = azurerm_application_security_group.asg_ftp.id
     }
     app-01 = {
@@ -73,6 +79,7 @@ locals {
       ip            = "192.168.8.4"
       pip_id        = null
       ip_forwarding = false
+      has_asg       = true
       asg_id        = azurerm_application_security_group.asg_app.id
     }
     fs-01 = {
@@ -80,6 +87,7 @@ locals {
       ip            = "192.168.8.5"
       pip_id        = null
       ip_forwarding = false
+      has_asg       = true
       asg_id        = azurerm_application_security_group.asg_fs.id
     }
     mgmt-01 = {
@@ -87,6 +95,7 @@ locals {
       ip            = "192.168.13.4"
       pip_id        = null
       ip_forwarding = false
+      has_asg       = true
       asg_id        = azurerm_application_security_group.asg_mgmt.id
     }
     ids-01 = {
@@ -94,6 +103,7 @@ locals {
       ip            = "192.168.13.5"
       pip_id        = null
       ip_forwarding = false
+      has_asg       = false
       asg_id        = null
     }
   }
@@ -569,4 +579,10 @@ resource "azurerm_network_interface" "nic" {
     private_ip_address            = each.value.ip
     public_ip_address_id          = each.value.pip_id
   }
+}
+
+resource "azurerm_network_interface_application_security_group_association" "nic_asg" {
+  for_each                      = { for k, v in local.vms : k => v if v.has_asg }
+  network_interface_id          = azurerm_network_interface.nic[each.key].id
+  application_security_group_id = each.value.asg_id
 }
