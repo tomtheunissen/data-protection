@@ -21,3 +21,15 @@ variable "ssh_public_key_path" {
   type        = string
   default     = "~/.ssh/id_rsa.pub"
 }
+
+variable "sql_admin_login" {
+  description = "Email address of the Microsoft Entra user that administers the SQL server"
+  type        = string
+  default     = "2503297theunissen@zuyd.nl"
+}
+
+variable "sql_admin_object_id" {
+  description = "Object ID of the Microsoft Entra user that administers the SQL server"
+  type        = string
+  default     = "d0874a5b-50f8-4259-a0c0-07db7f3927a3"
+}
