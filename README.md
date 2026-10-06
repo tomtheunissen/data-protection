@@ -72,12 +72,13 @@ terraform plan -var="ssh_public_key_path=~/.ssh/my_key.pub"
 | `security.tf` | Application security groups, network security groups with their rules, and NSG subnet associations |
 | `compute.tf` | Network interfaces, ASG associations and the ten Linux VMs |
 | `outputs.tf` | Public IP addresses of the proxy and VPN server, and private IP addresses of all VMs for the Ansible inventory |
+| `database.tf` | Azure SQL server `sql-zkoo-01` and database `sqldb-zkoo-01`, with public access disabled and Entra ID authentication only |
 
 ### Planned files
 
 | File | Planned contents |
 |---|---|
-| `database.tf` | Azure SQL server `sql-zkoo-01` and database `sqldb-zkoo-01`, with public access disabled and Entra ID authentication only |
+
 | `storage.tf` | Storage account `stzkoosensitive01` with an Azure Files share for sensitive medical files, public access disabled, soft delete enabled |
 | `appservice.tf` | App Service plan, `app-zkoo-02` (private, reachable only through its private endpoint) and `app-zkoo-03` (public endpoint, restricted to the proxy's public IP) |
 | `private_endpoints.tf` | Private endpoints `pep-sql`, `pep-sensitivedata` and `pep-webapp` with fixed addresses, private DNS zones and their VNet links |
