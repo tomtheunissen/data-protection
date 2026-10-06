@@ -78,7 +78,6 @@ terraform plan -var="ssh_public_key_path=~/.ssh/my_key.pub"
 
 | File | Planned contents |
 |---|---|
-
 | `storage.tf` | Storage account `stzkoosensitive01` with an Azure Files share for sensitive medical files, public access disabled, soft delete enabled |
 | `appservice.tf` | App Service plan, `app-zkoo-02` (private, reachable only through its private endpoint) and `app-zkoo-03` (public endpoint, restricted to the proxy's public IP) |
 | `private_endpoints.tf` | Private endpoints `pep-sql`, `pep-sensitivedata` and `pep-webapp` with fixed addresses, private DNS zones and their VNet links |
