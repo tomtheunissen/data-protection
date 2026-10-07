@@ -29,9 +29,13 @@ resource "azurerm_linux_virtual_machine" "vm" {
   admin_username        = var.admin_username
   network_interface_ids = [azurerm_network_interface.nic[each.key].id]
 
-  admin_ssh_key {
-    username   = var.admin_username
-    public_key = file(var.ssh_public_key_path)
+  # One key block per public key file in ssh-keys/, so every team member can log in
+  dynamic "admin_ssh_key" {
+    for_each = fileset("${path.module}/ssh-keys", "*.pub")
+    content {
+      username   = var.admin_username
+      public_key = file("${path.module}/ssh-keys/${admin_ssh_key.value}")
+    }
   }
 
   os_disk {
