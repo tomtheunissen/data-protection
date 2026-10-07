@@ -16,12 +16,6 @@ variable "admin_username" {
   default     = "azureadmin"
 }
 
-variable "ssh_public_key_path" {
-  description = "Path to the SSH public key used for the admin account"
-  type        = string
-  default     = "~/.ssh/id_rsa.pub"
-}
-
 variable "sql_admin_login" {
   description = "Email address of the Microsoft Entra user that administers the SQL server"
   type        = string
