@@ -26,6 +26,12 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+# SSH keys: only public keys (.pub) and the README may be committed,
+# so a private key copied here by mistake never ends up in Git
+terraform/ssh-keys/*
+!terraform/ssh-keys/*.pub
+!terraform/ssh-keys/README.md
+
 # macOS system files
 .DS_Store
 
