@@ -116,7 +116,7 @@ Every team member's **public** key is stored in `terraform/ssh-keys/` as `<first
 
 ## Naming convention
 
-Resources follow the Microsoft Cloud Adoption Framework: `<type>-<role>-<number>`, in lowercase. Examples: `vm-web-01`, `nsg-edge`, `pep-sql`. Storage accounts do not allow hyphens, so their name is written as one word: `stzkoosensitive01`.
+Resources follow the Microsoft Cloud Adoption Framework: `<type>-<role>-<number>`, in lowercase. Examples: `vm-web-01`, `nic-web-01`, `osdisk-web-01`, `nsg-edge`, `pep-sql`. Storage accounts do not allow hyphens, so their name is written as one word: `stzkoosensitive01`.
 
 Inside the code, Terraform resource names use underscores (`snet_edge`), while the Azure names use hyphens (`snet-edge`).
 
