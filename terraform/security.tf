@@ -88,9 +88,9 @@ resource "azurerm_network_security_group" "nsg_edge" {
     access                 = "Allow"
     protocol               = "Tcp"
     source_port_range      = "*"
-    destination_port_range = "22"
+    destination_port_range = "2222"
     # Deze reeks wordt later vervangen (TEST-NET-3), vervang met partner IP-ranges
-    source_address_prefix                      = "203.0.113.0/24"
+    source_address_prefixes                    = var.partner_ip_ranges
     destination_application_security_group_ids = [azurerm_application_security_group.asg_proxy.id]
   }
 
@@ -117,6 +117,22 @@ resource "azurerm_network_security_group" "nsg_edge" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+}
+
+# Temporary rule to configure vm-vpn-01 before the VPN works; only exists when bootstrap_ssh_ips is set
+resource "azurerm_network_security_rule" "bootstrap_ssh" {
+  count                                      = length(var.bootstrap_ssh_ips) > 0 ? 1 : 0
+  name                                       = "allow-bootstrap-ssh"
+  priority                                   = 140
+  direction                                  = "Inbound"
+  access                                     = "Allow"
+  protocol                                   = "Tcp"
+  source_port_range                          = "*"
+  destination_port_range                     = "22"
+  source_address_prefixes                    = var.bootstrap_ssh_ips
+  destination_application_security_group_ids = [azurerm_application_security_group.asg_vpn.id]
+  resource_group_name                        = data.azurerm_resource_group.rg.name
+  network_security_group_name                = azurerm_network_security_group.nsg_edge.name
 }
 
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_edge" {
@@ -269,6 +285,18 @@ resource "azurerm_network_security_group" "nsg_mgmt" {
     destination_port_range                     = "22"
     source_address_prefix                      = local.admin_pool
     destination_application_security_group_ids = [azurerm_application_security_group.asg_mgmt.id]
+  }
+
+  security_rule {
+    name                                  = "allow-ssh-mgmt"
+    priority                              = 110
+    direction                             = "Inbound"
+    access                                = "Allow"
+    protocol                              = "Tcp"
+    source_port_range                     = "*"
+    destination_port_range                = "22"
+    source_application_security_group_ids = [azurerm_application_security_group.asg_mgmt.id]
+    destination_address_prefix            = local.vms["ids-01"].ip
   }
 
   security_rule {

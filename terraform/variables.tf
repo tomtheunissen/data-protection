@@ -27,3 +27,15 @@ variable "sql_admin_object_id" {
   type        = string
   default     = "d0874a5b-50f8-4259-a0c0-07db7f3927a3"
 }
+
+variable "partner_ip_ranges" {
+  description = "Public IP ranges of external partners allowed to use SFTP. Placeholder (TEST-NET-3) until the real partner ranges are known."
+  type        = list(string)
+  default     = ["203.0.113.0/24"]
+}
+
+variable "bootstrap_ssh_ips" {
+  description = "Temporary public IPs (CIDR) allowed to SSH to vm-vpn-01 before the VPN is configured. Leave empty after bootstrap."
+  type        = list(string)
+  default     = []
+}

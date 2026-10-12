@@ -38,6 +38,14 @@ resource "azurerm_linux_virtual_machine" "vm" {
     }
   }
 
+  # Systeem aangewezen identiteit enkel voor VMs die wachtwoordloze toegang tot Azure services nodig hebben
+  dynamic "identity" {
+    for_each = each.value.managed_identity ? [1] : []
+    content {
+      type = "SystemAssigned"
+    }
+  }
+
   os_disk {
     name                 = "osdisk-${each.key}"
     caching              = "ReadWrite"
