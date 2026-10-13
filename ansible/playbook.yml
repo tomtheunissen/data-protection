@@ -1,0 +1,78 @@
+---
+#hosts-all
+- name: all_host_requirements
+  hosts: all
+  become: true
+
+  tasks: 
+    - name: System update
+      ansible.builtin.apt: 
+        update_cache: true
+        cache_valid_time: 3600
+        upgrade: dist
+  
+    - name: Timezone Setup
+      community.general.timezone: 
+        name: Europe/Amsterdam
+
+    - name: chrony install
+      ansible.builtin.apt: 
+        name: chrony
+        state: present
+
+    - name: chrony startup
+      ansible.builtin.service:
+        name: chrony
+        state: started
+        enabled: true
+      
+    - name: BasePackages install
+      ansible.builtin.apt:
+        name:
+          - ufw
+          - fail2ban
+          - auditd
+          - unattended-upgrades
+        state: present
+
+    - name: unattended-upgrades startup
+      ansible.builtin.copy:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        content: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Unattended-Upgrade "1";
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: auditd startup
+      ansible.builtin.service:
+        name: auditd
+        state: started
+        enabled: true
+
+
+
+
+
+
+#snet-edge
+- name: 
+
+
+
+#snet-frontend
+- name:
+
+
+
+#snet-backend
+- name:
+
+
+#snet-mgmt
+- name:
+
+
+#snet-pep
+- name:
