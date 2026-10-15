@@ -1,41 +1,49 @@
 ---
-#hosts-all
-- name: all_host_requirements
+# Base configuration for every VM
+- name: All host requirements
   hosts: all
   become: true
 
-  tasks: 
+  vars:
+    # Sources allowed to SSH in; defaults to the jump host, override per group/host in the inventory
+    ssh_allowed_from: "{{ ssh_sources | default(['192.168.13.4']) }}"
+
+  handlers:
+    - name: Restart ssh
+      ansible.builtin.service:
+        name: ssh
+        state: restarted
+
+  tasks:
     - name: System update
-      ansible.builtin.apt: 
+      ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
         upgrade: dist
-  
-    - name: Timezone Setup
+
+    - name: Check if a reboot is required
+      ansible.builtin.stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Reboot after kernel or library updates
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+      when: reboot_required.stat.exists
+
+    - name: Timezone setup
       community.general.timezone: 
         name: Europe/Amsterdam
 
-    - name: chrony install
-      ansible.builtin.apt: 
-        name: chrony
-        state: present
-
-    - name: chrony startup
-      ansible.builtin.service:
-        name: chrony
-        state: started
-        enabled: true
-      
-    - name: BasePackages install
+    - name: Base packages install
       ansible.builtin.apt:
         name:
           - ufw
-          - fail2ban
           - auditd
           - unattended-upgrades
         state: present
 
-    - name: unattended-upgrades startup
+    - name: Unattended-upgrades setup
       ansible.builtin.copy:
         dest: /etc/apt/apt.conf.d/20auto-upgrades
         content: |
@@ -45,34 +53,116 @@
         group: root
         mode: "0644"
 
-    - name: auditd startup
+    # chrony is preinstalled on Azure Ubuntu images and synced to the host PTP clock; only ensure it runs
+    - name: Base services startup
       ansible.builtin.service:
-        name: auditd
+        name: "{{ item }}"
         state: started
         enabled: true
+      loop:
+        - chrony
+        - auditd
+
+    # SSH hardening
+
+    - name: Team public keys
+      ansible.posix.authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ lookup('ansible.builtin.file', item) }}"
+        state: present
+      loop: "{{ query('ansible.builtin.fileglob', playbook_dir + '/files/ssh-keys/*.pub') }}"
+
+    - name: SSH hardening config
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/10-hardening.conf
+        content: |
+          PasswordAuthentication no
+          KbdInteractiveAuthentication no
+          PermitRootLogin no
+          X11Forwarding no
+          MaxAuthTries 3
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart ssh
+
+    - name: Validate SSH config before restart
+      ansible.builtin.command: sshd -t
+      changed_when: false
+
+    # Host firewall: order matters, SSH must be allowed before ufw is enabled
+
+    - name: Allow SSH from management sources
+      community.general.ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+        from_ip: "{{ item }}"
+      loop: "{{ ssh_allowed_from }}"
+
+    - name: Default deny incoming
+      community.general.ufw:
+        default: deny
+        direction: incoming
+
+    - name: Default allow outgoing
+      community.general.ufw:
+        default: allow
+        direction: outgoing
+
+    - name: Enable ufw
+      community.general.ufw:
+        state: enabled
 
 
+# snet-edge
+- name: VPN server
+  hosts: vpn
+  become: true
+  tasks: []
+
+- name: Reverse proxy with WAF
+  hosts: proxy
+  become: true
+  tasks: []
 
 
+# snet-frontend
+- name: Web servers
+  hosts: webservers
+  become: true
+  tasks: []
+
+- name: Media server
+  hosts: media
+  become: true
+  tasks: []
+
+- name: SFTP server
+  hosts: sftp
+  become: true
+  tasks: []
 
 
-#snet-edge
-- name: 
+# snet-backend
+- name: Application server
+  hosts: appserver
+  become: true
+  tasks: []
+
+- name: File server
+  hosts: fileserver
+  become: true
+  tasks: []
 
 
+# snet-mgmt
+- name: Jump host
+  hosts: mgmt
+  become: true
+  tasks: []
 
-#snet-frontend
-- name:
-
-
-
-#snet-backend
-- name:
-
-
-#snet-mgmt
-- name:
-
-
-#snet-pep
-- name:
+- name: IDS
+  hosts: ids
+  become: true
+  tasks: []
