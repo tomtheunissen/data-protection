@@ -67,9 +67,8 @@ write_files:
 
       echo "Running Ansible for the VPN server and the jump host"
       cd "$REPO_DIR/ansible"
-      install -m 644 -o "$ADMIN_USER" -g "$ADMIN_USER" /var/lib/zkoo/inventory.ini inventory.ini
       sudo -H -u "$ADMIN_USER" ansible-galaxy collection install -r requirements.yml
-      sudo -H -u "$ADMIN_USER" ansible-playbook -i inventory.ini playbook.yml --limit vpn,mgmt
+      sudo -H -u "$ADMIN_USER" ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit vpn,mgmt
       echo "Bootstrap finished"
 
 runcmd:
