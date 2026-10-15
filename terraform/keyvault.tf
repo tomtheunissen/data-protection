@@ -3,7 +3,7 @@ data "azurerm_client_config" "current" {}
 
 # Stores VPN client profiles and the storage key, so no secrets end up in code or Git
 resource "azurerm_key_vault" "kv" {
-  name                       = "kv-zkoo-01"
+  name                       = local.key_vault_name
   location                   = data.azurerm_resource_group.rg.location
   resource_group_name        = data.azurerm_resource_group.rg.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
@@ -54,5 +54,12 @@ resource "azurerm_key_vault_secret" "storage_key" {
 resource "azurerm_key_vault_secret" "github_deploy_key" {
   name         = "github-deploy-key"
   value        = file(pathexpand(var.deploy_key_path))
+  key_vault_id = azurerm_key_vault.kv.id
+}
+
+# Private key of the jump host; cloud-init on vm-mgmt-01 fetches it so Ansible can SSH to the other VMs
+resource "azurerm_key_vault_secret" "mgmt_ssh_key" {
+  name         = "mgmt-ssh-key"
+  value        = tls_private_key.mgmt.private_key_openssh
   key_vault_id = azurerm_key_vault.kv.id
 }

@@ -34,12 +34,6 @@ variable "partner_ip_ranges" {
   default     = ["203.0.113.0/24"]
 }
 
-variable "bootstrap_ssh_ips" {
-  description = "Temporary public IPs (CIDR) allowed to SSH to vm-vpn-01 before the VPN is configured. Leave empty after bootstrap."
-  type        = list(string)
-  default     = []
-}
-
 variable "team_object_ids" {
   description = "Entra object IDs of all team members who may read secrets from the Key Vault"
   type        = list(string)
@@ -53,4 +47,10 @@ variable "deploy_key_path" {
   description = "Path to the private GitHub deploy key (read-only) that vm-mgmt-01 uses to clone the repo. Kept outside the repo."
   type        = string
   default     = "~/.ssh/zkoo_deploy"
+}
+
+variable "repo_url" {
+  description = "SSH clone URL of this repository, used by vm-mgmt-01 with the read-only deploy key"
+  type        = string
+  default     = "git@github.com:tomtheunissen/data-protection.git"
 }

@@ -119,22 +119,6 @@ resource "azurerm_network_security_group" "nsg_edge" {
   }
 }
 
-# Temporary rule to configure vm-vpn-01 before the VPN works; only exists when bootstrap_ssh_ips is set
-resource "azurerm_network_security_rule" "bootstrap_ssh" {
-  count                                      = length(var.bootstrap_ssh_ips) > 0 ? 1 : 0
-  name                                       = "allow-bootstrap-ssh"
-  priority                                   = 140
-  direction                                  = "Inbound"
-  access                                     = "Allow"
-  protocol                                   = "Tcp"
-  source_port_range                          = "*"
-  destination_port_range                     = "22"
-  source_address_prefixes                    = var.bootstrap_ssh_ips
-  destination_application_security_group_ids = [azurerm_application_security_group.asg_vpn.id]
-  resource_group_name                        = data.azurerm_resource_group.rg.name
-  network_security_group_name                = azurerm_network_security_group.nsg_edge.name
-}
-
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc_edge" {
   subnet_id                 = azurerm_subnet.snet_edge.id
   network_security_group_id = azurerm_network_security_group.nsg_edge.id

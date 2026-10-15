@@ -9,6 +9,11 @@ terraform {
       source  = "hashicorp/local"
       version = "~> 2.5"
     }
+
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 
   # Shared state in a separate storage account (created with the Azure CLI, not managed here)

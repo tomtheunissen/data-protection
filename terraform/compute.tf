@@ -1,3 +1,8 @@
+# SSH key of the jump host; its public half goes on every VM so Ansible on vm-mgmt-01 can reach them
+resource "tls_private_key" "mgmt" {
+  algorithm = "ED25519"
+}
+
 resource "azurerm_network_interface" "nic" {
   for_each              = local.vms
   name                  = "nic-${each.key}"
@@ -29,16 +34,28 @@ resource "azurerm_linux_virtual_machine" "vm" {
   admin_username        = var.admin_username
   network_interface_ids = [azurerm_network_interface.nic[each.key].id]
 
-  # One key block per public key file in ssh-keys/, so every team member can log in
+  # Only the jump host gets a bootstrap script; it installs Ansible and configures the VPN server
+  custom_data = each.key == "mgmt-01" ? base64encode(templatefile("${path.module}/cloud-init/mgmt.yaml.tftpl", {
+    admin_username = var.admin_username
+    key_vault_name = local.key_vault_name
+    repo_url       = var.repo_url
+    vpn_ip         = local.vpn_ip
+    inventory      = local.ansible_inventory
+  })) : null
+
+  # One key block per team member's public key in ssh-keys/, plus the jump host key for Ansible
   dynamic "admin_ssh_key" {
-    for_each = fileset("${path.module}/ssh-keys", "*.pub")
+    for_each = concat(
+      [for f in fileset("${path.module}/ssh-keys", "*.pub") : file("${path.module}/ssh-keys/${f}")],
+      [tls_private_key.mgmt.public_key_openssh],
+    )
     content {
       username   = var.admin_username
-      public_key = file("${path.module}/ssh-keys/${admin_ssh_key.value}")
+      public_key = admin_ssh_key.value
     }
   }
 
-  # Systeem aangewezen identiteit enkel voor VMs die wachtwoordloze toegang tot Azure services nodig hebben
+  # System-assigned identity only for VMs that need passwordless access to Azure services
   dynamic "identity" {
     for_each = each.value.managed_identity ? [1] : []
     content {

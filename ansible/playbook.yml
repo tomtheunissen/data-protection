@@ -29,10 +29,11 @@
     - name: Reboot after kernel or library updates
       ansible.builtin.reboot:
         reboot_timeout: 600
-      when: reboot_required.stat.exists
+      # The control node cannot reboot itself mid-run; it picks up updates on its next restart
+      when: reboot_required.stat.exists and ansible_connection != "local"
 
     - name: Timezone setup
-      community.general.timezone: 
+      community.general.timezone:
         name: Europe/Amsterdam
 
     - name: Base packages install
