@@ -21,10 +21,3 @@ resource "azurerm_storage_share" "medical" {
   storage_account_id = azurerm_storage_account.st.id
   quota              = 10
 }
-
-# Laat het patient portaal op vm-web-01 the medische bestanden lezen en schrijven zonder een storage key
-resource "azurerm_role_assignment" "web01_medical_files" {
-  scope                = azurerm_storage_share.medical.rbac_scope_id
-  role_definition_name = "Storage File Data SMB Share Contributor"
-  principal_id         = azurerm_linux_virtual_machine.vm["web-01"].identity[0].principal_id
-}

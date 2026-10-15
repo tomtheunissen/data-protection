@@ -103,7 +103,7 @@ locals {
       has_asg          = true
       asg_id           = azurerm_application_security_group.asg_mgmt.id
       size             = "Standard_B1s"
-      managed_identity = false
+      managed_identity = true
       ansible_group    = "mgmt"
     }
     ids-01 = {

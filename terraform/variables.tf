@@ -39,3 +39,11 @@ variable "bootstrap_ssh_ips" {
   type        = list(string)
   default     = []
 }
+
+variable "team_object_ids" {
+  description = "Entra object IDs of all team members who may read secrets from the Key Vault"
+  type        = list(string)
+  default = [
+    "d0874a5b-50f8-4259-a0c0-07db7f3927a3", # Tom
+  ]
+}
