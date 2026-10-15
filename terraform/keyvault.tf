@@ -49,3 +49,10 @@ resource "azurerm_key_vault_secret" "storage_key" {
   value        = azurerm_storage_account.st.primary_access_key
   key_vault_id = azurerm_key_vault.kv.id
 }
+
+# Read-only GitHub deploy key; cloud-init on vm-mgmt-01 fetches it with its managed identity to clone the repo
+resource "azurerm_key_vault_secret" "github_deploy_key" {
+  name         = "github-deploy-key"
+  value        = file(pathexpand(var.deploy_key_path))
+  key_vault_id = azurerm_key_vault.kv.id
+}

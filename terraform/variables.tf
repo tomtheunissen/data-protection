@@ -48,3 +48,9 @@ variable "team_object_ids" {
     "3e435e69-145f-49a6-b26e-cb81852782ce", # Maddox
   ]
 }
+
+variable "deploy_key_path" {
+  description = "Path to the private GitHub deploy key (read-only) that vm-mgmt-01 uses to clone the repo. Kept outside the repo."
+  type        = string
+  default     = "~/.ssh/zkoo_deploy"
+}
