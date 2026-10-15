@@ -16,6 +16,7 @@ locals {
       asg_id           = azurerm_application_security_group.asg_proxy.id
       size             = "Standard_B2s"
       managed_identity = false
+      ansible_group    = "proxy"
     }
     vpn-01 = {
       subnet_id        = azurerm_subnet.snet_edge.id
@@ -26,6 +27,7 @@ locals {
       asg_id           = azurerm_application_security_group.asg_vpn.id
       size             = "Standard_B2s"
       managed_identity = false
+      ansible_group    = "vpn"
     }
     web-01 = {
       subnet_id        = azurerm_subnet.snet_frontend.id
@@ -36,6 +38,7 @@ locals {
       asg_id           = azurerm_application_security_group.asg_portal.id
       size             = "Standard_B1s"
       managed_identity = true
+      ansible_group    = "webservers"
     }
     web-02 = {
       subnet_id        = azurerm_subnet.snet_frontend.id
@@ -46,6 +49,7 @@ locals {
       asg_id           = azurerm_application_security_group.asg_website.id
       size             = "Standard_B1s"
       managed_identity = false
+      ansible_group    = "webservers"
     }
     media-01 = {
       subnet_id        = azurerm_subnet.snet_frontend.id
@@ -56,6 +60,7 @@ locals {
       asg_id           = azurerm_application_security_group.asg_media.id
       size             = "Standard_B2s"
       managed_identity = false
+      ansible_group    = "media"
     }
     ftp-01 = {
       subnet_id        = azurerm_subnet.snet_frontend.id
@@ -66,6 +71,7 @@ locals {
       asg_id           = azurerm_application_security_group.asg_ftp.id
       size             = "Standard_B1s"
       managed_identity = false
+      ansible_group    = "sftp"
     }
     app-01 = {
       subnet_id        = azurerm_subnet.snet_backend.id
@@ -76,6 +82,7 @@ locals {
       asg_id           = azurerm_application_security_group.asg_app.id
       size             = "Standard_B1s"
       managed_identity = false
+      ansible_group    = "appserver"
     }
     fs-01 = {
       subnet_id        = azurerm_subnet.snet_backend.id
@@ -86,6 +93,7 @@ locals {
       asg_id           = azurerm_application_security_group.asg_fs.id
       size             = "Standard_B1s"
       managed_identity = false
+      ansible_group    = "fileserver"
     }
     mgmt-01 = {
       subnet_id        = azurerm_subnet.snet_mgmt.id
@@ -96,6 +104,7 @@ locals {
       asg_id           = azurerm_application_security_group.asg_mgmt.id
       size             = "Standard_B1s"
       managed_identity = false
+      ansible_group    = "mgmt"
     }
     ids-01 = {
       subnet_id        = azurerm_subnet.snet_mgmt.id
@@ -106,6 +115,7 @@ locals {
       asg_id           = null
       size             = "Standard_B2s"
       managed_identity = false
+      ansible_group    = "ids"
     }
   }
 }
