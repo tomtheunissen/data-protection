@@ -87,6 +87,15 @@
         mode: "0644"
       notify: Restart ssh
 
+    # sshd -t needs this directory; on Ubuntu 24.04 it only exists once ssh has started via socket activation
+    - name: Ensure sshd privilege separation directory exists
+      ansible.builtin.file:
+        path: /run/sshd
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
     - name: Validate SSH config before restart
       ansible.builtin.command: sshd -t
       changed_when: false
