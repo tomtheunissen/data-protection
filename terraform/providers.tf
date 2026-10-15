@@ -4,6 +4,10 @@ provider "azurerm" {
       purge_soft_delete_on_destroy    = false
       recover_soft_deleted_key_vaults = true
     }
+
+    log_analytics_workspace {
+      permanently_delete_on_destroy = false
+    }
   }
   resource_provider_registrations = "none"
   subscription_id                 = var.subscription_id
