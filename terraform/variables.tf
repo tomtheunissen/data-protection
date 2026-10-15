@@ -45,5 +45,6 @@ variable "team_object_ids" {
   type        = list(string)
   default = [
     "d0874a5b-50f8-4259-a0c0-07db7f3927a3", # Tom
+    "3e435e69-145f-49a6-b26e-cb81852782ce", # Maddox
   ]
 }
