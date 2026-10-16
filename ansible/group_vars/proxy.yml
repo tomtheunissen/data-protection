@@ -1,0 +1,13 @@
+---
+# Pin these to a specific version tag once the setup is stable
+proxy_waf_image: owasp/modsecurity-crs:nginx
+proxy_stream_image: nginx:1.27-alpine
+
+proxy_server_name: zkoo
+# OWASP CRS paranoia level used for blocking (1 = fewest false positives)
+proxy_blocking_paranoia: 1
+
+proxy_sftp_backend_port: 22
+# Keep in sync with partner_ip_ranges in terraform/variables.tf
+proxy_sftp_allowed_from:
+  - 203.0.113.0/24

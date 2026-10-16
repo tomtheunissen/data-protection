@@ -1,0 +1,30 @@
+# Managed by Ansible, changes are overwritten
+name: proxy
+
+services:
+  # HTTPS reverse proxy with ModSecurity v3 and the OWASP Core Rule Set
+  waf:
+    image: {{ proxy_waf_image }}
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    environment:
+      SERVER_NAME: "{{ proxy_server_name }}"
+      PORT: "8080"
+      SSL_PORT: "443"
+      BACKEND: "https://web_backend"
+      MODSEC_RULE_ENGINE: "on"
+      BLOCKING_PARANOIA: "{{ proxy_blocking_paranoia }}"
+    volumes:
+      - ./upstream.conf:/etc/nginx/conf.d/upstream.conf:ro
+      - ./certs/server.crt:/etc/nginx/conf/server.crt:ro
+      - ./certs/server.key:/etc/nginx/conf/server.key:ro
+
+  # Plain TCP relay for partner SFTP, the WAF cannot inspect SSH traffic
+  sftp-relay:
+    image: {{ proxy_stream_image }}
+    restart: unless-stopped
+    ports:
+      - "2222:2222"
+    volumes:
+      - ./stream.conf:/etc/nginx/nginx.conf:ro

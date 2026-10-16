@@ -1,0 +1,6 @@
+# Managed by Ansible
+upstream web_backend {
+{% for host in groups['webservers'] %}
+    server {{ hostvars[host].ansible_host }}:443;
+{% endfor %}
+}

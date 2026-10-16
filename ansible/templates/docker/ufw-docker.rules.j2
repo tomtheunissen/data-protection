@@ -1,0 +1,10 @@
+*filter
+:ufw-user-forward - [0:0]
+:DOCKER-USER - [0:0]
+# Replies and traffic that does not enter through the uplink (container to container, container outbound)
+-A DOCKER-USER -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
+-A DOCKER-USER ! -i {{ ansible_default_ipv4.interface }} -j RETURN
+# New inbound connections to published ports must match a "ufw route allow" rule
+-A DOCKER-USER -j ufw-user-forward
+-A DOCKER-USER -j DROP
+COMMIT
