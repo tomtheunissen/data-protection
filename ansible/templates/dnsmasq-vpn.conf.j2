@@ -1,0 +1,7 @@
+# Managed by Ansible; DNS forwarder for VPN clients so private endpoint names resolve to 192.168.14.x
+interface=tun0
+bind-dynamic
+no-resolv
+server={{ azure_dns }}
+# Leave the loopback interface to systemd-resolved
+except-interface=lo

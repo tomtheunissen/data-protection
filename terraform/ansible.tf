@@ -9,6 +9,8 @@ locals {
       local = k == "mgmt-01"
       # Extra SSH sources for ufw; empty means the playbook default (jump host only)
       ssh_sources = k == "mgmt-01" ? [local.admin_pool] : []
+      # Host-specific variables; the VPN server needs its public IP for the client profiles
+      extra_vars = k == "vpn-01" ? { vpn_public_ip = azurerm_public_ip.pip_vpn.ip_address } : {}
     }
   }
 
@@ -17,6 +19,7 @@ locals {
     groups         = local.ansible_groups
     hosts          = local.ansible_hosts
     admin_username = var.admin_username
+    key_vault_name = local.key_vault_name
   })
 }
 

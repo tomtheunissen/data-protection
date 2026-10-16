@@ -1,0 +1,28 @@
+# ZKOO VPN profile for {{ item }}
+client
+dev tun
+proto udp
+remote {{ vpn_public_ip }} {{ vpn_port }}
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+tls-version-min 1.2
+data-ciphers AES-256-GCM:AES-128-GCM
+auth-user-pass
+auth-nocache
+verb 3
+
+<ca>
+{{ vpn_ca_cert.content | b64decode | trim }}
+</ca>
+<cert>
+{{ (vpn_client_certs.results | selectattr('item', 'equalto', item) | first).content | b64decode | trim }}
+</cert>
+<key>
+{{ (vpn_client_keys.results | selectattr('item', 'equalto', item) | first).content | b64decode | trim }}
+</key>
+<tls-crypt>
+{{ vpn_tls_crypt_key.content | b64decode | trim }}
+</tls-crypt>

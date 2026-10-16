@@ -1,0 +1,21 @@
+---
+# OpenVPN users; admins get a fixed address in the admin pool and must use TOTP (MFA)
+vpn_admins:
+  - name: tom
+    ip: 10.8.4.10
+  - name: maddox
+    ip: 10.8.4.11
+
+# Employees get a dynamic address from the employee pool and log in with their certificate only
+vpn_employees:
+  - medewerker01
+
+vpn_port: 1194
+vpn_server_ip: 10.8.0.1
+# One /21 covers both pools: employees 10.8.0.0/22, admins 10.8.4.0/24
+vpn_netmask: 255.255.248.0
+vpn_employee_pool_start: 10.8.0.2
+vpn_employee_pool_end: 10.8.3.254
+vnet_route: 192.168.0.0 255.255.0.0
+# Azure DNS only answers queries from inside Azure, so VPN clients use a forwarder on the VPN server
+azure_dns: 168.63.129.16

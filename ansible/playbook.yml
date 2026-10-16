@@ -129,7 +129,303 @@
 - name: VPN server
   hosts: vpn
   become: true
-  tasks: []
+
+  vars:
+    vpn_users: "{{ (vpn_admins | map(attribute='name') | list) + vpn_employees }}"
+    easyrsa_dir: /etc/openvpn/easy-rsa
+    # Profiles are built on the jump host, uploaded to Key Vault and removed again
+    vpn_profile_dir: /home/{{ ansible_user }}/.vpn-profiles
+
+  handlers:
+    - name: Restart openvpn
+      ansible.builtin.service:
+        name: openvpn-server@server
+        state: restarted
+
+    - name: Restart dnsmasq
+      ansible.builtin.service:
+        name: dnsmasq
+        state: restarted
+
+  tasks:
+    # dnsmasq starts during install, so its config must exist first or it clashes with systemd-resolved on port 53
+    - name: DNS forwarder config directory
+      ansible.builtin.file:
+        path: /etc/dnsmasq.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: DNS forwarder for VPN clients
+      ansible.builtin.template:
+        src: dnsmasq-vpn.conf.j2
+        dest: /etc/dnsmasq.d/vpn.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart dnsmasq
+
+    - name: VPN packages install
+      ansible.builtin.apt:
+        name:
+          - openvpn
+          - easy-rsa
+          - oathtool
+          - dnsmasq
+        state: present
+
+    # PKI: own CA, one server certificate and one client certificate per user
+
+    - name: Easy-RSA working directory
+      ansible.builtin.copy:
+        src: /usr/share/easy-rsa/
+        dest: "{{ easyrsa_dir }}/"
+        remote_src: true
+        mode: preserve
+
+    - name: Initialise PKI
+      ansible.builtin.command: ./easyrsa init-pki
+      args:
+        chdir: "{{ easyrsa_dir }}"
+        creates: "{{ easyrsa_dir }}/pki"
+      environment:
+        EASYRSA_BATCH: "1"
+
+    - name: Build certificate authority
+      ansible.builtin.command: ./easyrsa build-ca nopass
+      args:
+        chdir: "{{ easyrsa_dir }}"
+        creates: "{{ easyrsa_dir }}/pki/ca.crt"
+      environment:
+        EASYRSA_BATCH: "1"
+        EASYRSA_REQ_CN: ZKOO-VPN-CA
+
+    - name: Build server certificate
+      ansible.builtin.command: ./easyrsa build-server-full server nopass
+      args:
+        chdir: "{{ easyrsa_dir }}"
+        creates: "{{ easyrsa_dir }}/pki/issued/server.crt"
+      environment:
+        EASYRSA_BATCH: "1"
+
+    - name: Build client certificates
+      ansible.builtin.command: ./easyrsa build-client-full {{ item }} nopass
+      args:
+        chdir: "{{ easyrsa_dir }}"
+        creates: "{{ easyrsa_dir }}/pki/issued/{{ item }}.crt"
+      environment:
+        EASYRSA_BATCH: "1"
+      loop: "{{ vpn_users }}"
+
+    - name: Generate certificate revocation list
+      ansible.builtin.command: ./easyrsa gen-crl
+      args:
+        chdir: "{{ easyrsa_dir }}"
+        creates: "{{ easyrsa_dir }}/pki/crl.pem"
+      environment:
+        EASYRSA_BATCH: "1"
+
+    # OpenVPN drops to nobody/nogroup, so files read per connection must be readable by that group
+    - name: Publish revocation list
+      ansible.builtin.copy:
+        src: "{{ easyrsa_dir }}/pki/crl.pem"
+        dest: /etc/openvpn/server/crl.pem
+        remote_src: true
+        owner: root
+        group: nogroup
+        mode: "0640"
+
+    - name: Generate tls-crypt key
+      ansible.builtin.command: openvpn --genkey secret /etc/openvpn/server/tls-crypt.key
+      args:
+        creates: /etc/openvpn/server/tls-crypt.key
+
+    # Admins: fixed address in the admin pool and a TOTP secret
+
+    - name: Client config directory
+      ansible.builtin.file:
+        path: /etc/openvpn/server/ccd
+        state: directory
+        owner: root
+        group: nogroup
+        mode: "0750"
+
+    - name: Fixed admin addresses
+      ansible.builtin.copy:
+        dest: /etc/openvpn/server/ccd/{{ item.name }}
+        content: "ifconfig-push {{ item.ip }} {{ vpn_netmask }}\n"
+        owner: root
+        group: nogroup
+        mode: "0640"
+      loop: "{{ vpn_admins }}"
+
+    - name: TOTP secret directory
+      ansible.builtin.file:
+        path: /etc/openvpn/otp
+        state: directory
+        owner: root
+        group: nogroup
+        mode: "0750"
+
+    - name: Generate TOTP secrets for admins
+      ansible.builtin.shell: set -o pipefail && head -c 20 /dev/urandom | base32 | tr -d '=' > /etc/openvpn/otp/{{ item.name }}
+      args:
+        executable: /bin/bash
+        creates: /etc/openvpn/otp/{{ item.name }}
+      loop: "{{ vpn_admins }}"
+
+    - name: TOTP secret permissions
+      ansible.builtin.file:
+        path: /etc/openvpn/otp/{{ item.name }}
+        owner: root
+        group: nogroup
+        mode: "0640"
+      loop: "{{ vpn_admins }}"
+
+    - name: User verification script
+      ansible.builtin.template:
+        src: verify-user.sh.j2
+        dest: /etc/openvpn/server/verify-user.sh
+        owner: root
+        group: nogroup
+        mode: "0750"
+
+    - name: OpenVPN server config
+      ansible.builtin.template:
+        src: server.conf.j2
+        dest: /etc/openvpn/server/server.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart openvpn
+
+    # Routing without NAT; Azure route table rt-vpn sends replies for the pools back to this VM
+
+    - name: Enable IP forwarding
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: "1"
+        sysctl_set: true
+        state: present
+
+    - name: Allow OpenVPN
+      community.general.ufw:
+        rule: allow
+        port: "{{ vpn_port }}"
+        proto: udp
+
+    - name: Allow DNS from VPN clients
+      community.general.ufw:
+        rule: allow
+        interface: tun0
+        direction: in
+        port: "53"
+        proto: any
+
+    - name: Allow forwarding from VPN clients into the VNet
+      community.general.ufw:
+        rule: allow
+        route: true
+        interface_in: tun0
+        interface_out: eth0
+
+    - name: OpenVPN service
+      ansible.builtin.service:
+        name: openvpn-server@server
+        state: started
+        enabled: true
+
+    - name: DNS forwarder service
+      ansible.builtin.service:
+        name: dnsmasq
+        state: started
+        enabled: true
+
+    # Client profiles: built on the jump host and stored in Key Vault, never left on disk
+
+    - name: Read CA certificate
+      ansible.builtin.slurp:
+        src: "{{ easyrsa_dir }}/pki/ca.crt"
+      register: vpn_ca_cert
+
+    - name: Read tls-crypt key
+      ansible.builtin.slurp:
+        src: /etc/openvpn/server/tls-crypt.key
+      register: vpn_tls_crypt_key
+      no_log: true
+
+    - name: Read client certificates
+      ansible.builtin.slurp:
+        src: "{{ easyrsa_dir }}/pki/issued/{{ item }}.crt"
+      loop: "{{ vpn_users }}"
+      register: vpn_client_certs
+
+    - name: Read client keys
+      ansible.builtin.slurp:
+        src: "{{ easyrsa_dir }}/pki/private/{{ item }}.key"
+      loop: "{{ vpn_users }}"
+      register: vpn_client_keys
+      no_log: true
+
+    - name: Read admin TOTP secrets
+      ansible.builtin.slurp:
+        src: /etc/openvpn/otp/{{ item.name }}
+      loop: "{{ vpn_admins }}"
+      register: vpn_totp_secrets
+      no_log: true
+
+    - name: Temporary profile directory on the jump host
+      ansible.builtin.file:
+        path: "{{ vpn_profile_dir }}"
+        state: directory
+        mode: "0700"
+      delegate_to: localhost
+      become: false
+
+    - name: Build client profiles
+      ansible.builtin.template:
+        src: client.ovpn.j2
+        dest: "{{ vpn_profile_dir }}/{{ item }}.ovpn"
+        mode: "0600"
+      loop: "{{ vpn_users }}"
+      delegate_to: localhost
+      become: false
+      no_log: true
+
+    - name: Log in to Azure with the jump host identity
+      ansible.builtin.command: az login --identity --allow-no-subscriptions --output none
+      delegate_to: localhost
+      become: false
+      changed_when: false
+
+    - name: Store client profiles in Key Vault
+      ansible.builtin.command: >-
+        az keyvault secret set --vault-name {{ key_vault_name }}
+        --name vpn-profile-{{ item }} --file {{ vpn_profile_dir }}/{{ item }}.ovpn --output none
+      loop: "{{ vpn_users }}"
+      delegate_to: localhost
+      become: false
+      changed_when: true
+
+    - name: Store admin TOTP secrets in Key Vault
+      ansible.builtin.command: >-
+        az keyvault secret set --vault-name {{ key_vault_name }}
+        --name vpn-totp-{{ item.item.name }}
+        --value otpauth://totp/ZKOO-VPN:{{ item.item.name }}?secret={{ item.content | b64decode | trim }}&issuer=ZKOO-VPN
+        --output none
+      loop: "{{ vpn_totp_secrets.results }}"
+      delegate_to: localhost
+      become: false
+      changed_when: true
+      no_log: true
+
+    - name: Remove local profile copies
+      ansible.builtin.file:
+        path: "{{ vpn_profile_dir }}"
+        state: absent
+      delegate_to: localhost
+      become: false
 
 - name: Reverse proxy with WAF
   hosts: proxy

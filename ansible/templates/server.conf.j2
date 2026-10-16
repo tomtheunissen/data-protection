@@ -1,0 +1,37 @@
+# Managed by Ansible; OpenVPN server for ZKOO employees and admins
+port {{ vpn_port }}
+proto udp
+dev tun
+topology subnet
+
+ca /etc/openvpn/easy-rsa/pki/ca.crt
+cert /etc/openvpn/easy-rsa/pki/issued/server.crt
+key /etc/openvpn/easy-rsa/pki/private/server.key
+crl-verify /etc/openvpn/server/crl.pem
+dh none
+tls-crypt /etc/openvpn/server/tls-crypt.key
+tls-version-min 1.2
+data-ciphers AES-256-GCM:AES-128-GCM
+
+# Address plan: server .0.1, employees from a dynamic pool, admins get a fixed IP via client-config-dir
+mode server
+tls-server
+ifconfig {{ vpn_server_ip }} {{ vpn_netmask }}
+ifconfig-pool {{ vpn_employee_pool_start }} {{ vpn_employee_pool_end }} {{ vpn_netmask }}
+client-config-dir /etc/openvpn/server/ccd
+push "topology subnet"
+push "route-gateway {{ vpn_server_ip }}"
+push "route {{ vnet_route }}"
+push "dhcp-option DNS {{ vpn_server_ip }}"
+
+# Second factor: username must match the certificate, admins must enter a valid TOTP code
+script-security 2
+auth-user-pass-verify /etc/openvpn/server/verify-user.sh via-file
+
+keepalive 10 120
+user nobody
+group nogroup
+persist-key
+persist-tun
+verb 3
+status /var/log/openvpn/status.log

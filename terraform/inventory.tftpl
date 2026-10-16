@@ -5,11 +5,12 @@
 [${group}]
 %{ for name, host in hosts ~}
 %{ if host.group == group ~}
-${name} ansible_host=${host.address}%{ if host.local } ansible_connection=local%{ endif }%{ if length(host.ssh_sources) > 0 } ssh_sources="[${join(", ", [for s in host.ssh_sources : "'${s}'"])}]"%{ endif }
+${name} ansible_host=${host.address}%{ if host.local } ansible_connection=local%{ endif }%{ if length(host.ssh_sources) > 0 } ssh_sources="[${join(", ", [for s in host.ssh_sources : "'${s}'"])}]"%{ endif }%{ for key, value in host.extra_vars } ${key}=${value}%{ endfor }
 %{ endif ~}
 %{ endfor ~}
 %{ endfor ~}
 
 [all:vars]
 ansible_user=${admin_username}
+key_vault_name=${key_vault_name}
 ansible_python_interpreter=/usr/bin/python3

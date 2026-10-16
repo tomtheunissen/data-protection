@@ -1,0 +1,34 @@
+#!/bin/bash
+# Managed by Ansible; called by OpenVPN with a file holding the username and the one-time code
+set -u
+
+ADMINS="{{ vpn_admins | map(attribute='name') | join(' ') }}"
+OTP_DIR="/etc/openvpn/otp"
+
+username="$(sed -n 1p "$1")"
+code="$(sed -n 2p "$1")"
+
+# The username must match the certificate, so nobody can use another user's MFA settings
+if [ "$username" != "${common_name:-}" ]; then
+  echo "verify-user: username '$username' does not match certificate '${common_name:-}'" >&2
+  exit 1
+fi
+
+# Employees: certificate only
+case " $ADMINS " in
+  *" $username "*) ;;
+  *) exit 0 ;;
+esac
+
+# Admins: a missing secret file must never mean "no MFA"
+secret_file="$OTP_DIR/$username"
+if [ ! -r "$secret_file" ]; then
+  echo "verify-user: no TOTP secret for admin '$username'" >&2
+  exit 1
+fi
+
+if oathtool --totp --base32 --window=1 "$(cat "$secret_file")" "$code" >/dev/null 2>&1; then
+  exit 0
+fi
+echo "verify-user: invalid TOTP code for '$username'" >&2
+exit 1
