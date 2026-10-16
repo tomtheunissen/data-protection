@@ -13,11 +13,11 @@ services:
       SERVER_NAME: "{{ proxy_server_name }}"
       PORT: "8080"
       SSL_PORT: "{{ proxy_waf_container_port }}"
-      BACKEND: "https://web_backend"
       MODSEC_RULE_ENGINE: "on"
       BLOCKING_PARANOIA: "{{ proxy_blocking_paranoia }}"
     volumes:
       - ./upstream.conf:/etc/nginx/conf.d/upstream.conf:ro
+      - ./default.conf.template:/etc/nginx/templates/conf.d/default.conf.template:ro
       - ./certs/server.crt:/etc/nginx/conf/server.crt:ro
       - ./certs/server.key:/etc/nginx/conf/server.key:ro
 

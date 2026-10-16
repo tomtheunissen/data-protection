@@ -9,6 +9,11 @@ proxy_waf_container_port: 8443
 # OWASP CRS paranoia level used for blocking (1 = fewest false positives)
 proxy_blocking_paranoia: 1
 
+# Path routing: / is the public company website, /portaal/ the internal patient portal
+proxy_site_host: vm-web-02
+proxy_portal_host: vm-web-01
+proxy_portal_path: /portaal/
+
 proxy_sftp_backend_port: 22
 # Keep in sync with partner_ip_ranges in terraform/variables.tf
 proxy_sftp_allowed_from:

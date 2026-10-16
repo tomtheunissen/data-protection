@@ -529,6 +529,7 @@
       loop:
         - compose.yml
         - upstream.conf
+        - default.conf.template
         - stream.conf
       notify: Restart proxy containers
 

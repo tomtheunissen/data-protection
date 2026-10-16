@@ -1,6 +1,8 @@
 # Managed by Ansible
-upstream web_backend {
-{% for host in groups['webservers'] %}
-    server {{ hostvars[host].ansible_host }}:443;
-{% endfor %}
+upstream site_backend {
+    server {{ hostvars[proxy_site_host].ansible_host }}:443;
+}
+
+upstream portal_backend {
+    server {{ hostvars[proxy_portal_host].ansible_host }}:443;
 }
