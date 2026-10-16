@@ -103,7 +103,7 @@ locals {
       ip_forwarding    = false
       has_asg          = true
       asg_id           = azurerm_application_security_group.asg_mgmt.id
-      size             = "Standard_B1s"
+      size             = "Standard_B2s"
       managed_identity = true
       ansible_group    = "mgmt"
     }
