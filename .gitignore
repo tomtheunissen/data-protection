@@ -33,6 +33,9 @@ terraform/ssh-keys/*
 !terraform/ssh-keys/README.md
 ansible/files/ssh-keys/*
 !ansible/files/ssh-keys/*.pub
+ansible/files/sftp-keys/*
+!ansible/files/sftp-keys/*.pub
+!ansible/files/sftp-keys/.gitkeep
 
 # macOS system files
 .DS_Store

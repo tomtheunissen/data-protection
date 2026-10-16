@@ -125,9 +125,9 @@
         state: enabled
 
 
-# Docker runtime for the service VMs; VPN, jump host and IDS stay native because they need host networking
+# Docker runtime for the service VMs; VPN, jump host and IDS need host networking and SFTP uses the host sshd, so those stay native
 - name: Container hosts
-  hosts: proxy:webservers:media:sftp:appserver:fileserver
+  hosts: proxy:webservers:media:appserver:fileserver
   become: true
 
   handlers:
@@ -633,10 +633,99 @@
   become: true
   tasks: []
 
+# Native sshd: port 22 already serves management SSH, a Match block gives partners SFTP only
 - name: SFTP server
   hosts: sftp
   become: true
-  tasks: []
+
+  handlers:
+    - name: Restart ssh
+      ansible.builtin.service:
+        name: ssh
+        state: restarted
+
+  tasks:
+    - name: Partner group
+      ansible.builtin.group:
+        name: "{{ sftp_group }}"
+        state: present
+
+    # "*" means no usable password but not locked, so key login keeps working
+    - name: Partner accounts
+      ansible.builtin.user:
+        name: "{{ item }}"
+        group: "{{ sftp_group }}"
+        home: "{{ sftp_root }}/{{ item }}"
+        create_home: false
+        shell: /usr/sbin/nologin
+        password: "*"
+        state: present
+      loop: "{{ sftp_partners }}"
+
+    # sshd refuses a chroot unless every directory in the path is owned by root and not writable by others
+    - name: Chroot base directory
+      ansible.builtin.file:
+        path: "{{ sftp_root }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Partner chroot directories
+      ansible.builtin.file:
+        path: "{{ sftp_root }}/{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      loop: "{{ sftp_partners }}"
+
+    - name: Partner upload directories
+      ansible.builtin.file:
+        path: "{{ sftp_root }}/{{ item }}/upload"
+        state: directory
+        owner: "{{ item }}"
+        group: "{{ sftp_group }}"
+        mode: "0750"
+      loop: "{{ sftp_partners }}"
+
+    - name: Partner key directory
+      ansible.builtin.file:
+        path: "{{ sftp_key_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Partner public keys
+      ansible.builtin.copy:
+        src: sftp-keys/{{ item }}.pub
+        dest: "{{ sftp_key_dir }}/{{ item }}"
+        owner: root
+        group: root
+        mode: "0644"
+      loop: "{{ sftp_partners }}"
+
+    - name: SFTP restrictions for partners
+      ansible.builtin.template:
+        src: sftp/99-sftp-partners.conf.j2
+        dest: /etc/ssh/sshd_config.d/99-sftp-partners.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart ssh
+
+    - name: Validate SSH config before restart
+      ansible.builtin.command: sshd -t
+      changed_when: false
+
+    - name: Allow SFTP from the reverse proxy
+      community.general.ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+        from_ip: "{{ hostvars[item].ansible_host }}"
+      loop: "{{ groups['proxy'] }}"
 
 
 # snet-backend

@@ -1,0 +1,8 @@
+---
+sftp_group: sftp-partners
+# One chroot per partner below this directory
+sftp_root: /srv/sftp
+# Root-owned public keys, so partners cannot change their own access
+sftp_key_dir: /etc/ssh/sftp-keys
+# Each partner is defined by a public key in files/sftp-keys/<name>.pub
+sftp_partners: "{{ query('ansible.builtin.fileglob', playbook_dir + '/files/sftp-keys/*.pub') | map('basename') | map('regex_replace', '\\.pub$', '') | list }}"

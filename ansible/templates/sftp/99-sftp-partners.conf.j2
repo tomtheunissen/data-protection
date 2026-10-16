@@ -1,0 +1,15 @@
+# Managed by Ansible
+# Partners get SFTP only, locked into their own directory; the admin user keeps a normal shell
+Match Group {{ sftp_group }}
+    ChrootDirectory {{ sftp_root }}/%u
+    ForceCommand internal-sftp -l INFO
+    AuthorizedKeysFile {{ sftp_key_dir }}/%u
+    AllowTcpForwarding no
+    AllowAgentForwarding no
+    AllowStreamLocalForwarding no
+    PermitTunnel no
+    PermitTTY no
+    X11Forwarding no
+
+# Close the Match block so settings after this include are not limited to partners
+Match all
