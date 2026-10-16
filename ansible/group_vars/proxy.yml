@@ -4,6 +4,8 @@ proxy_waf_image: owasp/modsecurity-crs:nginx
 proxy_stream_image: nginx:1.27-alpine
 
 proxy_server_name: zkoo
+# HTTPS port inside the WAF container; the host publishes it on 443
+proxy_waf_container_port: 8443
 # OWASP CRS paranoia level used for blocking (1 = fewest false positives)
 proxy_blocking_paranoia: 1
 

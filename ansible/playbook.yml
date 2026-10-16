@@ -538,12 +538,13 @@
         state: present
         pull: missing
 
+    # DOCKER-USER sees the packet after Docker's DNAT, so the rule matches the container port, not 443
     - name: Allow HTTPS to the WAF
       community.general.ufw:
         rule: allow
         route: true
         proto: tcp
-        to_port: "443"
+        to_port: "{{ proxy_waf_container_port }}"
 
     - name: Allow partner SFTP to the relay
       community.general.ufw:

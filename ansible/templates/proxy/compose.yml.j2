@@ -6,12 +6,13 @@ services:
   waf:
     image: {{ proxy_waf_image }}
     restart: unless-stopped
+    # The image runs unprivileged and cannot bind below 1024, so host 443 maps to a high container port
     ports:
-      - "443:443"
+      - "443:{{ proxy_waf_container_port }}"
     environment:
       SERVER_NAME: "{{ proxy_server_name }}"
       PORT: "8080"
-      SSL_PORT: "443"
+      SSL_PORT: "{{ proxy_waf_container_port }}"
       BACKEND: "https://web_backend"
       MODSEC_RULE_ENGINE: "on"
       BLOCKING_PARANOIA: "{{ proxy_blocking_paranoia }}"
