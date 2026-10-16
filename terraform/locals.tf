@@ -5,7 +5,7 @@ locals {
   pep_sql_ip           = "192.168.14.5"
   pep_webapp_ip        = "192.168.14.6"
   vpn_ip               = "192.168.1.5"
-  key_vault_name       = "kv-zkoo-01"
+  key_vault_name       = "kv-zkoo-${random_string.kv_suffix.result}"
 
   vms = {
     proxy-01 = {

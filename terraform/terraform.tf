@@ -14,6 +14,11 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
 
   # Shared state in a separate storage account (created with the Azure CLI, not managed here)

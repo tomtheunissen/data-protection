@@ -1,6 +1,13 @@
 # Identity of whoever runs Terraform, used for the tenant ID and their own access policy
 data "azurerm_client_config" "current" {}
 
+# New suffix per deployment, so a fresh vault is created instead of recovering a soft-deleted one with stale access policies
+resource "random_string" "kv_suffix" {
+  length  = 4
+  upper   = false
+  special = false
+}
+
 # Stores VPN client profiles and the storage key, so no secrets end up in code or Git
 resource "azurerm_key_vault" "kv" {
   name                       = local.key_vault_name

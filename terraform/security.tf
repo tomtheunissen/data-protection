@@ -106,6 +106,20 @@ resource "azurerm_network_security_group" "nsg_edge" {
     destination_address_prefix            = azurerm_subnet.snet_edge.address_prefixes[0]
   }
 
+  # Forwarded traffic from VPN clients: sources are outside the VirtualNetwork tag
+  # for snet-edge (no UDR there), so the default AllowVnetOutBound does not match
+  security_rule {
+    name                       = "allow-vpn-clients-to-vnet"
+    priority                   = 100
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefixes    = [local.admin_pool, local.employee_pool]
+    destination_address_prefix = "VirtualNetwork"
+  }
+
   security_rule {
     name                       = "deny-all-inbound"
     priority                   = 4096

@@ -12,3 +12,7 @@ output "vm_private_ips" {
   description = "Private IP address of each VM, used for the Ansible inventory"
   value       = { for k, v in local.vms : "vm-${k}" => v.ip }
 }
+
+output "key_vault_name" {
+  value = local.key_vault_name
+}
