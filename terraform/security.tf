@@ -297,7 +297,7 @@ resource "azurerm_network_security_group" "nsg_mgmt" {
     destination_address_prefix            = local.vms["ids-01"].ip
   }
 
-    # Mirrored traffic from the entry points to the IDS sensor (VXLAN software TAP)
+  # Mirrored traffic from the entry points to the IDS sensor (VXLAN software TAP)
   security_rule {
     name                                  = "allow-mirror-to-ids"
     priority                              = 120
