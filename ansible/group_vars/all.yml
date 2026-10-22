@@ -14,3 +14,8 @@ vpn_admins:
 # Employees get a dynamic address from the employee pool and log in with their certificate only
 vpn_employees:
   - medewerker01
+
+# Software TAP: the entry points copy their traffic to the IDS over VXLAN
+ids_mirror_vni: 4242
+ids_mirror_port: 4789
+ids_mirror_interface: vxmirror

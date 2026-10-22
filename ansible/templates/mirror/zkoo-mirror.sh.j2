@@ -1,0 +1,40 @@
+#!/bin/bash
+# Managed by Ansible
+# Software TAP: copies every packet on the uplink to the IDS over a VXLAN tunnel
+set -euo pipefail
+
+UPLINK="{{ ansible_default_ipv4.interface }}"
+LOCAL_IP="{{ ansible_default_ipv4.address }}"
+IDS_IP="{{ hostvars[groups['ids'][0]].ansible_host }}"
+TUNNEL="{{ ids_mirror_interface }}"
+
+start() {
+    if ! ip link show "$TUNNEL" >/dev/null 2>&1; then
+        ip link add "$TUNNEL" type vxlan id {{ ids_mirror_vni }} \
+            local "$LOCAL_IP" remote "$IDS_IP" dstport {{ ids_mirror_port }} dev "$UPLINK"
+    fi
+    ip link set "$TUNNEL" up
+
+    # Start from a clean filter set so a restart never stacks duplicate mirrors
+    tc qdisc del dev "$UPLINK" clsact 2>/dev/null || true
+    tc qdisc add dev "$UPLINK" clsact
+
+    # Never mirror packets to the IDS itself, or every copy would be copied again
+    tc filter add dev "$UPLINK" egress prio 1 protocol ip \
+        u32 match ip dst "$IDS_IP"/32 action pass
+    tc filter add dev "$UPLINK" egress prio 2 matchall \
+        action mirred egress mirror dev "$TUNNEL"
+    tc filter add dev "$UPLINK" ingress prio 2 matchall \
+        action mirred egress mirror dev "$TUNNEL"
+}
+
+stop() {
+    tc qdisc del dev "$UPLINK" clsact 2>/dev/null || true
+    ip link del "$TUNNEL" 2>/dev/null || true
+}
+
+case "${1:-start}" in
+    start) start ;;
+    stop) stop ;;
+    *) echo "Usage: $0 start|stop" >&2; exit 1 ;;
+esac

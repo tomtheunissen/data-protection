@@ -1,0 +1,6 @@
+---
+# Networks Suricata treats as "ours": the VNet and both VPN pools
+suricata_home_net:
+  - 192.168.0.0/16
+  - "{{ vpn_employee_pool }}"
+  - "{{ vpn_admin_pool }}"

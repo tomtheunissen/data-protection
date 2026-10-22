@@ -1,0 +1,5 @@
+# Managed by Ansible
+# Suricata captures on the VXLAN interface, so that interface must exist first
+[Unit]
+After=zkoo-ids-tap.service
+Requires=zkoo-ids-tap.service

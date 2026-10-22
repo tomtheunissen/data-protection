@@ -920,7 +920,179 @@
   become: true
   tasks: []
 
+# Suricata runs only on vm-ids-01; the entry points feed it a copy of their traffic (see the next play)
 - name: IDS
   hosts: ids
   become: true
-  tasks: []
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
+    - name: Restart suricata
+      ansible.builtin.service:
+        name: suricata
+        state: restarted
+
+  tasks:
+    - name: IDS packages install
+      ansible.builtin.apt:
+        name:
+          - suricata
+          - suricata-update
+          - jq
+        state: present
+
+    # Receiving end of the software TAP
+
+    - name: Tunnel script
+      ansible.builtin.template:
+        src: ids/zkoo-ids-tap.sh.j2
+        dest: /usr/local/sbin/zkoo-ids-tap.sh
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Tunnel service
+      ansible.builtin.template:
+        src: ids/zkoo-ids-tap.service.j2
+        dest: /etc/systemd/system/zkoo-ids-tap.service
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload systemd
+
+    - name: Suricata service drop-in directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/suricata.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Suricata starts after the tunnel interface
+      ansible.builtin.template:
+        src: ids/suricata-override.conf.j2
+        dest: /etc/systemd/system/suricata.service.d/override.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Reload systemd
+        - Restart suricata
+
+    - name: Apply systemd changes
+      ansible.builtin.meta: flush_handlers
+
+    - name: Tunnel interface
+      ansible.builtin.service:
+        name: zkoo-ids-tap
+        state: started
+        enabled: true
+
+    - name: Allow mirrored traffic from the entry points only
+      community.general.ufw:
+        rule: allow
+        port: "{{ ids_mirror_port }}"
+        proto: udp
+        from_ip: "{{ hostvars[item].ansible_host }}"
+      loop: "{{ groups['proxy'] + groups['vpn'] }}"
+
+    # Suricata configuration: edits to the packaged suricata.yaml
+
+    - name: Suricata home networks
+      ansible.builtin.replace:
+        path: /etc/suricata/suricata.yaml
+        regexp: '^(\s+)HOME_NET: .*$'
+        replace: '\1HOME_NET: "[{{ suricata_home_net | join('','') }}]"'
+      notify: Restart suricata
+
+    # Copies of outgoing packets carry offloaded (unfinished) checksums, so checksum checks would drop them
+    - name: Capture on the tunnel interface
+      ansible.builtin.replace:
+        path: /etc/suricata/suricata.yaml
+        # The lookahead keeps this idempotent: once the checksum line is there, nothing matches
+        regexp: '^af-packet:\n  - interface: \S+\n(?!    checksum-checks: no\n)'
+        replace: "af-packet:\n  - interface: {{ ids_mirror_interface }}\n    checksum-checks: no\n"
+      notify: Restart suricata
+
+    - name: Disable stream checksum validation
+      ansible.builtin.replace:
+        path: /etc/suricata/suricata.yaml
+        regexp: '^(\s+checksum-validation:) yes(.*)$'
+        replace: '\1 no\2'
+      notify: Restart suricata
+
+    # Emerging Threats Open rule set
+    - name: Download the rule set
+      ansible.builtin.command: suricata-update
+      args:
+        creates: /var/lib/suricata/rules/suricata.rules
+      notify: Restart suricata
+
+    - name: Weekly rule update
+      ansible.builtin.cron:
+        name: suricata-update
+        cron_file: suricata-update
+        user: root
+        weekday: "1"
+        hour: "4"
+        minute: "17"
+        job: "suricata-update --quiet && systemctl reload suricata"
+
+    - name: Validate Suricata configuration
+      ansible.builtin.command: suricata -T -c /etc/suricata/suricata.yaml
+      changed_when: false
+
+    - name: Suricata service
+      ansible.builtin.service:
+        name: suricata
+        state: started
+        enabled: true
+
+
+# Software TAP on the two entry points: every packet on eth0 is copied to vm-ids-01 over VXLAN
+- name: Traffic mirror to IDS
+  hosts: proxy:vpn
+  become: true
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
+    - name: Restart mirror
+      ansible.builtin.service:
+        name: zkoo-mirror
+        state: restarted
+
+  tasks:
+    - name: Mirror script
+      ansible.builtin.template:
+        src: mirror/zkoo-mirror.sh.j2
+        dest: /usr/local/sbin/zkoo-mirror.sh
+        owner: root
+        group: root
+        mode: "0755"
+      notify: Restart mirror
+
+    - name: Mirror service
+      ansible.builtin.template:
+        src: mirror/zkoo-mirror.service.j2
+        dest: /etc/systemd/system/zkoo-mirror.service
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Reload systemd
+        - Restart mirror
+
+    - name: Apply systemd changes
+      ansible.builtin.meta: flush_handlers
+
+    - name: Mirror running
+      ansible.builtin.service:
+        name: zkoo-mirror
+        state: started
+        enabled: true

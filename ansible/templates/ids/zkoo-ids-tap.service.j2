@@ -1,0 +1,15 @@
+# Managed by Ansible
+[Unit]
+Description=VXLAN interface that receives mirrored traffic for Suricata
+After=network-online.target
+Wants=network-online.target
+Before=suricata.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/zkoo-ids-tap.sh start
+ExecStop=/usr/local/sbin/zkoo-ids-tap.sh stop
+
+[Install]
+WantedBy=multi-user.target

@@ -297,6 +297,19 @@ resource "azurerm_network_security_group" "nsg_mgmt" {
     destination_address_prefix            = local.vms["ids-01"].ip
   }
 
+    # Mirrored traffic from the entry points to the IDS sensor (VXLAN software TAP)
+  security_rule {
+    name                                  = "allow-mirror-to-ids"
+    priority                              = 120
+    direction                             = "Inbound"
+    access                                = "Allow"
+    protocol                              = "Udp"
+    source_port_range                     = "*"
+    destination_port_range                = "4789"
+    source_application_security_group_ids = [azurerm_application_security_group.asg_proxy.id, azurerm_application_security_group.asg_vpn.id]
+    destination_address_prefix            = local.vms["ids-01"].ip
+  }
+
   security_rule {
     name                       = "deny-all-inbound"
     priority                   = 4096

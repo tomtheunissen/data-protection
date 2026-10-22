@@ -1,0 +1,23 @@
+#!/bin/bash
+# Managed by Ansible
+# Receiving end of the software TAP: decapsulated copies appear on this interface for Suricata
+set -euo pipefail
+
+UPLINK="{{ ansible_default_ipv4.interface }}"
+LOCAL_IP="{{ ansible_default_ipv4.address }}"
+TUNNEL="{{ ids_mirror_interface }}"
+
+case "${1:-start}" in
+    start)
+        if ! ip link show "$TUNNEL" >/dev/null 2>&1; then
+            # No fixed remote: accepts tunnels from every mirroring host (ufw limits who may send)
+            ip link add "$TUNNEL" type vxlan id {{ ids_mirror_vni }} \
+                local "$LOCAL_IP" dstport {{ ids_mirror_port }} dev "$UPLINK" nolearning
+        fi
+        ip link set "$TUNNEL" up promisc on
+        ;;
+    stop)
+        ip link del "$TUNNEL" 2>/dev/null || true
+        ;;
+    *) echo "Usage: $0 start|stop" >&2; exit 1 ;;
+esac

@@ -1,0 +1,14 @@
+# Managed by Ansible
+[Unit]
+Description=Mirror uplink traffic to the IDS over VXLAN
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/zkoo-mirror.sh start
+ExecStop=/usr/local/sbin/zkoo-mirror.sh stop
+
+[Install]
+WantedBy=multi-user.target
