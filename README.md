@@ -56,7 +56,7 @@ Only `vm-proxy-01` and `vm-vpn-01` have a public IP address.
 | vm-ftp-01 | SFTP for partners, chrooted per partner | Native sshd |
 | vm-vpn-01 | OpenVPN + dnsmasq DNS forwarder | Native |
 | vm-mgmt-01 | Jump host and Ansible control node | Native |
-| vm-ids-01 | Suricata IDS (planned) | Native |
+| vm-ids-01 | Suricata IDS, fed by a software TAP from the proxy and the VPN server | Native |
 | vm-media-01 | Media server on 8096 (planned) | Docker |
 
 Services run in containers for isolation and reproducibility. The VPN, the jump host and the IDS stay native because they need host networking (tun device, routing, packet capture), so a container would add a layer without adding isolation. SFTP uses the host's own sshd, which already listens on port 22.
@@ -80,7 +80,22 @@ Services run in containers for isolation and reproducibility. The VPN, the jump 
 | Partners | Partner IP → proxy (2222) → vm-ftp-01 (22), chrooted SFTP |
 | Employees | OpenVPN → employee-pool → vm-app-01 (443), vm-fs-01 (445), Azure Files (445) |
 | Admins | OpenVPN + TOTP → admin-pool → vm-mgmt-01 (22) → all VMs (22) |
-| Attacker | Internet → only 443 and 1194 are open; SQLi/XSS is blocked by the WAF (403) |
+| Attacker | Internet → only 443 and 1194 are open; SQLi/XSS is blocked by the WAF (403); scans and known attack patterns raise Suricata alerts |
+
+### Intrusion detection
+
+Azure has no switch with a mirror port, so a VM never sees traffic meant for another VM. The two entry points therefore act as a software TAP: on `vm-proxy-01` and `vm-vpn-01`, `tc` copies every packet on `eth0` (both directions) into a VXLAN tunnel (UDP 4789) to `vm-ids-01`. Suricata only runs there and listens on the tunnel interface `vxmirror`.
+
+```
+vm-proxy-01 ─┐  copy of every packet on eth0
+             ├── VXLAN (UDP 4789) ──► vm-ids-01: Suricata on vxmirror
+vm-vpn-01 ───┘
+```
+
+- Rules: Emerging Threats Open, updated weekly with `suricata-update`.
+- Alerts: `/var/log/suricata/fast.log` (one line per alert) and `/var/log/suricata/eve.json` (full JSON).
+- On the VPN server the copy includes the decrypted client traffic, because it leaves through `eth0` into the VNet.
+- HTTPS stays encrypted for the IDS. The WAF covers the application layer; Suricata covers the network layer (scans, brute force, known exploit patterns, DNS).
 
 ## Repository layout
 
@@ -185,10 +200,10 @@ Always on `vm-mgmt-01`:
 cd ~/data-protection && git pull
 cd ansible
 ansible-galaxy collection install -r requirements.yml
-ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,sftp,appserver,fileserver
+ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,sftp,appserver,fileserver,ids,vpn
 ```
 
-Use `/var/lib/zkoo/inventory.ini`: the bootstrap writes its own copy there, so `git pull` never conflicts with it. Add `--check` for a dry run.
+The bootstrap already configured `vpn` and `mgmt`; including `vpn` again is harmless and adds the traffic mirror if it is missing. Use `/var/lib/zkoo/inventory.ini`: the bootstrap writes its own copy there, so `git pull` never conflicts with it. Add `--check` for a dry run.
 
 ## Testing the routes
 
@@ -214,6 +229,18 @@ Connected as an employee (employees):
 - Finder or Explorer: `smb://192.168.8.5/zkoo-data`, password from Key Vault (`smb-password-<user>`)
 - `ssh azureadmin@192.168.13.4` must fail: employees cannot reach the jump host
 
+On `vm-mgmt-01` (intrusion detection):
+
+```bash
+ssh 192.168.13.5 'sudo tcpdump -ni vxmirror -c 10'               # mirrored packets arrive
+ssh 192.168.1.4 'curl -s http://testmynids.org/uid/index.html'   # standard Suricata test
+ssh 192.168.13.5 'sudo tail -5 /var/log/suricata/fast.log'       # GPL ATTACK_RESPONSE id check returned root
+```
+
+A port scan from a laptop (`nmap -Pn <proxy-ip>`) should also show up in `fast.log`.
+
+The full step-by-step test plan is in [docs/testplan.md](docs/testplan.md).
+
 ## Common tasks
 
 | Task | How |
@@ -235,6 +262,7 @@ Connected as an employee (employees):
 - **Private data paths.** SQL, Azure Files and App Service are only reachable through private endpoints; their public access is disabled.
 - **Hardened SSH.** Key login only, no root login, at most 3 attempts. SFTP partners get no shell, no TTY and no forwarding.
 - **File share.** SMB3 only, encryption required, no guest access, employee pool only.
+- **Intrusion detection.** Suricata on `vm-ids-01` inspects a copy of all traffic through both entry points; only the proxy and the VPN server may send to its tunnel port (NSG and `ufw`).
 - **Logging.** `auditd` on every VM; SQL auditing and file share logs go to Log Analytics.
 
 ## Known pitfalls
@@ -246,6 +274,7 @@ Connected as an employee (employees):
 | WAF container keeps restarting | The image runs unprivileged and cannot bind below 1024. Host 443 maps to container 8443, and the `ufw route` rule uses 8443 because `DOCKER-USER` sees the port after Docker's DNAT. |
 | `terraform destroy` hangs on Log Analytics | Permanent delete of the workspace is disabled in `providers.tf`. |
 | `inventory.ini` shows as deleted after a destroy | Terraform removes the file with the environment. Restore it with `git restore ansible/inventory.ini`; do not commit the deletion. |
+| Suricata sees only small packets | A VXLAN copy is 50 bytes larger than the original, so full-size packets are fragmented on the way to the IDS. If fragments do not arrive, Suricata still sees handshakes, scans and DNS, but not large data packets. |
 | `$KV` or `$P` is empty | `terraform output` only works from the `terraform` folder, and shell variables only exist in the window where you set them. |
 
 ## Tearing down

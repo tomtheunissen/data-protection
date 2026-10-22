@@ -56,7 +56,7 @@ Alleen `vm-proxy-01` en `vm-vpn-01` hebben een publiek IP-adres.
 | vm-ftp-01 | SFTP voor partners, met een chroot per partner | Native sshd |
 | vm-vpn-01 | OpenVPN + dnsmasq als DNS-forwarder | Native |
 | vm-mgmt-01 | Jump host en Ansible-controller | Native |
-| vm-ids-01 | Suricata IDS (gepland) | Native |
+| vm-ids-01 | Suricata IDS, gevoed door een software-TAP vanaf de proxy en de VPN-server | Native |
 | vm-media-01 | Mediaserver op 8096 (gepland) | Docker |
 
 Diensten draaien in containers voor isolatie en reproduceerbaarheid. De VPN, de jump host en de IDS blijven native, omdat ze host-netwerkrechten nodig hebben (tun-device, routering, packet capture). Een container zou daar alleen een extra laag toevoegen zonder extra isolatie. SFTP gebruikt de sshd van de host zelf, die al op poort 22 luistert.
@@ -80,7 +80,22 @@ Diensten draaien in containers voor isolatie en reproduceerbaarheid. De VPN, de 
 | Partners | Partner-IP → proxy (2222) → vm-ftp-01 (22), SFTP met chroot |
 | Employees | OpenVPN → employee-pool → vm-app-01 (443), vm-fs-01 (445), Azure Files (445) |
 | Admins | OpenVPN + TOTP → admin-pool → vm-mgmt-01 (22) → alle VM's (22) |
-| Hacker | Internet → alleen 443 en 1194 staan open; SQLi en XSS worden door de WAF geblokkeerd (403) |
+| Hacker | Internet → alleen 443 en 1194 staan open; SQLi en XSS worden door de WAF geblokkeerd (403); scans en bekende aanvalspatronen geven Suricata-meldingen |
+
+### Intrusion detection
+
+Azure heeft geen switch met een mirrorpoort, dus een VM ziet nooit verkeer dat voor een andere VM bedoeld is. De twee toegangspunten werken daarom als software-TAP: op `vm-proxy-01` en `vm-vpn-01` kopieert `tc` elk pakket op `eth0` (in beide richtingen) naar een VXLAN-tunnel (UDP 4789) naar `vm-ids-01`. Suricata draait alleen daar en luistert op de tunnelinterface `vxmirror`.
+
+```
+vm-proxy-01 ─┐  kopie van elk pakket op eth0
+             ├── VXLAN (UDP 4789) ──► vm-ids-01: Suricata op vxmirror
+vm-vpn-01 ───┘
+```
+
+- Regels: Emerging Threats Open, elke week bijgewerkt met `suricata-update`.
+- Meldingen: `/var/log/suricata/fast.log` (één regel per melding) en `/var/log/suricata/eve.json` (volledige JSON).
+- Op de VPN-server bevat de kopie ook het ontsleutelde verkeer van clients, omdat dat via `eth0` het VNet in gaat.
+- HTTPS blijft voor de IDS versleuteld. De WAF dekt de applicatielaag af; Suricata het netwerk (scans, brute-force, bekende exploitpatronen, DNS).
 
 ## Opbouw van de repository
 
@@ -185,10 +200,10 @@ Altijd op `vm-mgmt-01`:
 cd ~/data-protection && git pull
 cd ansible
 ansible-galaxy collection install -r requirements.yml
-ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,sftp,appserver,fileserver
+ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,sftp,appserver,fileserver,ids,vpn
 ```
 
-Gebruik `/var/lib/zkoo/inventory.ini`: de bootstrap zet daar een eigen kopie neer, zodat `git pull` er nooit mee in conflict komt. Voeg `--check` toe voor een droge run.
+De bootstrap heeft `vpn` en `mgmt` al ingericht. `vpn` nog eens meenemen kan geen kwaad en zet de traffic mirror neer als die ontbreekt. Gebruik `/var/lib/zkoo/inventory.ini`: de bootstrap zet daar een eigen kopie neer, zodat `git pull` er nooit mee in conflict komt. Voeg `--check` toe voor een droge run.
 
 ## De routes testen
 
@@ -214,6 +229,18 @@ Verbonden als medewerker (medewerkers):
 - Finder of Verkenner: `smb://192.168.8.5/zkoo-data`, met het wachtwoord uit de Key Vault (`smb-password-<gebruiker>`)
 - `ssh azureadmin@192.168.13.4` moet mislukken: medewerkers kunnen niet bij de jump host
 
+Op `vm-mgmt-01` (intrusion detection):
+
+```bash
+ssh 192.168.13.5 'sudo tcpdump -ni vxmirror -c 10'               # gekopieerde pakketten komen aan
+ssh 192.168.1.4 'curl -s http://testmynids.org/uid/index.html'   # standaardtest voor Suricata
+ssh 192.168.13.5 'sudo tail -5 /var/log/suricata/fast.log'       # GPL ATTACK_RESPONSE id check returned root
+```
+
+Een poortscan vanaf een laptop (`nmap -Pn <proxy-ip>`) hoort ook in `fast.log` te verschijnen.
+
+Het volledige testplan, stap voor stap, staat in [docs/testplan.md](docs/testplan.md).
+
 ## Veelvoorkomende taken
 
 | Taak | Hoe |
@@ -235,6 +262,7 @@ Verbonden als medewerker (medewerkers):
 - **Privé datapaden.** SQL, Azure Files en App Service zijn alleen via private endpoints bereikbaar; publieke toegang staat uit.
 - **Geharde SSH.** Alleen inloggen met sleutels, geen root-login, maximaal 3 pogingen. SFTP-partners krijgen geen shell, geen TTY en geen forwarding.
 - **Fileshare.** Alleen SMB3, versleuteling verplicht, geen gasttoegang, alleen de employee-pool.
+- **Intrusion detection.** Suricata op `vm-ids-01` inspecteert een kopie van al het verkeer door beide toegangspunten. Alleen de proxy en de VPN-server mogen naar de tunnelpoort sturen (NSG en `ufw`).
 - **Logging.** `auditd` op elke VM; SQL-auditing en logs van de fileshare gaan naar Log Analytics.
 
 ## Bekende valkuilen
@@ -246,6 +274,7 @@ Verbonden als medewerker (medewerkers):
 | De WAF-container blijft herstarten | De image draait zonder rootrechten en kan geen poort onder 1024 openen. Host 443 wordt doorgestuurd naar container 8443, en de `ufw route`-regel gebruikt 8443, omdat `DOCKER-USER` de poort pas na de DNAT van Docker ziet. |
 | `terraform destroy` blijft hangen op Log Analytics | Het permanent verwijderen van de workspace staat uit in `providers.tf`. |
 | `inventory.ini` staat als verwijderd na een destroy | Terraform verwijdert het bestand samen met de omgeving. Zet het terug met `git restore ansible/inventory.ini`; commit de verwijdering niet. |
+| Suricata ziet alleen kleine pakketten | Een VXLAN-kopie is 50 bytes groter dan het origineel, dus volle pakketten worden onderweg naar de IDS gesplitst. Komen de fragmenten niet aan, dan ziet Suricata nog wel verbindingsopbouw, scans en DNS, maar geen grote datapakketten. |
 | `$KV` of `$P` is leeg | `terraform output` werkt alleen vanuit de map `terraform`, en shellvariabelen bestaan alleen in het venster waarin je ze hebt gezet. |
 
 ## Afbreken
