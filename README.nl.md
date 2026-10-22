@@ -49,7 +49,7 @@ Alleen `vm-proxy-01` en `vm-vpn-01` hebben een publiek IP-adres.
 | VM | Dienst | Draait als |
 |---|---|---|
 | vm-proxy-01 | nginx + ModSecurity + OWASP CRS (WAF) op 443; TCP-relay voor SFTP van partners op 2222 | Docker |
-| vm-web-01 | Patiëntportaal, bereikbaar op `/portaal/` via de WAF | Docker |
+| vm-web-01 | Patiëntportaal, bereikbaar op `/portaal/` via de WAF; mount de Azure Files-share `medical-files` op `/mnt/medical-files` | Docker |
 | vm-web-02 | Publieke bedrijfswebsite, bereikbaar op `/` via de WAF | Docker |
 | vm-app-01 | Bedrijfsapplicatie voor medewerkers (HTTPS) | Docker |
 | vm-fs-01 | Samba-fileshare voor medewerkers (SMB3) | Docker |
@@ -259,7 +259,7 @@ Het volledige testplan, stap voor stap, staat in [docs/testplan.md](docs/testpla
 - **MFA voor beheerders.** Beheerders hebben een certificaat én een TOTP-code nodig; medewerkers kunnen niet bij de jump host.
 - **Geen geheimen in Git.** Wachtwoorden, VPN-profielen, TOTP-geheimen en SSH-sleutels staan in de Key Vault. De jump host leest ze met zijn managed identity.
 - **WAF.** ModSecurity met de OWASP Core Rule Set blokkeert SQL-injectie en XSS voordat die het patiëntportaal bereiken. Het portaal moet als kwetsbaar worden beschouwd. De WAF-container draait als gebruiker zonder rootrechten.
-- **Privé datapaden.** SQL, Azure Files en App Service zijn alleen via private endpoints bereikbaar; publieke toegang staat uit.
+- **Privé datapaden.** SQL, Azure Files en App Service zijn alleen via private endpoints bereikbaar; publieke toegang staat uit. Alleen het patiëntportaal mount de share met medische bestanden (SMB 3.1.1 met versleuteling); de storage key komt uit de Key Vault en is alleen leesbaar voor root.
 - **Geharde SSH.** Alleen inloggen met sleutels, geen root-login, maximaal 3 pogingen. SFTP-partners krijgen geen shell, geen TTY en geen forwarding.
 - **Fileshare.** Alleen SMB3, versleuteling verplicht, geen gasttoegang, alleen de employee-pool.
 - **Intrusion detection.** Suricata op `vm-ids-01` inspecteert een kopie van al het verkeer door beide toegangspunten. Alleen de proxy en de VPN-server mogen naar de tunnelpoort sturen (NSG en `ufw`).

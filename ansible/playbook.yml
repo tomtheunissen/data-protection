@@ -630,6 +630,81 @@
         from_ip: "{{ hostvars[item].ansible_host }}"
       loop: "{{ groups['proxy'] }}"
 
+# Medical files: Azure Files share, reachable only through pep-sensitivedata (192.168.14.4)
+- name: Patient portal storage
+  hosts: vm-web-01
+  become: true
+
+  vars:
+    medical_credentials_file: /etc/smbcredentials/{{ medical_storage_account }}.cred
+    medical_mount_options:
+      - vers=3.1.1
+      - seal
+      - credentials={{ medical_credentials_file }}
+      - uid=0
+      - gid=0
+      - dir_mode=0770
+      - file_mode=0660
+      - serverino
+      - nosharesock
+      - actimeo=30
+      - _netdev
+      - nofail
+
+  tasks:
+    - name: SMB client install
+      ansible.builtin.apt:
+        name: cifs-utils
+        state: present
+
+    - name: Log in to Azure with the jump host identity
+      ansible.builtin.command: az login --identity --allow-no-subscriptions --output none
+      delegate_to: localhost
+      become: false
+      changed_when: false
+
+    - name: Read the storage account key from Key Vault
+      ansible.builtin.command: >-
+        az keyvault secret show --vault-name {{ key_vault_name }}
+        --name {{ medical_storage_key_secret }} --query value --output tsv
+      register: medical_storage_key
+      delegate_to: localhost
+      become: false
+      changed_when: false
+      no_log: true
+
+    - name: Credentials directory
+      ansible.builtin.file:
+        path: /etc/smbcredentials
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    # Readable by root only; the key never ends up in Git or in the fstab line
+    - name: Share credentials
+      ansible.builtin.copy:
+        dest: "{{ medical_credentials_file }}"
+        content: |
+          username={{ medical_storage_account }}
+          password={{ medical_storage_key.stdout }}
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+
+    # The name resolves to the private endpoint through the private DNS zone;
+    # seal = SMB 3 encryption, nofail = the VM still boots if the share is unreachable
+    - name: Mount the medical files share
+      ansible.posix.mount:
+        src: //{{ medical_storage_account }}.file.core.windows.net/{{ medical_share }}
+        path: "{{ medical_mount_path }}"
+        fstype: cifs
+        # One comma-separated string without spaces, or the fstab line breaks
+        opts: "{{ medical_mount_options | join(',') }}"
+        state: mounted
+
+
 - name: Media server
   hosts: media
   become: true

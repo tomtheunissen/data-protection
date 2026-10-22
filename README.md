@@ -49,7 +49,7 @@ Only `vm-proxy-01` and `vm-vpn-01` have a public IP address.
 | VM | Service | Runs as |
 |---|---|---|
 | vm-proxy-01 | nginx + ModSecurity + OWASP CRS (WAF) on 443; TCP relay for partner SFTP on 2222 | Docker |
-| vm-web-01 | Patient portal, reached at `/portaal/` through the WAF | Docker |
+| vm-web-01 | Patient portal, reached at `/portaal/` through the WAF; mounts the Azure Files share `medical-files` at `/mnt/medical-files` | Docker |
 | vm-web-02 | Public company website, reached at `/` through the WAF | Docker |
 | vm-app-01 | Business application for employees (HTTPS) | Docker |
 | vm-fs-01 | Samba file share for employees (SMB3) | Docker |
@@ -259,7 +259,7 @@ The full step-by-step test plan is in [docs/testplan.md](docs/testplan.md).
 - **MFA for admins.** Admins need a certificate and a TOTP code; employees cannot reach the jump host.
 - **No secrets in Git.** Passwords, VPN profiles, TOTP secrets and SSH keys live in Key Vault. The jump host reads them with its managed identity.
 - **WAF.** ModSecurity with the OWASP Core Rule Set blocks SQL injection and XSS before they reach the patient portal, which must be treated as vulnerable. The WAF container runs as an unprivileged user.
-- **Private data paths.** SQL, Azure Files and App Service are only reachable through private endpoints; their public access is disabled.
+- **Private data paths.** SQL, Azure Files and App Service are only reachable through private endpoints; their public access is disabled. Only the patient portal mounts the medical files share (SMB 3.1.1 with encryption); the storage key comes from Key Vault and is readable by root only.
 - **Hardened SSH.** Key login only, no root login, at most 3 attempts. SFTP partners get no shell, no TTY and no forwarding.
 - **File share.** SMB3 only, encryption required, no guest access, employee pool only.
 - **Intrusion detection.** Suricata on `vm-ids-01` inspects a copy of all traffic through both entry points; only the proxy and the VPN server may send to its tunnel port (NSG and `ufw`).

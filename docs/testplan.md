@@ -100,6 +100,19 @@ Verbonden als **medewerker01**. Laat het wachtwoord leeg; wil OpenVPN Connect da
 | E7 | Medewerker kan **niet** bij het frontend | `nc -vz -G 5 192.168.4.4 443` | Timeout | ☐ |
 | E8 | Bestand op de server | Als admin op mgmt: `ssh 192.168.8.5 'sudo ls -l /srv/samba/zkoo-data'` | Bestand van E4, groep `1500` | ☐ |
 
+## 6b. Medische bestanden (Azure Files via private endpoint)
+
+Verbonden als **tom**, op mgmt.
+
+| ID | Test | Commando | Verwacht | ✓ |
+|---|---|---|---|---|
+| S1 | Share gemount op het portaal | `ssh 192.168.4.4 'findmnt /mnt/medical-files'` | Type `cifs`, opties met `vers=3.1.1` en `seal` | ☐ |
+| S2 | Via het private endpoint | `ssh 192.168.4.4 'getent hosts stzkoosensitive01.file.core.windows.net'` | 192.168.14.4 | ☐ |
+| S3 | Schrijven | `ssh 192.168.4.4 'sudo touch /mnt/medical-files/testbestand && sudo ls -l /mnt/medical-files'` | `testbestand` staat erop | ☐ |
+| S4 | Sleutel alleen leesbaar voor root | `ssh 192.168.4.4 'sudo stat -c "%a %U" /etc/smbcredentials/stzkoosensitive01.cred'` | `600 root` | ☐ |
+| S5 | Een andere VM kan **niet** bij de share | `ssh 192.168.4.5 'timeout 5 bash -c "</dev/tcp/192.168.14.4/445" && echo open \|\| echo geblokkeerd'` | `geblokkeerd` (nsg-pep) | ☐ |
+| S6 | Geen publieke toegang | Laptop, VPN **uit**: `nc -vz -G 5 stzkoosensitive01.file.core.windows.net 445` | Mislukt (publieke toegang staat uit) | ☐ |
+
 ## 7. Intrusion detection
 
 Verbonden als **tom**, op mgmt.

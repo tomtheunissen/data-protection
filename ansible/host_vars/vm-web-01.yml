@@ -1,0 +1,7 @@
+---
+# The patient portal is the only VM that mounts the medical files share (Azure Files over the private endpoint)
+medical_storage_account: stzkoosensitive01
+medical_share: medical-files
+medical_mount_path: /mnt/medical-files
+# Key Vault secret written by Terraform (keyvault.tf)
+medical_storage_key_secret: storage-key-stzkoosensitive01
