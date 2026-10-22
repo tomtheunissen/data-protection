@@ -1,129 +1,269 @@
-# ZKOO Proof of Concept: Azure Infrastructure
+# ZKOO Proof of Concept: Data Protection in the Cloud
 
-Terraform code for the proof of concept (PoC) of the ZKOO data protection case. It deploys a segmented Azure environment that replaces the original "allow everything" setup with least-privilege network rules, two controlled entry points and private access to sensitive data.
+*[Nederlandse versie](README.nl.md)*
 
-The design follows the SOLL architecture (SOLL-7.0). Configuration of the virtual machines themselves (OpenVPN, nginx with ModSecurity, Suricata, Samba, SFTP) is handled separately with Ansible.
+Infrastructure as Code for the proof of concept (PoC) of the ZKOO data protection case. Terraform builds a segmented Azure environment; Ansible configures the virtual machines. The design follows the SOLL architecture (SOLL-7.0): least-privilege network rules, two controlled entry points (a WAF reverse proxy and a VPN) and private access to sensitive data.
 
-## Architecture overview
+**Ground rule:** after `terraform apply`, all management runs from the jump host `vm-mgmt-01` over the VPN. Nobody connects to the VMs directly from a laptop, and Ansible never runs from a laptop.
+
+## Contents
+
+- [Architecture](#architecture)
+- [Repository layout](#repository-layout)
+- [Prerequisites](#prerequisites)
+- [Deploying the environment](#deploying-the-environment)
+- [Connecting through the VPN](#connecting-through-the-vpn)
+- [Configuring the VMs with Ansible](#configuring-the-vms-with-ansible)
+- [Testing the routes](#testing-the-routes)
+- [Common tasks](#common-tasks)
+- [Security design](#security-design)
+- [Known pitfalls](#known-pitfalls)
+- [Tearing down](#tearing-down)
+- [Team agreements](#team-agreements)
+
+## Architecture
 
 ### Network
 
-| Subnet | Address range | Purpose |
+All subnets live in `vnet-zkoo-01` (192.168.0.0/16).
+
+| Subnet | Address range | VMs | Purpose |
+|---|---|---|---|
+| snet-edge | 192.168.1.0/24 | vm-proxy-01 (.4), vm-vpn-01 (.5) | Only entry points from the internet |
+| snet-frontend | 192.168.4.0/22 | vm-web-01 (.4), vm-web-02 (.5), vm-media-01 (.6), vm-ftp-01 (.7) | Services reached through the proxy |
+| snet-backend | 192.168.8.0/22 | vm-app-01 (.4), vm-fs-01 (.5) | Internal services for employees |
+| snet-mgmt | 192.168.13.0/28 | vm-mgmt-01 (.4), vm-ids-01 (.5) | Jump host and IDS |
+| snet-pep | 192.168.14.0/27 | – | Private endpoints for SQL, Azure Files and App Service |
+
+VPN clients get an address from one of two pools outside the VNet. The route table `rt-vpn` sends replies for these pools back to `vm-vpn-01`; there is no NAT, so every VM sees the real client address.
+
+| Pool | Range | Users | Authentication |
+|---|---|---|---|
+| employee-pool | 10.8.0.0/22 | ZKOO employees | Certificate |
+| admin-pool | 10.8.4.0/24 | Administrators, fixed address per admin | Certificate + TOTP (MFA) |
+
+Only `vm-proxy-01` and `vm-vpn-01` have a public IP address.
+
+### Services per VM
+
+| VM | Service | Runs as |
 |---|---|---|
-| snet-edge | 192.168.1.0/24 | Entry points: reverse proxy with WAF, OpenVPN server |
-| snet-frontend | 192.168.4.0/22 | Services for external users: patient portal, website, media, SFTP |
-| snet-backend | 192.168.8.0/22 | Internal services for employees: business application, file server |
-| snet-mgmt | 192.168.13.0/28 | Management jump host and IDS |
-| snet-pep | 192.168.14.0/27 | Private endpoints to Azure SQL, Azure Files and App Service |
+| vm-proxy-01 | nginx + ModSecurity + OWASP CRS (WAF) on 443; TCP relay for partner SFTP on 2222 | Docker |
+| vm-web-01 | Patient portal, reached at `/portaal/` through the WAF | Docker |
+| vm-web-02 | Public company website, reached at `/` through the WAF | Docker |
+| vm-app-01 | Business application for employees (HTTPS) | Docker |
+| vm-fs-01 | Samba file share for employees (SMB3) | Docker |
+| vm-ftp-01 | SFTP for partners, chrooted per partner | Native sshd |
+| vm-vpn-01 | OpenVPN + dnsmasq DNS forwarder | Native |
+| vm-mgmt-01 | Jump host and Ansible control node | Native |
+| vm-ids-01 | Suricata IDS (planned) | Native |
+| vm-media-01 | Media server on 8096 (planned) | Docker |
 
-All subnets share the virtual network `vnet-zkoo-01` (192.168.0.0/16). VPN users receive an address from one of two pools that live outside the VNet:
-
-| Pool | Address range | Users |
-|---|---|---|
-| employee-pool | 10.8.0.0/22 | ZKOO employees |
-| admin-pool | 10.8.4.0/24 | Administrators (MFA required) |
-
-Only `vm-proxy-01` and `vm-vpn-01` have a public IP address. Every other VM is reachable only through those two VMs.
+Services run in containers for isolation and reproducibility. The VPN, the jump host and the IDS stay native because they need host networking (tun device, routing, packet capture), so a container would add a layer without adding isolation. SFTP uses the host's own sshd, which already listens on port 22.
 
 ### Services outside the VNet
 
 | Service | Name | Access |
 |---|---|---|
-| Azure SQL server and database | `sql-zkoo-01` / `sqldb-zkoo-01` | Private endpoint `pep-sql` only, public access disabled, Entra ID authentication only |
-| Storage account with Azure Files share | `stzkoosensitive01` | Private endpoint `pep-sensitivedata` only, public access disabled |
-| Web app | `app-zkoo-02` | Private endpoint `pep-webapp` only, public access disabled |
-| Web app | `app-zkoo-03` | Public endpoint, restricted to the public IP of `vm-proxy-01` |
+| Azure SQL | `sql-zkoo-01` / `sqldb-zkoo-01` | Private endpoint `pep-sql` only, Entra ID authentication only |
+| Azure Files | `stzkoosensitive01`, share `medical-files` | Private endpoint `pep-sensitivedata` only |
+| App Service | `app-zkoo-02` | Private endpoint `pep-webapp` only |
+| App Service | `app-zkoo-03` | Public endpoint, restricted to the proxy's public IP |
+| Key Vault | `kv-zkoo-<random>` | Secrets for the bootstrap, VPN profiles and share passwords |
+| Log Analytics | – | SQL auditing and file share access logs |
+
+### Routes
+
+| Route | Path |
+|---|---|
+| Users | Internet → WAF (443) → web-02 (`/`) or web-01 (`/portaal/`) |
+| Partners | Partner IP → proxy (2222) → vm-ftp-01 (22), chrooted SFTP |
+| Employees | OpenVPN → employee-pool → vm-app-01 (443), vm-fs-01 (445), Azure Files (445) |
+| Admins | OpenVPN + TOTP → admin-pool → vm-mgmt-01 (22) → all VMs (22) |
+| Attacker | Internet → only 443 and 1194 are open; SQLi/XSS is blocked by the WAF (403) |
+
+## Repository layout
+
+```
+terraform/
+  terraform.tf           providers and the remote state backend
+  providers.tf           azurerm provider settings
+  variables.tf           input variables
+  locals.tf              pools, private endpoint IPs, map of all VMs, Key Vault name
+  main.tf                existing resource group (data source)
+  network.tf             VNet, subnets, public IPs, route table rt-vpn
+  security.tf            ASGs and NSGs (every NSG ends with deny-all)
+  compute.tf             NICs and the ten Linux VMs, cloud-init for vm-mgmt-01
+  keyvault.tf            Key Vault, access policies and bootstrap secrets
+  database.tf            Azure SQL
+  storage.tf             storage account and Azure Files share
+  appservice.tf          App Service plan and web apps
+  private_endpoints.tf   private endpoints and private DNS zones
+  monitoring.tf          Log Analytics, diagnostics, daily VM shutdown
+  ansible.tf             generates ../ansible/inventory.ini
+  inventory.tftpl        template for the Ansible inventory
+  cloud-init/            bootstrap script for vm-mgmt-01
+  ssh-keys/              team public keys (*.pub only)
+ansible/
+  playbook.yml           one play per VM group
+  inventory.ini          generated by Terraform, do not edit by hand
+  requirements.yml       Ansible collections
+  group_vars/            settings per group (all.yml holds the VPN users)
+  templates/             config files per service
+  files/sftp-keys/       partner public keys (*.pub only)
+```
 
 ## Prerequisites
 
-- Terraform 1.x (latest version recommended for azurerm 5)
-- azurerm provider `~> 5.5` (installed automatically by `terraform init`)
-- Azure CLI, logged in with `az login` to the Data Protection subscription
+- Terraform 1.x and the Azure CLI, logged in with `az login`
 - Contributor access to the resource group `2026_KE06_KDB1_casusgroep_04`
-- An SSH key pair (RSA, 4096 bits). Create one with `ssh-keygen -t rsa -b 4096` if needed (works on macOS and in Windows PowerShell)
-- Your public key added to `terraform/ssh-keys/` (see below)
+- Your public SSH key in `terraform/ssh-keys/<firstname>.pub`
+- The private GitHub deploy key at `~/.ssh/zkoo_deploy` (only on the machine that runs Terraform). Its public half is a read-only deploy key on the GitHub repository.
+- OpenVPN Connect and an authenticator app (TOTP) for admins
+- `qrencode` to show the TOTP QR code (`brew install qrencode`)
 
-## Usage
+### Remote state
 
-All Terraform files are in the `terraform` folder. Run every command from there:
+The Terraform state lives in Azure (see the backend in `terraform.tf`): storage account `stzkootfstate01`, container `tfstate`, key `zkoo.tfstate`. That account was created once with the Azure CLI and is not managed by Terraform, so `terraform destroy` never deletes it. Blob versioning and soft delete protect the state against mistakes.
+
+## Deploying the environment
+
+Run from the `terraform` folder on the Terraform machine (see [Team agreements](#team-agreements)):
 
 ```bash
 cd terraform
-terraform init      # download the azurerm provider
-terraform fmt       # format the code
-terraform plan      # preview the changes
-terraform apply     # create the resources
-terraform destroy   # remove everything
+terraform init
+terraform plan
+terraform apply
 ```
 
-**After every `git pull`, run `terraform init` first.** The `.terraform` folder is not in Git, so everyone downloads the provider locally. Without it, your editor and Terraform may use an outdated provider version and show errors for valid code.
+The apply takes about 15 to 20 minutes. Then `vm-mgmt-01` bootstraps itself through cloud-init, with no laptop involved:
 
-### Costs and automatic shutdown
+1. installs the Azure CLI and logs in with its **managed identity**;
+2. reads the GitHub deploy key and its own SSH key from Key Vault;
+3. clones this repository;
+4. runs the Ansible plays for `vpn` and `mgmt`;
+5. stores a VPN profile per user and a TOTP secret per admin in Key Vault.
 
-All VMs shut down automatically every day at 19:00 (W. Europe Standard Time). They do not start again by themselves. Start all VMs at once with:
+Follow the bootstrap (about 10 minutes):
 
 ```bash
-az vm start --ids $(az vm list -g 2026_KE06_KDB1_casusgroep_04 --query "[].id" -o tsv)
+az vm run-command invoke -g 2026_KE06_KDB1_casusgroep_04 -n vm-mgmt-01 \
+  --command-id RunShellScript --scripts "tail -5 /var/log/zkoo-bootstrap.log" \
+  --query "value[0].message" -o tsv
 ```
 
-Run `terraform destroy` when the environment is not in use for a longer period to avoid unnecessary costs.
+Wait for `Bootstrap finished`. Then commit the regenerated `ansible/inventory.ini`.
 
-## Variables
+## Connecting through the VPN
 
-| Variable | Default | Description |
-|---|---|---|
-| `subscription_id` | Data Protection subscription | Azure subscription to deploy into |
-| `resource_group_name` | `2026_KE06_KDB1_casusgroep_04` | Existing resource group provided by the school |
-| `admin_username` | `azureadmin` | Local admin account on all Linux VMs |
-| `sql_admin_login` | Group member's school email | Email address of the Microsoft Entra user that administers the SQL server |
-| `sql_admin_object_id` | Object ID of that user | Object ID of the Microsoft Entra user that administers the SQL server |
-
-Override a default without changing the code, for example:
+Download your profile and TOTP secret from the new Key Vault (from the `terraform` folder):
 
 ```bash
-terraform plan -var="admin_username=myadmin"
+KV=$(terraform output -raw key_vault_name)
+az keyvault secret download --vault-name $KV --name vpn-profile-<user> --file ~/<user>.ovpn --overwrite
+az keyvault secret show --vault-name $KV --name vpn-totp-<user> --query value -o tsv | qrencode -t ansiutf8
 ```
 
-## File structure
+1. Import the `.ovpn` file in OpenVPN Connect. Remove the profile of a previous deployment first: every rebuild creates a new CA.
+2. Scan the QR code with your authenticator app (admins only).
+3. Connect with your user name. Admins enter the 6-digit TOTP code as password; employees leave it empty.
+4. Log in on the jump host. Every rebuild gives it a new host key, so remove the old one first:
 
-| File | Contents |
+```bash
+ssh-keygen -R 192.168.13.4
+ssh azureadmin@192.168.13.4
+```
+
+Reboot `vm-mgmt-01` once after the first deployment so it loads the kernel updates from the bootstrap (`sudo reboot`).
+
+## Configuring the VMs with Ansible
+
+Always on `vm-mgmt-01`:
+
+```bash
+cd ~/data-protection && git pull
+cd ansible
+ansible-galaxy collection install -r requirements.yml
+ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,sftp,appserver,fileserver
+```
+
+Use `/var/lib/zkoo/inventory.ini`: the bootstrap writes its own copy there, so `git pull` never conflicts with it. Add `--check` for a dry run.
+
+## Testing the routes
+
+From a laptop (users and attackers):
+
+```bash
+P=$(terraform output -raw proxy_public_ip)
+curl -sk https://$P/ | grep Served                       # vm-web-02
+curl -sk https://$P/portaal/ | grep Served               # vm-web-01
+curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/portaal/?id=1'%20OR%20'1'='1"   # 403 from the WAF
+```
+
+On `vm-mgmt-01` with a partner key (partners):
+
+```bash
+sftp -i <partner-key> partner01@192.168.4.7    # only "upload" is visible, cd /etc fails
+ssh  -i <partner-key> partner01@192.168.4.7    # refused: "This service allows sftp connections only"
+```
+
+Connected as an employee (employees):
+
+- `https://192.168.8.4` opens the business application
+- Finder or Explorer: `smb://192.168.8.5/zkoo-data`, password from Key Vault (`smb-password-<user>`)
+- `ssh azureadmin@192.168.13.4` must fail: employees cannot reach the jump host
+
+## Common tasks
+
+| Task | How |
 |---|---|
-| `terraform.tf` | Required Terraform providers and version constraints |
-| `providers.tf` | Configuration of the azurerm provider |
-| `variables.tf` | Input variables that can differ per environment or user |
-| `main.tf` | Data source for the existing resource group |
-| `locals.tf` | Shared values: VPN pools, private endpoint addresses and the map of all VMs with their subnet, IP address, size and ASG |
-| `network.tf` | Virtual network, subnets, public IP addresses, route table for the VPN pools and its subnet associations |
-| `security.tf` | Application security groups, network security groups with their rules, and NSG subnet associations |
-| `compute.tf` | Network interfaces, ASG associations and the ten Linux VMs |
-| `database.tf` | Azure SQL server `sql-zkoo-01` and database `sqldb-zkoo-01`, with public access disabled and Entra ID authentication only |
-| `storage.tf` | Storage account `stzkoosensitive01` with an Azure Files share for sensitive medical files, public access disabled, soft delete enabled |
-| `appservice.tf` | App Service plan, `app-zkoo-02` (private, reachable only through its private endpoint) and `app-zkoo-03` (public endpoint, restricted to the proxy's public IP) |
-| `private_endpoints.tf` | Private endpoints `pep-sql`, `pep-sensitivedata` and `pep-webapp` with fixed addresses, private DNS zones and their VNet links |
-| `monitoring.tf` | Automatic daily shutdown of all VMs, Log Analytics workspace, SQL server auditing and file share access logs sent to Log Analytics |
-| `outputs.tf` | Public IP addresses of the proxy and VPN server, and private IP addresses of all VMs for the Ansible inventory |
+| Add a VPN admin or employee | Add the name to `vpn_admins` or `vpn_employees` in `ansible/group_vars/all.yml`, then rerun the `vpn` and `fileserver` plays. Employees automatically get a file share account. |
+| Add an SFTP partner | Put the partner's public key in `ansible/files/sftp-keys/<name>.pub` and rerun the `sftp` play. Also add the partner's IP range to `partner_ip_ranges` (Terraform) and `proxy_sftp_allowed_from` (Ansible). |
+| Add a team member's SSH key | Put `<firstname>.pub` in `terraform/ssh-keys/` before the next `terraform apply`. Changing keys recreates the VMs. |
+| Look up a password or profile | `az keyvault secret list --vault-name $KV -o table` |
+| Start the VMs after the daily shutdown | `az vm start --ids $(az vm list -g 2026_KE06_KDB1_casusgroep_04 --query "[].id" -o tsv)` |
 
-### Planned changes
+## Security design
 
-- `compute.tf`: system-assigned managed identity on `vm-web-01`, used to access Azure SQL without a password in the application code.
+- **Two entry points.** Only 443 (WAF), 1194/udp (VPN) and 2222 (SFTP, partner IPs only) are open from the internet.
+- **Least privilege per subnet.** Every NSG ends with an explicit deny-all; sources and destinations are specific VMs (ASGs) or VPN pools.
+- **Defense in depth.** Every VM also runs `ufw` with the same rules as its NSG. Docker publishes ports through the `FORWARD` chain and would bypass `ufw`, so a `DOCKER-USER` rule set sends new inbound connections to containers through `ufw route` rules.
+- **MFA for admins.** Admins need a certificate and a TOTP code; employees cannot reach the jump host.
+- **No secrets in Git.** Passwords, VPN profiles, TOTP secrets and SSH keys live in Key Vault. The jump host reads them with its managed identity.
+- **WAF.** ModSecurity with the OWASP Core Rule Set blocks SQL injection and XSS before they reach the patient portal, which must be treated as vulnerable. The WAF container runs as an unprivileged user.
+- **Private data paths.** SQL, Azure Files and App Service are only reachable through private endpoints; their public access is disabled.
+- **Hardened SSH.** Key login only, no root login, at most 3 attempts. SFTP partners get no shell, no TTY and no forwarding.
+- **File share.** SMB3 only, encryption required, no guest access, employee pool only.
+- **Logging.** `auditd` on every VM; SQL auditing and file share logs go to Log Analytics.
 
-## SSH access for the team
+## Known pitfalls
 
-Every team member's **public** key is stored in `terraform/ssh-keys/` as `<firstname>.pub`. Terraform adds all of them to the `azureadmin` account on every VM, so everyone can log in with their own key, no matter who runs `terraform apply`.
+| Symptom | Cause and fix |
+|---|---|
+| VPN connects, but the VMs do not answer | Forwarded VPN traffic leaves `vm-vpn-01` with a 10.8.x.x source. `snet-edge` has no route for the pools, so that source is not part of the `VirtualNetwork` tag and the default `AllowVnetOutBound` rule does not match. `nsg-edge` therefore has an explicit outbound rule `allow-vpn-clients-to-vnet`. |
+| Bootstrap fails with `Forbidden` on Key Vault | A Key Vault recovered from soft delete keeps its old access policies. The vault name therefore gets a random suffix on every deployment. |
+| WAF container keeps restarting | The image runs unprivileged and cannot bind below 1024. Host 443 maps to container 8443, and the `ufw route` rule uses 8443 because `DOCKER-USER` sees the port after Docker's DNAT. |
+| `terraform destroy` hangs on Log Analytics | Permanent delete of the workspace is disabled in `providers.tf`. |
+| `inventory.ini` shows as deleted after a destroy | Terraform removes the file with the environment. Restore it with `git restore ansible/inventory.ini`; do not commit the deletion. |
+| `$KV` or `$P` is empty | `terraform output` only works from the `terraform` folder, and shell variables only exist in the window where you set them. |
 
-- Never add a private key to this folder.
-- Adding or removing a key recreates the VMs. Agree on the keys before the first `terraform apply`.
+## Tearing down
 
-## Naming convention
+Disconnect the VPN first, then:
 
-Resources follow the Microsoft Cloud Adoption Framework: `<type>-<role>-<number>`, in lowercase. Examples: `vm-web-01`, `nic-web-01`, `osdisk-web-01`, `nsg-edge`, `pep-sql`. Storage accounts do not allow hyphens, so their name is written as one word: `stzkoosensitive01`.
+```bash
+cd terraform
+terraform destroy
+git restore ../ansible/inventory.ini
+```
 
-Inside the code, Terraform resource names use underscores (`snet_edge`), while the Azure names use hyphens (`snet-edge`).
+The Key Vault goes into soft delete for 7 days; the next deployment uses a new name, so it does not get in the way. The state storage account is not affected.
 
-## Security notes
+## Team agreements
 
-- **Never commit state files.** `terraform.tfstate` can contain secrets in plain text. The `.gitignore` excludes it.
-- **Never commit private SSH keys.** Only the public key (`.pub`) is referenced in the code.
-- **Commit `.terraform.lock.hcl`.** It makes sure everyone uses the same provider version.
-- **Least privilege.** Every NSG ends with an explicit deny rule. Rules use a specific VM (through an ASG) or address range as source and destination.
-- **Placeholder partner range.** The SFTP rule in `nsg-edge` uses the documentation range `203.0.113.0/24` until real partner IP ranges are known.
+- **One machine runs Terraform** (Tom's laptop). Others may run `terraform init`, `fmt` and `validate`, but never `plan`, `apply` or `destroy`.
+- **Pull before you work**, and rebase instead of merging: `git config pull.rebase true`.
+- **`inventory.ini` comes from Terraform only.** Never edit it by hand. In a conflict, take the version from the latest `terraform apply`.
+- **Commit messages describe the change**, for example `feat(proxy): route /portaal/ to web-01`.
+- **Code, comments and this README are in English**; a Dutch version is in [README.nl.md](README.nl.md). Keep both up to date.
