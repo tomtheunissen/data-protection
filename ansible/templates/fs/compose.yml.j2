@@ -1,0 +1,19 @@
+# Managed by Ansible, changes are overwritten
+name: fs
+
+services:
+  samba:
+    image: {{ fs_image }}
+    restart: unless-stopped
+    ports:
+      - "445:445"
+    # Share accounts and passwords, kept out of this file
+    env_file:
+      - ./accounts.env
+    environment:
+      GROUP_{{ fs_group }}: "{{ fs_group_gid }}"
+      # SMB3 with mandatory encryption, no guests, and only the employee VPN pool may connect
+      SAMBA_GLOBAL_STANZA: "server min protocol = SMB3; server smb encrypt = required; map to guest = Never; restrict anonymous = 2; hosts allow = {{ vpn_employee_pool }}"
+      SAMBA_VOLUME_CONFIG_{{ fs_share_name | replace('-', '') }}: "[{{ fs_share_name }}]; path = /shares/{{ fs_share_name }}; valid users = @{{ fs_group }}; guest ok = no; read only = no; browseable = yes; force group = {{ fs_group }}; create mask = 0660; directory mask = 2770"
+    volumes:
+      - {{ fs_data_root }}/{{ fs_share_name }}:/shares/{{ fs_share_name }}

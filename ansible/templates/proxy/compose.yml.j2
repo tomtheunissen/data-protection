@@ -13,6 +13,8 @@ services:
       SERVER_NAME: "{{ proxy_server_name }}"
       PORT: "8080"
       SSL_PORT: "{{ proxy_waf_container_port }}"
+      # Stapling needs a CA-issued certificate; re-enable with a real certificate
+      SSL_OCSP_STAPLING: "off"
       MODSEC_RULE_ENGINE: "on"
       BLOCKING_PARANOIA: "{{ proxy_blocking_paranoia }}"
     volumes:

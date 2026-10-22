@@ -803,10 +803,115 @@
         from_ip: "{{ vpn_employee_pool }}"
 
 
+# Samba in Docker for employees on the VPN; passwords are generated once and kept in Key Vault
 - name: File server
   hosts: fileserver
   become: true
-  tasks: []
+
+  vars:
+    fs_dir: /opt/zkoo/fs
+
+  handlers:
+    - name: Restart file server containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ fs_dir }}"
+        state: restarted
+
+  tasks:
+    - name: File server directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      loop:
+        - "{{ fs_dir }}"
+        - "{{ fs_data_root }}"
+
+    # Setgid keeps new files in the employees group; the gid matches the group inside the container
+    - name: Share data directory
+      ansible.builtin.file:
+        path: "{{ fs_data_root }}/{{ fs_share_name }}"
+        state: directory
+        owner: root
+        group: "{{ fs_group_gid }}"
+        mode: "2770"
+
+    # Passwords: reuse what Key Vault already has so a rerun does not rotate them
+
+    - name: Log in to Azure with the jump host identity
+      ansible.builtin.command: az login --identity --allow-no-subscriptions --output none
+      delegate_to: localhost
+      become: false
+      changed_when: false
+
+    - name: Read existing share passwords from Key Vault
+      ansible.builtin.command: >-
+        az keyvault secret show --vault-name {{ key_vault_name }}
+        --name smb-password-{{ item }} --query value --output tsv
+      loop: "{{ fs_users }}"
+      register: fs_existing_passwords
+      # A missing secret is expected for new users; any other error (permissions, network) must stop the run
+      failed_when: fs_existing_passwords.rc != 0 and 'SecretNotFound' not in fs_existing_passwords.stderr
+      changed_when: false
+      delegate_to: localhost
+      become: false
+      no_log: true
+
+    - name: Generate passwords for new users
+      ansible.builtin.set_fact:
+        fs_passwords: >-
+          {{ fs_passwords | default({}) | combine({
+               item.item: item.stdout if item.rc == 0
+               else lookup('ansible.builtin.password', '/dev/null', length=24, chars=['ascii_letters', 'digits'])
+             }) }}
+      loop: "{{ fs_existing_passwords.results }}"
+      no_log: true
+
+    - name: Store new passwords in Key Vault
+      ansible.builtin.command: >-
+        az keyvault secret set --vault-name {{ key_vault_name }}
+        --name smb-password-{{ item.item }} --value {{ fs_passwords[item.item] }} --output none
+      loop: "{{ fs_existing_passwords.results }}"
+      when: item.rc != 0
+      delegate_to: localhost
+      become: false
+      changed_when: true
+      no_log: true
+
+    - name: Share accounts
+      ansible.builtin.template:
+        src: fs/accounts.env.j2
+        dest: "{{ fs_dir }}/accounts.env"
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+      notify: Restart file server containers
+
+    - name: File server configuration
+      ansible.builtin.template:
+        src: fs/compose.yml.j2
+        dest: "{{ fs_dir }}/compose.yml"
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart file server containers
+
+    - name: File server containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ fs_dir }}"
+        state: present
+        pull: missing
+
+    - name: Allow SMB from employee pool
+      community.general.ufw:
+        rule: allow
+        route: true
+        proto: tcp
+        to_port: "445"
+        from_ip: "{{ vpn_employee_pool }}"
 
 
 # snet-mgmt

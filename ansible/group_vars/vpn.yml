@@ -1,14 +1,5 @@
 ---
-# OpenVPN users; admins get a fixed address in the admin pool and must use TOTP (MFA)
-vpn_admins:
-  - name: tom
-    ip: 10.8.4.10
-  - name: maddox
-    ip: 10.8.4.11
-
-# Employees get a dynamic address from the employee pool and log in with their certificate only
-vpn_employees:
-  - medewerker01
+# vpn_admins and vpn_employees live in all.yml
 
 vpn_port: 1194
 vpn_server_ip: 10.8.0.1

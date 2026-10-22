@@ -1,0 +1,13 @@
+---
+# smbd only: no Avahi, WSDD2 or NetBIOS, so only port 445 is listening
+# Pin to a version tag (a<alpine>-s<samba>) once the setup is stable
+fs_image: ghcr.io/servercontainers/samba:smbd-only-latest
+
+fs_share_name: zkoo-data
+fs_data_root: /srv/samba
+
+# Every VPN employee gets a share account; ids are fixed so file ownership survives a container rebuild
+fs_users: "{{ vpn_employees }}"
+fs_group: employees
+fs_group_gid: 1500
+fs_uid_base: 2001
