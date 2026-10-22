@@ -1,0 +1,4 @@
+---
+# VPN address pools; keep in sync with employee_pool and admin_pool in terraform/locals.tf
+vpn_employee_pool: 10.8.0.0/22
+vpn_admin_pool: 10.8.4.0/24

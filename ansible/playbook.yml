@@ -734,7 +734,74 @@
 - name: Application server
   hosts: appserver
   become: true
-  tasks: []
+
+  vars:
+    app_dir: /opt/zkoo/app
+
+  handlers:
+    - name: Restart app containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ app_dir }}"
+        state: restarted
+
+  tasks:
+    - name: App directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      loop:
+        - "{{ app_dir }}"
+        - "{{ app_dir }}/certs"
+        - "{{ app_dir }}/html"
+
+    # Self-signed for the PoC; employees connect directly over the VPN
+    - name: Self-signed TLS certificate
+      ansible.builtin.command: >-
+        openssl req -x509 -newkey rsa:3072 -sha256 -days 365 -nodes
+        -keyout {{ app_dir }}/certs/server.key
+        -out {{ app_dir }}/certs/server.crt
+        -subj "/CN={{ inventory_hostname }}"
+      args:
+        creates: "{{ app_dir }}/certs/server.crt"
+      notify: Restart app containers
+
+    - name: Private key permissions
+      ansible.builtin.file:
+        path: "{{ app_dir }}/certs/server.key"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: App server configuration
+      ansible.builtin.template:
+        src: app/{{ item.src }}
+        dest: "{{ app_dir }}/{{ item.dest }}"
+        owner: root
+        group: root
+        mode: "0644"
+      loop:
+        - { src: compose.yml.j2, dest: compose.yml }
+        - { src: default.conf.j2, dest: default.conf }
+        - { src: index.html.j2, dest: html/index.html }
+      notify: Restart app containers
+
+    - name: App containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ app_dir }}"
+        state: present
+        pull: missing
+
+    - name: Allow HTTPS from employee pool
+      community.general.ufw:
+        rule: allow
+        route: true
+        proto: tcp
+        to_port: "443"
+        from_ip: "{{ vpn_employee_pool }}"
+
 
 - name: File server
   hosts: fileserver
