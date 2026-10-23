@@ -56,7 +56,7 @@ Vanaf je laptop, VPN **uit**.
 | U1 | Bedrijfswebsite | `curl -sk https://$P/ \| grep Served` | `vm-web-02` | ✓ |
 | U2 | Patiëntportaal | `curl -sk https://$P/portaal/ \| grep Served` | `vm-web-01` | ✓ |
 | U3 | Doorverwijzing zonder slash | `curl -sk -o /dev/null -w "%{http_code} %{redirect_url}\n" https://$P/portaal` | `301` naar `/portaal/` | ✓ |
-| U4 | HTTPS in de browser | `https://<proxy-ip>/` openen | Pagina laadt (na de certificaatwaarschuwing) | ☐ |
+| U4 | HTTPS in de browser | `https://<proxy-ip>/` openen | Pagina laadt (na de certificaatwaarschuwing) | ✓ |
 
 ## 4. Route Hacker (internet)
 
@@ -111,7 +111,7 @@ Verbonden als **tom**, op mgmt.
 | S3 | Schrijven | `ssh 192.168.4.4 'sudo touch /mnt/medical-files/testbestand && sudo ls -l /mnt/medical-files'` | `testbestand` staat erop | ✓ |
 | S4 | Sleutel alleen leesbaar voor root | `ssh 192.168.4.4 'sudo stat -c "%a %U" /etc/smbcredentials/stzkoosensitive01.cred'` | `600 root` | ✓ |
 | S5 | Een andere VM kan **niet** bij de share | `ssh 192.168.4.5 'timeout 5 bash -c "</dev/tcp/192.168.14.4/445" && echo open \|\| echo geblokkeerd'` | `geblokkeerd` (nsg-pep) | ✓ |
-| S6 | Geen publieke toegang | Laptop, VPN **uit**: `nc -vz -G 5 stzkoosensitive01.file.core.windows.net 445` | Mislukt (publieke toegang staat uit) | ☐ |
+| S6 | Geen publieke toegang | Laptop, VPN **uit**: `nc -vz -G 5 stzkoosensitive01.file.core.windows.net 445` | Mislukt (publieke toegang staat uit) | ✓ |
 
 ## 7. Intrusion detection
 
