@@ -91,14 +91,14 @@ Verbonden als **medewerker01**. Laat het wachtwoord leeg; wil OpenVPN Connect da
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| E1 | VPN zonder TOTP | Verbinden | Verbonden, adres in 10.8.0.0/22 | ☐ |
-| E2 | Appserver | `curl -sk https://192.168.8.4/` | Pagina van vm-app-01 | ☐ |
-| E3 | Fileserver: verbinden | Wachtwoord: `az keyvault secret show --vault-name $KV --name smb-password-medewerker01 --query value -o tsv`. Finder → Ga → Verbind met server → `smb://192.168.8.5/zkoo-data` | Share geopend | ☐ |
-| E4 | Fileserver: schrijven | Een bestand naar de share slepen | Bestand staat erop | ☐ |
-| E5 | Fileserver: fout wachtwoord | Opnieuw verbinden met een fout wachtwoord | Geweigerd | ☐ |
-| E6 | Medewerker kan **niet** bij de jump host | `nc -vz -G 5 192.168.13.4 22` | Timeout | ☐ |
-| E7 | Medewerker kan **niet** bij het frontend | `nc -vz -G 5 192.168.4.4 443` | Timeout | ☐ |
-| E8 | Bestand op de server | Als admin op mgmt: `ssh 192.168.8.5 'sudo ls -l /srv/samba/zkoo-data'` | Bestand van E4, groep `1500` | ☐ |
+| E1 | VPN zonder TOTP | Verbinden | Verbonden, adres in 10.8.0.0/22 | ✓ |
+| E2 | Appserver | `curl -sk https://192.168.8.4/` | Pagina van vm-app-01 | ✓ |
+| E3 | Fileserver: verbinden | Wachtwoord: `az keyvault secret show --vault-name $KV --name smb-password-medewerker01 --query value -o tsv`. Finder → Ga → Verbind met server → `smb://192.168.8.5/zkoo-data` | Share geopend | ✓ |
+| E4 | Fileserver: schrijven | Een bestand naar de share slepen | Bestand staat erop | ✓ |
+| E5 | Fileserver: fout wachtwoord | Opnieuw verbinden met een fout wachtwoord | Geweigerd | ✓ |
+| E6 | Medewerker kan **niet** bij de jump host | `nc -vz -G 5 192.168.13.4 22` | Timeout | ✓ |
+| E7 | Medewerker kan **niet** bij het frontend | `nc -vz -G 5 192.168.4.4 443` | Timeout | ✓ |
+| E8 | Bestand op de server | Als admin op mgmt: `ssh 192.168.8.5 'sudo ls -l /srv/samba/zkoo-data'` | Bestand van E4, groep `1500` | ✓ |
 
 ## 6b. Medische bestanden (Azure Files via private endpoint)
 
@@ -125,7 +125,7 @@ Verbonden als **tom**, op mgmt.
 | I4 | Grote pakketten komen aan | `ssh 192.168.13.5 'sudo timeout 30 tcpdump -ni vxmirror -c 5 greater 1200'` (draai intussen `ssh 192.168.1.4 'curl -s -o /dev/null https://www.microsoft.com'`) | Pakketten groter dan 1200 bytes. Zo niet: zie *Known pitfalls* in de README | ✓ |
 | I5 | Standaardtest Suricata (regel 2100498) | `ssh 192.168.1.4 "curl -s -o /dev/null -H 'X-Test: uid=0(root) gid=0(root)' http://example.com/"`, daarna `ssh 192.168.13.5 'sudo grep -i "id check" /var/log/suricata/fast.log'` | `GPL ATTACK_RESPONSE id check returned root` met bron 192.168.1.4 | ✓ |
 | I6 | Poortscan gedetecteerd | Na H5: `ssh 192.168.13.5 'sudo grep -i scan /var/log/suricata/fast.log \| tail -5'` | Eén of meer ET SCAN-meldingen met je publieke IP | ☐ |
-| I7 | VPN-verkeer zichtbaar | Als medewerker01 E2 opnieuw doen, daarna `ssh 192.168.13.5 'sudo jq -c "select(.src_ip|startswith(\"10.8.\"))" /var/log/suricata/eve.json \| tail -3'` | Regels met een bronadres 10.8.x.x | ☐ |
+| I7 | VPN-verkeer zichtbaar | Als medewerker01 E2 opnieuw doen, daarna `ssh 192.168.13.5 'sudo jq -c "select(.src_ip|startswith(\"10.8.\"))" /var/log/suricata/eve.json \| tail -3'` | Regels met een bronadres 10.8.x.x | ✓ |
 | I8 | Alleen de toegangspunten mogen naar de tunnel | `ssh 192.168.13.5 'sudo ufw status \| grep 4789'` | 2 regels: 192.168.1.4 en 192.168.1.5 | ✓ |
 
 ## 8. Afronding
