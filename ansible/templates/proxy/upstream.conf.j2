@@ -6,3 +6,9 @@ upstream site_backend {
 upstream portal_backend {
     server {{ hostvars[proxy_portal_host].ansible_host }}:443;
 }
+
+{% if proxy_media_enabled %}
+upstream media_backend {
+    server {{ hostvars[proxy_media_host].ansible_host }}:{{ proxy_media_port }};
+}
+{% endif %}

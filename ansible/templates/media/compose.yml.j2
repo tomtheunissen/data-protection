@@ -1,0 +1,16 @@
+# Managed by Ansible, changes are overwritten
+name: media
+
+services:
+  jellyfin:
+    image: {{ media_image }}
+    restart: unless-stopped
+    user: "{{ media_uid }}:{{ media_gid }}"
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8096:8096"
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - ./library:/media:ro

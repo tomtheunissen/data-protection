@@ -708,7 +708,62 @@
 - name: Media server
   hosts: media
   become: true
-  tasks: []
+
+  vars:
+    media_dir: /opt/zkoo/media
+
+  handlers:
+    - name: Restart media containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ media_dir }}"
+        state: restarted
+
+  tasks:
+    - name: Media project directory
+      ansible.builtin.file:
+        path: "{{ media_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    # Jellyfin runs as media_uid, so it must own the directories it writes to
+    - name: Jellyfin data directories
+      ansible.builtin.file:
+        path: "{{ media_dir }}/{{ item }}"
+        state: directory
+        owner: "{{ media_uid }}"
+        group: "{{ media_gid }}"
+        mode: "0750"
+      loop:
+        - config
+        - cache
+        - library
+
+    - name: Media server configuration
+      ansible.builtin.template:
+        src: media/compose.yml.j2
+        dest: "{{ media_dir }}/compose.yml"
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart media containers
+
+    - name: Media containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ media_dir }}"
+        state: present
+        pull: missing
+
+    - name: Allow Jellyfin from the reverse proxy only
+      community.general.ufw:
+        rule: allow
+        route: true
+        proto: tcp
+        to_port: "8096"
+        from_ip: "{{ hostvars[item].ansible_host }}"
+      loop: "{{ groups['proxy'] }}"
+
 
 # Native sshd: port 22 already serves management SSH, a Match block gives partners SFTP only
 - name: SFTP server

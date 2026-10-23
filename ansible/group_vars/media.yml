@@ -1,0 +1,5 @@
+---
+media_image: jellyfin/jellyfin:12.3
+# Jellyfin runs as this uid/gid instead of root
+media_uid: 8096
+media_gid: 8096
