@@ -2,7 +2,7 @@
 
 Dit testplan controleert na een volledige uitrol of elke route uit de SOLL doet wat hij moet doen, ook de dingen die **niet** mogen. Vink elke test af en bewaar de output als bewijs voor het verslag, bijvoorbeeld met `| tee bewijs/<test-id>.txt` of een screenshot.
 
-**Datum:** ____________ **Uitgevoerd door:** ____________
+**Datum:** 23 oktober 2026 **Uitgevoerd door:** Tom Theunissen
 
 Gebruikte variabelen (in de map `terraform`):
 
@@ -18,8 +18,8 @@ V=$(terraform output -raw vpn_public_ip)
 
 | ID | Stap | Verwacht | ✓ |
 |---|---|---|---|
-| T0.1 | Optioneel, voor test P4: zet je eigen publieke IP (`curl -4 ifconfig.me`) tijdelijk als `/32` in `partner_ip_ranges` (Terraform) én `proxy_sftp_allowed_from` (Ansible). Commit en push. | Beide lijsten bevatten je IP | ☐ |
-| T0.2 | `git status` op je laptop | `working tree clean`, alles gepusht | ☐ |
+| T0.1 | Optioneel, voor test P4: zet je eigen publieke IP (`curl -4 ifconfig.me`) tijdelijk als `/32` in `partner_ip_ranges` (Terraform) én `proxy_sftp_allowed_from` (Ansible). Commit en push. | Beide lijsten bevatten je IP | ✓ |
+| T0.2 | `git status` op je laptop | `working tree clean`, alles gepusht | ✓ |
 
 ## 1. Uitrol
 
@@ -124,8 +124,8 @@ Verbonden als **tom**, op mgmt.
 | I3 | Kopieën komen aan | `ssh 192.168.13.5 'sudo tcpdump -ni vxmirror -c 20'` (terwijl je U1 draait) | Pakketten van en naar 192.168.1.4 | ✓ |
 | I4 | Grote pakketten komen aan | `ssh 192.168.13.5 'sudo timeout 30 tcpdump -ni vxmirror -c 5 greater 1200'` (draai intussen `ssh 192.168.1.4 'curl -s -o /dev/null https://www.microsoft.com'`) | Pakketten groter dan 1200 bytes. Zo niet: zie *Known pitfalls* in de README | ✓ |
 | I5 | Standaardtest Suricata (regel 2100498) | `ssh 192.168.1.4 "curl -s -o /dev/null -H 'X-Test: uid=0(root) gid=0(root)' http://example.com/"`, daarna `ssh 192.168.13.5 'sudo grep -i "id check" /var/log/suricata/fast.log'` | `GPL ATTACK_RESPONSE id check returned root` met bron 192.168.1.4 | ✓ |
-| I6 | Poortscan gedetecteerd | Na H5: `ssh 192.168.13.5 'sudo grep -i scan /var/log/suricata/fast.log \| tail -5'` | Eén of meer ET SCAN-meldingen met je publieke IP | ☐ |
-| I7 | VPN-verkeer zichtbaar | Als medewerker01 E2 opnieuw doen, daarna `ssh 192.168.13.5 'sudo jq -c "select(.src_ip|startswith(\"10.8.\"))" /var/log/suricata/eve.json \| tail -3'` | Regels met een bronadres 10.8.x.x | ✓ |
+| I6 | Poortscan gedetecteerd | Na H5: `ssh 192.168.13.5 "sudo grep <eigen-ip> /var/log/suricata/fast.log \| sed 's/.*\] \(.*\) \[\*\*\].*/\1/' \| sort \| uniq -c"` | Meldingen met je publieke IP als bron | ✓ (zie Bevindingen) |
+| I7 | VPN-verkeer zichtbaar | Als medewerker01 E2 en E3 doen, daarna `ssh 192.168.13.5 'sudo jq -c "select((.src_ip // \"\") \| startswith(\"10.8.0.\")) \| {timestamp, src_ip, dest_ip, dest_port, event_type}" /var/log/suricata/eve.json \| tail -5'` | Regels met bronadres 10.8.0.x naar 192.168.8.4/.5 | ✓ |
 | I8 | Alleen de toegangspunten mogen naar de tunnel | `ssh 192.168.13.5 'sudo ufw status \| grep 4789'` | 2 regels: 192.168.1.4 en 192.168.1.5 | ✓ |
 
 ## 8. Afronding
@@ -144,3 +144,7 @@ Verbonden als **tom**, op mgmt.
 | I5 | testmynids.org gaf geen antwoord (`Could not resolve host`) | De dienst testmynids.org bestaat niet meer | Eigen testverzoek met dezelfde inhoud (`uid=0(root)`) in een HTTP-header; regel 2100498 matcht op die inhoud in elk pakket |
 | I4 | Risico op verloren fragmenten (VXLAN +50 bytes) | – | Getest: pakketten tot 1536 bytes komen aan, fragmentatie werkt in Azure |
 | I1–I5 | Veel meldingen van 168.63.129.16 (`SURICATA STREAM`, `HTTP unable to match`) | Intern platformverkeer van Azure (WireServer), wijkt af van standaard TCP/HTTP | Later onderdrukken met een suppress-regel (tuning) |
+| I6 | Geen ET SCAN-melding bij de nmap-scan | De NSG blokkeert 9998 van de 10.000 poorten vóór het verkeer de proxy (en dus de mirror) bereikt; Suricata ziet alleen 443 en 2222 | Scan wel gedetecteerd: 110 meldingen `SURICATA STREAM … RST invalid ack` van het scannende IP, het patroon van een nmap SYN-scan (SYN, SYN-ACK, RST). Defense in depth: NSG eerst, IDS daarna |
+| I7 | – | – | De IDS legde ook een geblokkeerde SSH-poging van medewerker01 (10.8.0.2) naar de jump host vast. Pogingen die de NSG tegenhoudt, zijn dus toch zichtbaar |
+| E1 | OpenVPN Connect eist een wachtwoord, ook voor medewerkers | De client maakt het veld verplicht; de server controleert het voor medewerkers niet | Medewerkers loggen in met alleen een certificaat (één factor). Aanbeveling: TOTP ook voor medewerkers |
+| E3 | macOS probeert ook poort 139 (NetBIOS) | Standaardgedrag van macOS | Poort 139 is dicht; de container draait alleen smbd op 445 |
