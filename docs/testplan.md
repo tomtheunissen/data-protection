@@ -25,7 +25,7 @@ V=$(terraform output -raw vpn_public_ip)
 
 | ID | Stap | Verwacht | ✓ |
 |---|---|---|---|
-| T1.1 | `terraform apply` | `Apply complete!`, 0 errors | ☐ |
+| T1.1 | `terraform apply` | `Apply complete!`, 0 errors | ✓ |
 | T1.2 | Bootstrap volgen met `tail -5 /var/log/zkoo-bootstrap.log` (Run Command) | `failed=0` voor vm-mgmt-01 en vm-vpn-01, daarna `Bootstrap finished` | ☐ |
 | T1.3 | VPN-profielen en TOTP ophalen uit `$KV` (tom en medewerker01) | `.ovpn`-bestanden gedownload, QR-code gescand | ☐ |
 | T1.4 | Verbinden als tom, `ssh-keygen -R 192.168.13.4`, inloggen op mgmt, `sudo reboot` | Ingelogd; na de reboot opnieuw ingelogd | ☐ |
