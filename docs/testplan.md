@@ -39,7 +39,7 @@ Verbonden als **tom**.
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
 | A1 | VPN met geldige TOTP | Verbinden in OpenVPN Connect | *Securely Connected*, adres 10.8.4.10 (`ifconfig \| grep 10.8.4`) | ✓ |
-| A2 | VPN met **foute** TOTP | Verbinden met code `000000` | Verbinding geweigerd (`AUTH_FAILED`) | ☐ |
+| A2 | VPN met **foute** TOTP | Verbinden met code `000000` | Verbinding geweigerd (`AUTH_FAILED`) | ✓ |
 | A3 | SSH naar de jump host | `ssh azureadmin@192.168.13.4` | Ingelogd | ✓ |
 | A4 | Vanaf mgmt naar een andere VM | `ssh 192.168.1.5 hostname` | `vm-vpn-01` | ✓ |
 | A5 | Admin kan **niet** bij de appserver | `curl -sk --max-time 5 https://192.168.8.4` (laptop) | Timeout | ✓ |
@@ -69,21 +69,21 @@ Vanaf je laptop, VPN **uit**. Voor H5 en H6 heb je `nmap` nodig (`brew install n
 | H3 | Path traversal | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/portaal/?file=../../../../etc/passwd"` | `403` | ✓ |
 | H4 | Scanner-user-agent | `curl -sk -o /dev/null -w "%{http_code}\n" -A "sqlmap/1.7" https://$P/` | `403` | ✓ |
 | H5 | Open poorten op de proxy | `nmap -Pn -p 1-10000 $P` | Alleen `443/tcp` open (2222 alleen als je IP in T0.1 is toegevoegd) | ✓ |
-| H6 | Open poorten op de VPN-server | `nmap -Pn -p 1-10000 $V` | Geen TCP-poorten open (OpenVPN is UDP) | ☐ |
-| H7 | SSH op de publieke IP's | `nc -vz -G 5 $P 22` en `nc -vz -G 5 $V 22` | Allebei timeout | ☐ |
-| H8 | Melding in de WAF-log | Op mgmt: `ssh 192.168.1.4 'sudo docker logs proxy-waf-1 --tail 200 2>&1 \| grep -ci modsecurity'` | Groter dan 0 (meldingen van H1 t/m H4) | ☐ |
+| H6 | Open poorten op de VPN-server | `nmap -Pn -p 1-10000 $V` | Geen TCP-poorten open (OpenVPN is UDP) | ✓ |
+| H7 | SSH op de publieke IP's | `nc -vz -G 5 $P 22` en `nc -vz -G 5 $V 22` | Allebei timeout | ✓ |
+| H8 | Melding in de WAF-log | Op mgmt: `ssh 192.168.1.4 'sudo docker logs proxy-waf-1 --tail 200 2>&1 \| grep -ci modsecurity'` | Groter dan 0 (meldingen van H1 t/m H4) | ✓ |
 
 ## 5. Route Partners (SFTP)
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| P1 | Inloggen met sleutel (vanaf mgmt) | Testsleutel tijdelijk op mgmt, `sftp -i ~/.ssh/zkoo_partner01 partner01@192.168.4.7` | `Connected` | ☐ |
-| P2 | Chroot | In sftp: `pwd`, `ls`, `cd /etc` | `/`, alleen `upload`, `cd /etc` mislukt | ☐ |
-| P3 | Upload | `put /etc/hostname upload/test.txt`, `ls upload` | `test.txt` staat er | ☐ |
-| P4 | Via de relay op de proxy (alleen met T0.1) | Laptop: `sftp -P 2222 -i ~/.ssh/zkoo_partner01 partner01@$P` | `Connected`, zelfde chroot | ☐ |
-| P5 | Relay vanaf een niet-partner-IP | Zonder T0.1, of via de hotspot van je telefoon: `nc -vz -G 5 $P 2222` | Timeout | ☐ |
-| P6 | Geen shell | `ssh -i ~/.ssh/zkoo_partner01 partner01@192.168.4.7` | `This service allows sftp connections only.` | ☐ |
-| P7 | Opruimen | `rm ~/.ssh/zkoo_partner01` op mgmt | Testsleutel weg van mgmt | ☐ |
+| P1 | Inloggen met sleutel (vanaf mgmt) | Testsleutel tijdelijk op mgmt, `sftp -i ~/.ssh/zkoo_partner01 partner01@192.168.4.7` | `Connected` | ✓ |
+| P2 | Chroot | In sftp: `pwd`, `ls`, `cd /etc` | `/`, alleen `upload`, `cd /etc` mislukt | ✓ |
+| P3 | Upload | `put /etc/hostname upload/test.txt`, `ls upload` | `test.txt` staat er | ✓ |
+| P4 | Via de relay op de proxy (alleen met T0.1) | Laptop: `sftp -P 2222 -i ~/.ssh/zkoo_partner01 partner01@$P` | `Connected`, zelfde chroot | ✓ |
+| P5 | Relay vanaf een niet-partner-IP | Zonder T0.1, of via de hotspot van je telefoon: `nc -vz -G 5 $P 2222` | Timeout | ✓ |
+| P6 | Geen shell | `ssh -i ~/.ssh/zkoo_partner01 partner01@192.168.4.7` | `This service allows sftp connections only.` | ✓ |
+| P7 | Opruimen | `rm ~/.ssh/zkoo_partner01` op mgmt | Testsleutel weg van mgmt | ✓ |
 
 ## 6. Route Employees (VPN → app en fileserver)
 
