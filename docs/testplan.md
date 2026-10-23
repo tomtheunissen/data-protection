@@ -53,9 +53,9 @@ Vanaf je laptop, VPN **uit**.
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| U1 | Bedrijfswebsite | `curl -sk https://$P/ \| grep Served` | `vm-web-02` | ☐ |
-| U2 | Patiëntportaal | `curl -sk https://$P/portaal/ \| grep Served` | `vm-web-01` | ☐ |
-| U3 | Doorverwijzing zonder slash | `curl -sk -o /dev/null -w "%{http_code} %{redirect_url}\n" https://$P/portaal` | `301` naar `/portaal/` | ☐ |
+| U1 | Bedrijfswebsite | `curl -sk https://$P/ \| grep Served` | `vm-web-02` | ✓ |
+| U2 | Patiëntportaal | `curl -sk https://$P/portaal/ \| grep Served` | `vm-web-01` | ✓ |
+| U3 | Doorverwijzing zonder slash | `curl -sk -o /dev/null -w "%{http_code} %{redirect_url}\n" https://$P/portaal` | `301` naar `/portaal/` | ✓ |
 | U4 | HTTPS in de browser | `https://<proxy-ip>/` openen | Pagina laadt (na de certificaatwaarschuwing) | ☐ |
 
 ## 4. Route Hacker (internet)
@@ -64,11 +64,11 @@ Vanaf je laptop, VPN **uit**. Voor H5 en H6 heb je `nmap` nodig (`brew install n
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| H1 | SQL-injectie op het portaal | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/portaal/?id=1'%20OR%20'1'='1"` | `403` | ☐ |
-| H2 | XSS | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/?q=<script>alert(1)</script>"` | `403` | ☐ |
-| H3 | Path traversal | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/portaal/?file=../../../../etc/passwd"` | `403` | ☐ |
-| H4 | Scanner-user-agent | `curl -sk -o /dev/null -w "%{http_code}\n" -A "sqlmap/1.7" https://$P/` | `403` | ☐ |
-| H5 | Open poorten op de proxy | `nmap -Pn -p 1-10000 $P` | Alleen `443/tcp` open (2222 alleen als je IP in T0.1 is toegevoegd) | ☐ |
+| H1 | SQL-injectie op het portaal | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/portaal/?id=1'%20OR%20'1'='1"` | `403` | ✓ |
+| H2 | XSS | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/?q=<script>alert(1)</script>"` | `403` | ✓ |
+| H3 | Path traversal | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/portaal/?file=../../../../etc/passwd"` | `403` | ✓ |
+| H4 | Scanner-user-agent | `curl -sk -o /dev/null -w "%{http_code}\n" -A "sqlmap/1.7" https://$P/` | `403` | ✓ |
+| H5 | Open poorten op de proxy | `nmap -Pn -p 1-10000 $P` | Alleen `443/tcp` open (2222 alleen als je IP in T0.1 is toegevoegd) | ✓ |
 | H6 | Open poorten op de VPN-server | `nmap -Pn -p 1-10000 $V` | Geen TCP-poorten open (OpenVPN is UDP) | ☐ |
 | H7 | SSH op de publieke IP's | `nc -vz -G 5 $P 22` en `nc -vz -G 5 $V 22` | Allebei timeout | ☐ |
 | H8 | Melding in de WAF-log | Op mgmt: `ssh 192.168.1.4 'sudo docker logs proxy-waf-1 --tail 200 2>&1 \| grep -ci modsecurity'` | Groter dan 0 (meldingen van H1 t/m H4) | ☐ |
@@ -106,11 +106,11 @@ Verbonden als **tom**, op mgmt.
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| S1 | Share gemount op het portaal | `ssh 192.168.4.4 'findmnt /mnt/medical-files'` | Type `cifs`, opties met `vers=3.1.1` en `seal` | ☐ |
-| S2 | Via het private endpoint | `ssh 192.168.4.4 'getent hosts stzkoosensitive01.file.core.windows.net'` | 192.168.14.4 | ☐ |
-| S3 | Schrijven | `ssh 192.168.4.4 'sudo touch /mnt/medical-files/testbestand && sudo ls -l /mnt/medical-files'` | `testbestand` staat erop | ☐ |
-| S4 | Sleutel alleen leesbaar voor root | `ssh 192.168.4.4 'sudo stat -c "%a %U" /etc/smbcredentials/stzkoosensitive01.cred'` | `600 root` | ☐ |
-| S5 | Een andere VM kan **niet** bij de share | `ssh 192.168.4.5 'timeout 5 bash -c "</dev/tcp/192.168.14.4/445" && echo open \|\| echo geblokkeerd'` | `geblokkeerd` (nsg-pep) | ☐ |
+| S1 | Share gemount op het portaal | `ssh 192.168.4.4 'findmnt /mnt/medical-files'` | Type `cifs`, opties met `vers=3.1.1` en `seal` | ✓ |
+| S2 | Via het private endpoint | `ssh 192.168.4.4 'getent hosts stzkoosensitive01.file.core.windows.net'` | 192.168.14.4 | ✓ |
+| S3 | Schrijven | `ssh 192.168.4.4 'sudo touch /mnt/medical-files/testbestand && sudo ls -l /mnt/medical-files'` | `testbestand` staat erop | ✓ |
+| S4 | Sleutel alleen leesbaar voor root | `ssh 192.168.4.4 'sudo stat -c "%a %U" /etc/smbcredentials/stzkoosensitive01.cred'` | `600 root` | ✓ |
+| S5 | Een andere VM kan **niet** bij de share | `ssh 192.168.4.5 'timeout 5 bash -c "</dev/tcp/192.168.14.4/445" && echo open \|\| echo geblokkeerd'` | `geblokkeerd` (nsg-pep) | ✓ |
 | S6 | Geen publieke toegang | Laptop, VPN **uit**: `nc -vz -G 5 stzkoosensitive01.file.core.windows.net 445` | Mislukt (publieke toegang staat uit) | ☐ |
 
 ## 7. Intrusion detection
@@ -119,14 +119,14 @@ Verbonden als **tom**, op mgmt.
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| I1 | Services draaien | `ssh 192.168.13.5 'systemctl is-active zkoo-ids-tap suricata'` | 2× `active` | ☐ |
-| I2 | Mirror draait op beide toegangspunten | `ssh 192.168.1.4 'systemctl is-active zkoo-mirror'` en hetzelfde voor `192.168.1.5` | `active` | ☐ |
-| I3 | Kopieën komen aan | `ssh 192.168.13.5 'sudo tcpdump -ni vxmirror -c 20'` (terwijl je U1 draait) | Pakketten van en naar 192.168.1.4 | ☐ |
-| I4 | Grote pakketten komen aan | `ssh 192.168.13.5 'sudo timeout 30 tcpdump -ni vxmirror -c 5 greater 1200'` (draai intussen `ssh 192.168.1.4 'curl -s -o /dev/null https://www.microsoft.com'`) | Pakketten groter dan 1200 bytes. Zo niet: zie *Known pitfalls* in de README | ☐ |
-| I5 | Standaardtest Suricata | `ssh 192.168.1.4 'curl -s http://testmynids.org/uid/index.html'`, daarna `ssh 192.168.13.5 'sudo tail -5 /var/log/suricata/fast.log'` | `GPL ATTACK_RESPONSE id check returned root` | ☐ |
+| I1 | Services draaien | `ssh 192.168.13.5 'systemctl is-active zkoo-ids-tap suricata'` | 2× `active` | ✓ |
+| I2 | Mirror draait op beide toegangspunten | `ssh 192.168.1.4 'systemctl is-active zkoo-mirror'` en hetzelfde voor `192.168.1.5` | `active` | ✓ |
+| I3 | Kopieën komen aan | `ssh 192.168.13.5 'sudo tcpdump -ni vxmirror -c 20'` (terwijl je U1 draait) | Pakketten van en naar 192.168.1.4 | ✓ |
+| I4 | Grote pakketten komen aan | `ssh 192.168.13.5 'sudo timeout 30 tcpdump -ni vxmirror -c 5 greater 1200'` (draai intussen `ssh 192.168.1.4 'curl -s -o /dev/null https://www.microsoft.com'`) | Pakketten groter dan 1200 bytes. Zo niet: zie *Known pitfalls* in de README | ✓ |
+| I5 | Standaardtest Suricata (regel 2100498) | `ssh 192.168.1.4 "curl -s -o /dev/null -H 'X-Test: uid=0(root) gid=0(root)' http://example.com/"`, daarna `ssh 192.168.13.5 'sudo grep -i "id check" /var/log/suricata/fast.log'` | `GPL ATTACK_RESPONSE id check returned root` met bron 192.168.1.4 | ✓ |
 | I6 | Poortscan gedetecteerd | Na H5: `ssh 192.168.13.5 'sudo grep -i scan /var/log/suricata/fast.log \| tail -5'` | Eén of meer ET SCAN-meldingen met je publieke IP | ☐ |
 | I7 | VPN-verkeer zichtbaar | Als medewerker01 E2 opnieuw doen, daarna `ssh 192.168.13.5 'sudo jq -c "select(.src_ip|startswith(\"10.8.\"))" /var/log/suricata/eve.json \| tail -3'` | Regels met een bronadres 10.8.x.x | ☐ |
-| I8 | Alleen de toegangspunten mogen naar de tunnel | `ssh 192.168.13.5 'sudo ufw status \| grep 4789'` | 2 regels: 192.168.1.4 en 192.168.1.5 | ☐ |
+| I8 | Alleen de toegangspunten mogen naar de tunnel | `ssh 192.168.13.5 'sudo ufw status \| grep 4789'` | 2 regels: 192.168.1.4 en 192.168.1.5 | ✓ |
 
 ## 8. Afronding
 
@@ -141,4 +141,6 @@ Verbonden als **tom**, op mgmt.
 
 | Test-ID | Wat ging er mis | Oorzaak | Oplossing |
 |---|---|---|---|
-| | | | |
+| I5 | testmynids.org gaf geen antwoord (`Could not resolve host`) | De dienst testmynids.org bestaat niet meer | Eigen testverzoek met dezelfde inhoud (`uid=0(root)`) in een HTTP-header; regel 2100498 matcht op die inhoud in elk pakket |
+| I4 | Risico op verloren fragmenten (VXLAN +50 bytes) | – | Getest: pakketten tot 1536 bytes komen aan, fragmentatie werkt in Azure |
+| I1–I5 | Veel meldingen van 168.63.129.16 (`SURICATA STREAM`, `HTTP unable to match`) | Intern platformverkeer van Azure (WireServer), wijkt af van standaard TCP/HTTP | Later onderdrukken met een suppress-regel (tuning) |
