@@ -29,7 +29,7 @@ V=$(terraform output -raw vpn_public_ip)
 | T1.2 | Bootstrap volgen met `tail -5 /var/log/zkoo-bootstrap.log` (Run Command) | `failed=0` voor vm-mgmt-01 en vm-vpn-01, daarna `Bootstrap finished` | ✓ |
 | T1.3 | VPN-profielen en TOTP ophalen uit `$KV` (tom en medewerker01) | `.ovpn`-bestanden gedownload, QR-code gescand | ✓ |
 | T1.4 | Verbinden als tom, `ssh-keygen -R 192.168.13.4`, inloggen op mgmt, `sudo reboot` | Ingelogd; na de reboot opnieuw ingelogd | ✓ |
-| T1.5 | Op mgmt: `git pull`, collections installeren, playbook met `--limit proxy,webservers,sftp,appserver,fileserver,ids,vpn` | `failed=0` en `unreachable=0` voor elke VM | ☐ |
+| T1.5 | Op mgmt: `git pull`, collections installeren, playbook met `--limit proxy,webservers,sftp,appserver,fileserver,ids,vpn` | `failed=0` en `unreachable=0` voor elke VM | ✓ |
 | T1.6 | Nieuwe `ansible/inventory.ini` committen (laptop) | Gepusht | ✓ |
 
 ## 2. Route Admin (VPN + MFA → jump host)
@@ -38,14 +38,14 @@ Verbonden als **tom**.
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| A1 | VPN met geldige TOTP | Verbinden in OpenVPN Connect | *Securely Connected*, adres 10.8.4.10 (`ifconfig \| grep 10.8.4`) | ☐ |
+| A1 | VPN met geldige TOTP | Verbinden in OpenVPN Connect | *Securely Connected*, adres 10.8.4.10 (`ifconfig \| grep 10.8.4`) | ✓ |
 | A2 | VPN met **foute** TOTP | Verbinden met code `000000` | Verbinding geweigerd (`AUTH_FAILED`) | ☐ |
-| A3 | SSH naar de jump host | `ssh azureadmin@192.168.13.4` | Ingelogd | ☐ |
-| A4 | Vanaf mgmt naar een andere VM | `ssh 192.168.1.5 hostname` | `vm-vpn-01` | ☐ |
-| A5 | Admin kan **niet** bij de appserver | `curl -sk --max-time 5 https://192.168.8.4` (laptop) | Timeout | ☐ |
-| A6 | Admin kan **niet** bij de fileserver | `nc -vz -G 5 192.168.8.5 445` (laptop) | Timeout | ☐ |
-| A7 | Admin kan **niet** rechtstreeks bij een andere VM | `nc -vz -G 5 192.168.4.4 22` (laptop) | Timeout | ☐ |
-| A8 | Private DNS via de VPN | `nslookup stzkoosensitive01.file.core.windows.net` (laptop) | Server 10.8.0.1, adres 192.168.14.4 | ☐ |
+| A3 | SSH naar de jump host | `ssh azureadmin@192.168.13.4` | Ingelogd | ✓ |
+| A4 | Vanaf mgmt naar een andere VM | `ssh 192.168.1.5 hostname` | `vm-vpn-01` | ✓ |
+| A5 | Admin kan **niet** bij de appserver | `curl -sk --max-time 5 https://192.168.8.4` (laptop) | Timeout | ✓ |
+| A6 | Admin kan **niet** bij de fileserver | `nc -vz -G 5 192.168.8.5 445` (laptop) | Timeout | ✓ |
+| A7 | Admin kan **niet** rechtstreeks bij een andere VM | `nc -vz -G 5 192.168.4.4 22` (laptop) | Timeout | ✓ |
+| A8 | Private DNS via de VPN | `nslookup stzkoosensitive01.file.core.windows.net` (laptop) | Server 10.8.0.1, adres 192.168.14.4 | ✓ |
 
 ## 3. Route Users (internet → WAF → web)
 
