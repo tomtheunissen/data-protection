@@ -620,6 +620,7 @@
         project_src: "{{ web_dir }}"
         state: present
         pull: missing
+        remove_orphans: true
 
     - name: Allow HTTPS from the reverse proxy only
       community.general.ufw:

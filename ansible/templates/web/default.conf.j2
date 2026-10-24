@@ -10,4 +10,15 @@ server {
 
     root /usr/share/nginx/html;
     index index.html;
+{% if web_role == 'portal' and web_dvwa_enabled | default(false) %}
+
+    # Vulnerable test target; only reachable through the reverse proxy and its WAF
+    location /dvwa/ {
+        proxy_pass http://dvwa:80/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+{% endif %}
 }

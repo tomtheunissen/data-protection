@@ -1,8 +1,15 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><title>ZKOO</title></head>
+<head><meta charset="utf-8"><title>{% if web_role == 'portal' %}ZKOO Patient Portal{% else %}ZKOO{% endif %}</title></head>
 <body>
-  <h1>ZKOO placeholder</h1>
+{% if web_role == 'portal' %}
+  <h1>ZKOO Patient Portal</h1>
+{% if web_dvwa_enabled | default(false) %}
+  <p>Test environment: <a href="dvwa/">vulnerable test application (DVWA)</a></p>
+{% endif %}
+{% else %}
+  <h1>ZKOO - Software for healthcare</h1>
+{% endif %}
   <p>Served by {{ inventory_hostname }}</p>
 </body>
 </html>
