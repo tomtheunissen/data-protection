@@ -20,9 +20,9 @@ proxy_sftp_allowed_from:
   - 203.0.113.0/24
   - 84.84.226.81/32   # TEMP: Tom's IP for test P4, remove after testing
 
-# Training videos (Jellyfin); Jellyfin's Base URL must be set to /media
-# Keep false until the Jellyfin setup wizard is done, or anyone can claim the admin account
-proxy_media_enabled: false
+# Training videos (Jellyfin); the media play sets Jellyfin's Base URL to /media
+# The media play runs before the proxy play and finishes the setup wizard, so nobody can claim the admin account
+proxy_media_enabled: true
 proxy_media_host: vm-media-01
 proxy_media_path: /media/
 proxy_media_port: 8096

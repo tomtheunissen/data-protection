@@ -57,7 +57,7 @@ Alleen `vm-proxy-01` en `vm-vpn-01` hebben een publiek IP-adres.
 | vm-vpn-01 | OpenVPN + dnsmasq als DNS-forwarder | Native |
 | vm-mgmt-01 | Jump host en Ansible-controller | Native |
 | vm-ids-01 | Suricata IDS, gevoed door een software-TAP vanaf de proxy en de VPN-server | Native |
-| vm-media-01 | Mediaserver op 8096 (gepland) | Docker |
+| vm-media-01 | Jellyfin met trainingsvideo's, bereikbaar op `/media/` via de WAF | Docker |
 
 Diensten draaien in containers voor isolatie en reproduceerbaarheid. De VPN, de jump host en de IDS blijven native, omdat ze host-netwerkrechten nodig hebben (tun-device, routering, packet capture). Een container zou daar alleen een extra laag toevoegen zonder extra isolatie. SFTP gebruikt de sshd van de host zelf, die al op poort 22 luistert.
 
@@ -200,8 +200,10 @@ Altijd op `vm-mgmt-01`:
 cd ~/data-protection && git pull
 cd ansible
 ansible-galaxy collection install -r requirements.yml
-ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,sftp,appserver,fileserver,ids,vpn
+ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,media,sftp,appserver,fileserver,ids,vpn
 ```
+
+De media-play draait vóór de proxy-play: hij rondt de installatiewizard van Jellyfin af (beheerder `zkoo-admin`, wachtwoord in Key Vault als `jellyfin-admin-password`) voordat de proxy `/media/` openzet. Zo kan niemand het beheerdersaccount claimen.
 
 De bootstrap heeft `vpn` en `mgmt` al ingericht. `vpn` nog eens meenemen kan geen kwaad en zet de traffic mirror neer als die ontbreekt. Gebruik `/var/lib/zkoo/inventory.ini`: de bootstrap zet daar een eigen kopie neer, zodat `git pull` er nooit mee in conflict komt. Voeg `--check` toe voor een droge run.
 
@@ -239,6 +241,19 @@ ssh 192.168.13.5 'sudo tail -5 /var/log/suricata/fast.log'       # GPL ATTACK_RE
 
 Een poortscan vanaf een laptop (`nmap -Pn <proxy-ip>`) hoort ook in `fast.log` te verschijnen.
 
+### DVWA (bewust kwetsbaar testdoel)
+
+DVWA draait naast het patiëntportaal op `vm-web-01`, maar alleen zolang `web_dvwa_enabled: true` staat in `ansible/host_vars/vm-web-01.yml`. Zet het buiten tests en de demo uit. Het databasewachtwoord wordt bij de eerste run gemaakt en staat in Key Vault (`dvwa-db-password`).
+
+- **Via de WAF:** `https://<proxy-ip>/portaal/dvwa/`. DVWA is gemaakt om in een submap te draaien en gebruikt relatieve links, dus het dubbele voorvoegsel werkt. Log in met de standaardgegevens van DVWA (`admin` / `password`), klik één keer op *Create / Reset Database* en zet het beveiligingsniveau op *Low*. Aanvallen zoals SQL-injectie horen nu een `403` van de WAF te krijgen.
+- **Zonder de WAF (ter vergelijking):** een SSH-tunnel via de jump host naar poort 443 van het portaal zelf. Aan de NSG en `ufw` verandert niets, want het verkeer is SSH tot het `vm-web-01` bereikt:
+
+  ```bash
+  ssh -i ~/.ssh/id_rsa -J azureadmin@192.168.13.4 -L 8444:127.0.0.1:443 azureadmin@192.168.4.4
+  ```
+
+  Open daarna `https://localhost:8444/dvwa/`. Dezelfde aanval lukt nu wel; zo zie je wat de WAF tegenhoudt.
+
 Het volledige testplan, stap voor stap, staat in [docs/testplan.md](docs/testplan.md).
 
 ## Veelvoorkomende taken
@@ -248,6 +263,8 @@ Het volledige testplan, stap voor stap, staat in [docs/testplan.md](docs/testpla
 | Een VPN-beheerder of -medewerker toevoegen | Zet de naam in `vpn_admins` of `vpn_employees` in `ansible/group_vars/all.yml` en draai de plays `vpn` en `fileserver` opnieuw. Medewerkers krijgen automatisch een account op de fileshare. |
 | Een SFTP-partner toevoegen | Zet de publieke sleutel van de partner in `ansible/files/sftp-keys/<naam>.pub` en draai de play `sftp` opnieuw. Voeg ook het IP-bereik van de partner toe aan `partner_ip_ranges` (Terraform) en `proxy_sftp_allowed_from` (Ansible). |
 | De SSH-sleutel van een teamlid toevoegen | Zet `<voornaam>.pub` in `terraform/ssh-keys/` vóór de volgende `terraform apply`. Een wijziging in de sleutels maakt de VM's opnieuw aan. |
+| DVWA aan- of uitzetten | Zet `web_dvwa_enabled` in `ansible/host_vars/vm-web-01.yml` en draai de play `webservers` opnieuw. |
+| Trainingsvideo's toevoegen | Kopieer de bestanden naar `/opt/zkoo/media/library` op `vm-media-01` en klik in het dashboard van Jellyfin op *Scan All Libraries*. |
 | Een wachtwoord of profiel opzoeken | `az keyvault secret list --vault-name $KV -o table` |
 | De VM's starten na de dagelijkse uitschakeling | `az vm start --ids $(az vm list -g 2026_KE06_KDB1_casusgroep_04 --query "[].id" -o tsv)` |
 
@@ -275,6 +292,7 @@ Het volledige testplan, stap voor stap, staat in [docs/testplan.md](docs/testpla
 | `terraform destroy` blijft hangen op Log Analytics | Het permanent verwijderen van de workspace staat uit in `providers.tf`. |
 | `inventory.ini` staat als verwijderd na een destroy | Terraform verwijdert het bestand samen met de omgeving. Zet het terug met `git restore ansible/inventory.ini`; commit de verwijdering niet. |
 | Suricata ziet alleen kleine pakketten | Een VXLAN-kopie is 50 bytes groter dan het origineel, dus volle pakketten worden onderweg naar de IDS gesplitst. Komen de fragmenten niet aan, dan ziet Suricata nog wel verbindingsopbouw, scans en DNS, maar geen grote datapakketten. |
+| `/media/` geeft een lege pagina of 404 | De Base URL van Jellyfin moet gelijk zijn aan `proxy_media_path`. De media-play zet hem één keer, samen met de installatiewizard. Is de wizard met de hand afgerond, zet dan *Dashboard → Networking → Base URL* op `/media` en herstart de container. |
 | `$KV` of `$P` is leeg | `terraform output` werkt alleen vanuit de map `terraform`, en shellvariabelen bestaan alleen in het venster waarin je ze hebt gezet. |
 
 ## Afbreken

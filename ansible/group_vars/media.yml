@@ -1,5 +1,19 @@
 ---
-media_image: jellyfin/jellyfin:12.3
+media_image: jellyfin/jellyfin:10.11.5
 # Jellyfin runs as this uid/gid instead of root
 media_uid: 8096
 media_gid: 8096
+
+# Ansible talks to Jellyfin on the media VM itself; nothing else reaches 8096 except the proxy
+media_local_url: http://127.0.0.1:8096
+# Keep in sync with proxy_media_path in group_vars/proxy.yml (without the trailing slash)
+media_base_url: /media
+
+# Admin account created by the playbook; the password is generated once and kept in Key Vault
+media_admin_user: zkoo-admin
+media_admin_password_secret: jellyfin-admin-password
+# How Ansible identifies itself to the Jellyfin API
+media_auth_header: 'MediaBrowser Client="Ansible", Device="vm-mgmt-01", DeviceId="zkoo-ansible", Version="1.0"'
+
+# Library on ./library (mounted read-only as /media in the container)
+media_library_name: Training

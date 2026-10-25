@@ -472,6 +472,254 @@
       delegate_to: localhost
       become: false
 
+
+- name: Media server
+  hosts: media
+  become: true
+
+  vars:
+    media_dir: /opt/zkoo/media
+
+  handlers:
+    - name: Restart media containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ media_dir }}"
+        state: restarted
+
+  tasks:
+    - name: Media project directory
+      ansible.builtin.file:
+        path: "{{ media_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    # Jellyfin runs as media_uid, so it must own the directories it writes to
+    - name: Jellyfin data directories
+      ansible.builtin.file:
+        path: "{{ media_dir }}/{{ item }}"
+        state: directory
+        owner: "{{ media_uid }}"
+        group: "{{ media_gid }}"
+        mode: "0750"
+      loop:
+        - config
+        - cache
+        - library
+
+    - name: Media server configuration
+      ansible.builtin.template:
+        src: media/compose.yml.j2
+        dest: "{{ media_dir }}/compose.yml"
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart media containers
+
+    - name: Media containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ media_dir }}"
+        state: present
+        pull: missing
+
+    # A fresh Jellyfin has an open setup wizard: whoever finishes it first owns the admin account.
+    # These tasks finish it with a password from Key Vault before the proxy publishes /media/.
+
+    - name: Log in to Azure with the jump host identity
+      ansible.builtin.command: az login --identity --allow-no-subscriptions --output none
+      delegate_to: localhost
+      become: false
+      changed_when: false
+
+    - name: Read the Jellyfin admin password from Key Vault
+      ansible.builtin.command: >-
+        az keyvault secret show --vault-name {{ key_vault_name }}
+        --name {{ media_admin_password_secret }} --query value --output tsv
+      register: media_existing_password
+      # A missing secret is expected on the first run; any other error must stop the run
+      failed_when: media_existing_password.rc != 0 and 'SecretNotFound' not in media_existing_password.stderr
+      changed_when: false
+      delegate_to: localhost
+      become: false
+      no_log: true
+
+    - name: Use the existing password or generate a new one
+      ansible.builtin.set_fact:
+        media_admin_password: >-
+          {{ media_existing_password.stdout if media_existing_password.rc == 0
+             else lookup('ansible.builtin.password', '/dev/null', length=24, chars=['ascii_letters', 'digits']) }}
+      no_log: true
+
+    - name: Store a new Jellyfin admin password in Key Vault
+      ansible.builtin.command: >-
+        az keyvault secret set --vault-name {{ key_vault_name }}
+        --name {{ media_admin_password_secret }} --value {{ media_admin_password }} --output none
+      delegate_to: localhost
+      become: false
+      changed_when: true
+      no_log: true
+      when: media_existing_password.rc != 0
+
+    # 200 means the Base URL is already set, which only happens after the wizard (see below).
+    # 404 means Jellyfin still serves from /; anything else means it is still starting.
+    - name: Check whether Jellyfin already serves under its Base URL
+      ansible.builtin.uri:
+        url: "{{ media_local_url }}{{ media_base_url }}/System/Info/Public"
+        status_code: [200, 404]
+      register: media_info_base
+      until: media_info_base.status in [200, 404]
+      retries: 30
+      delay: 5
+
+    - name: First-time Jellyfin setup
+      when: media_info_base.status != 200
+      block:
+        - name: Wait for Jellyfin to answer on /
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/System/Info/Public"
+          register: media_info
+          until: media_info.status == 200
+          retries: 30
+          delay: 5
+
+        - name: Setup wizard - language and metadata
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/Startup/Configuration"
+            method: POST
+            body_format: json
+            body:
+              UICulture: en-US
+              MetadataCountryCode: NL
+              PreferredMetadataLanguage: nl
+            status_code: [200, 204]
+          when: not media_info.json.StartupWizardCompleted
+
+        # Jellyfin only creates the initial user after this GET
+        - name: Setup wizard - prepare the initial user
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/Startup/User"
+          when: not media_info.json.StartupWizardCompleted
+
+        - name: Setup wizard - admin account
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/Startup/User"
+            method: POST
+            body_format: json
+            body:
+              Name: "{{ media_admin_user }}"
+              Password: "{{ media_admin_password }}"
+            status_code: [200, 204]
+          no_log: true
+          when: not media_info.json.StartupWizardCompleted
+
+        # Remote access means "not only localhost"; the NSG and ufw still limit it to the proxy
+        - name: Setup wizard - remote access without UPnP
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/Startup/RemoteAccess"
+            method: POST
+            body_format: json
+            body:
+              EnableRemoteAccess: true
+              EnableAutomaticPortMapping: false
+            status_code: [200, 204]
+          when: not media_info.json.StartupWizardCompleted
+
+        - name: Setup wizard - finish
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/Startup/Complete"
+            method: POST
+            status_code: [200, 204]
+          when: not media_info.json.StartupWizardCompleted
+
+        - name: Log in as the Jellyfin admin
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/Users/AuthenticateByName"
+            method: POST
+            headers:
+              Authorization: "{{ media_auth_header }}"
+            body_format: json
+            body:
+              Username: "{{ media_admin_user }}"
+              Pw: "{{ media_admin_password }}"
+          register: media_login
+          no_log: true
+
+        - name: Remember the API token
+          ansible.builtin.set_fact:
+            media_api_auth: '{{ media_auth_header }}, Token="{{ media_login.json.AccessToken }}"'
+          no_log: true
+
+        - name: Read the existing libraries
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/Library/VirtualFolders"
+            headers:
+              Authorization: "{{ media_api_auth }}"
+          register: media_libraries
+          no_log: true
+
+        - name: Training video library
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/Library/VirtualFolders?name={{ media_library_name | urlencode }}&collectionType=homevideos&refreshLibrary=true"
+            method: POST
+            headers:
+              Authorization: "{{ media_api_auth }}"
+            body_format: json
+            body:
+              LibraryOptions:
+                PathInfos:
+                  - Path: /media
+            status_code: [200, 204]
+          no_log: true
+          when: media_library_name not in (media_libraries.json | map(attribute='Name') | list)
+
+        - name: Read the network configuration
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/System/Configuration/network"
+            headers:
+              Authorization: "{{ media_api_auth }}"
+          register: media_network
+          no_log: true
+
+        # Base URL: the proxy forwards /media/ with the prefix. KnownProxies: trust X-Forwarded-For from the proxy only.
+        - name: Base URL and trusted proxy
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}/System/Configuration/network"
+            method: POST
+            headers:
+              Authorization: "{{ media_api_auth }}"
+            body_format: json
+            body: >-
+              {{ media_network.json | combine({
+                   'BaseUrl': media_base_url,
+                   'KnownProxies': groups['proxy'] | map('extract', hostvars, 'ansible_host') | list
+                 }) }}
+            status_code: [200, 204]
+          no_log: true
+
+        # The Base URL only takes effect after a restart
+        - name: Restart Jellyfin
+          community.docker.docker_compose_v2:
+            project_src: "{{ media_dir }}"
+            state: restarted
+
+        - name: Wait for Jellyfin under its Base URL
+          ansible.builtin.uri:
+            url: "{{ media_local_url }}{{ media_base_url }}/System/Info/Public"
+          register: media_info_after
+          until: media_info_after.status == 200
+          retries: 30
+          delay: 5
+
+    - name: Allow Jellyfin from the reverse proxy only
+      community.general.ufw:
+        rule: allow
+        route: true
+        proto: tcp
+        to_port: "8096"
+        from_ip: "{{ hostvars[item].ansible_host }}"
+      loop: "{{ groups['proxy'] }}"
+
 - name: Reverse proxy with WAF
   hosts: proxy
   become: true
@@ -602,17 +850,61 @@
         group: root
         mode: "0600"
 
+    # DVWA database password: reuse what Key Vault has so a rerun does not rotate it
+
+    - name: Log in to Azure with the jump host identity
+      ansible.builtin.command: az login --identity --allow-no-subscriptions --output none
+      delegate_to: localhost
+      become: false
+      changed_when: false
+      when: web_dvwa_enabled | default(false)
+
+    - name: Read the DVWA database password from Key Vault
+      ansible.builtin.command: >-
+        az keyvault secret show --vault-name {{ key_vault_name }}
+        --name {{ dvwa_db_password_secret }} --query value --output tsv
+      register: dvwa_existing_password
+      # A missing secret is expected on the first run; any other error must stop the run
+      failed_when: dvwa_existing_password.rc != 0 and 'SecretNotFound' not in dvwa_existing_password.stderr
+      changed_when: false
+      delegate_to: localhost
+      become: false
+      no_log: true
+      when: web_dvwa_enabled | default(false)
+
+    - name: Use the existing password or generate a new one
+      ansible.builtin.set_fact:
+        dvwa_db_password: >-
+          {{ dvwa_existing_password.stdout if dvwa_existing_password.rc == 0
+             else lookup('ansible.builtin.password', '/dev/null', length=24, chars=['ascii_letters', 'digits']) }}
+      no_log: true
+      when: web_dvwa_enabled | default(false)
+
+    - name: Store a new DVWA database password in Key Vault
+      ansible.builtin.command: >-
+        az keyvault secret set --vault-name {{ key_vault_name }}
+        --name {{ dvwa_db_password_secret }} --value {{ dvwa_db_password }} --output none
+      delegate_to: localhost
+      become: false
+      changed_when: true
+      no_log: true
+      when:
+        - web_dvwa_enabled | default(false)
+        - dvwa_existing_password.rc != 0
+
+    # compose.yml can contain the DVWA database password, so only root may read it
     - name: Web server configuration
       ansible.builtin.template:
         src: web/{{ item.src }}
         dest: "{{ web_dir }}/{{ item.dest }}"
         owner: root
         group: root
-        mode: "0644"
+        mode: "{{ item.mode }}"
       loop:
-        - { src: compose.yml.j2, dest: compose.yml }
-        - { src: default.conf.j2, dest: default.conf }
-        - { src: index.html.j2, dest: html/index.html }
+        - { src: compose.yml.j2, dest: compose.yml, mode: "0600" }
+        - { src: default.conf.j2, dest: default.conf, mode: "0644" }
+        - { src: index.html.j2, dest: html/index.html, mode: "0644" }
+      no_log: "{{ web_dvwa_enabled | default(false) }}"
       notify: Restart web containers
 
     - name: Web containers
@@ -704,66 +996,6 @@
         # One comma-separated string without spaces, or the fstab line breaks
         opts: "{{ medical_mount_options | join(',') }}"
         state: mounted
-
-
-- name: Media server
-  hosts: media
-  become: true
-
-  vars:
-    media_dir: /opt/zkoo/media
-
-  handlers:
-    - name: Restart media containers
-      community.docker.docker_compose_v2:
-        project_src: "{{ media_dir }}"
-        state: restarted
-
-  tasks:
-    - name: Media project directory
-      ansible.builtin.file:
-        path: "{{ media_dir }}"
-        state: directory
-        owner: root
-        group: root
-        mode: "0755"
-
-    # Jellyfin runs as media_uid, so it must own the directories it writes to
-    - name: Jellyfin data directories
-      ansible.builtin.file:
-        path: "{{ media_dir }}/{{ item }}"
-        state: directory
-        owner: "{{ media_uid }}"
-        group: "{{ media_gid }}"
-        mode: "0750"
-      loop:
-        - config
-        - cache
-        - library
-
-    - name: Media server configuration
-      ansible.builtin.template:
-        src: media/compose.yml.j2
-        dest: "{{ media_dir }}/compose.yml"
-        owner: root
-        group: root
-        mode: "0644"
-      notify: Restart media containers
-
-    - name: Media containers
-      community.docker.docker_compose_v2:
-        project_src: "{{ media_dir }}"
-        state: present
-        pull: missing
-
-    - name: Allow Jellyfin from the reverse proxy only
-      community.general.ufw:
-        rule: allow
-        route: true
-        proto: tcp
-        to_port: "8096"
-        from_ip: "{{ hostvars[item].ansible_host }}"
-      loop: "{{ groups['proxy'] }}"
 
 
 # Native sshd: port 22 already serves management SSH, a Match block gives partners SFTP only

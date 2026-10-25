@@ -15,5 +15,5 @@ medical_storage_key_secret: storage-key-stzkoosensitive01
 # Test target images; check the latest tags before pinning
 dvwa_image: ghcr.io/digininja/dvwa:latest
 dvwa_db_image: mariadb:10
-# Test target only, the database holds no real data and is not reachable from outside Docker
-dvwa_db_password: geheim1086wachtwoord
+# The database password is generated on the first run and kept in Key Vault (secret below), never in Git
+dvwa_db_password_secret: dvwa-db-password

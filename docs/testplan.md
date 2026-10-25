@@ -29,7 +29,7 @@ V=$(terraform output -raw vpn_public_ip)
 | T1.2 | Bootstrap volgen met `tail -5 /var/log/zkoo-bootstrap.log` (Run Command) | `failed=0` voor vm-mgmt-01 en vm-vpn-01, daarna `Bootstrap finished` | ✓ |
 | T1.3 | VPN-profielen en TOTP ophalen uit `$KV` (tom en medewerker01) | `.ovpn`-bestanden gedownload, QR-code gescand | ✓ |
 | T1.4 | Verbinden als tom, `ssh-keygen -R 192.168.13.4`, inloggen op mgmt, `sudo reboot` | Ingelogd; na de reboot opnieuw ingelogd | ✓ |
-| T1.5 | Op mgmt: `git pull`, collections installeren, playbook met `--limit proxy,webservers,sftp,appserver,fileserver,ids,vpn` | `failed=0` en `unreachable=0` voor elke VM | ✓ |
+| T1.5 | Op mgmt: `git pull`, collections installeren, playbook met `--limit proxy,webservers,media,sftp,appserver,fileserver,ids,vpn` | `failed=0` en `unreachable=0` voor elke VM | ✓ |
 | T1.6 | Nieuwe `ansible/inventory.ini` committen (laptop) | Gepusht | ✓ |
 
 ## 2. Route Admin (VPN + MFA → jump host)
@@ -73,6 +73,20 @@ Vanaf je laptop, VPN **uit**. Voor H5 en H6 heb je `nmap` nodig (`brew install n
 | H7 | SSH op de publieke IP's | `nc -vz -G 5 $P 22` en `nc -vz -G 5 $V 22` | Allebei timeout | ✓ |
 | H8 | Melding in de WAF-log | Op mgmt: `ssh 192.168.1.4 'sudo docker logs proxy-waf-1 --tail 200 2>&1 \| grep -ci modsecurity'` | Groter dan 0 (meldingen van H1 t/m H4) | ✓ |
 
+## 4b. DVWA: aanvallen met en zonder WAF
+
+Alleen tijdens deze test: zet `web_dvwa_enabled: true` in `ansible/host_vars/vm-web-01.yml`, commit en push, en draai op mgmt de play met `--limit webservers`. Zet het na D7 weer uit.
+
+| ID | Test | Commando | Verwacht | ✓ |
+|---|---|---|---|---|
+| D1 | Wachtwoord in Key Vault, niet in Git | `az keyvault secret show --vault-name $KV --name dvwa-db-password --query value -o tsv` en `git grep -i dvwa_db_password:` | Wachtwoord bestaat; `git grep` vindt niets | ☐ |
+| D2 | Compose-bestand alleen voor root | Op mgmt: `ssh 192.168.4.4 'sudo stat -c "%a %U" /opt/zkoo/web/compose.yml'` | `600 root` | ☐ |
+| D3 | DVWA via de WAF | Browser: `https://$P/portaal/dvwa/`, inloggen met `admin` / `password`, *Create / Reset Database*, opnieuw inloggen, *DVWA Security* → *Low* | Loginpagina en menu laden, links werken | ☐ |
+| D4 | SQL-injectie via de WAF | In *SQL Injection*: `1' OR '1'='1` | `403 Forbidden` van de WAF | ☐ |
+| D5 | Tunnel zonder WAF | Laptop, VPN als tom: `ssh -i ~/.ssh/id_rsa -J azureadmin@192.168.13.4 -L 8444:127.0.0.1:443 azureadmin@192.168.4.4`, dan `https://localhost:8444/dvwa/` en weer *Low* | DVWA laadt | ☐ |
+| D6 | SQL-injectie zonder WAF | Zelfde invoer als D4 | Alle gebruikers uit de database verschijnen: de aanval lukt | ☐ |
+| D7 | DVWA weer uit | `web_dvwa_enabled: false`, play `webservers` opnieuw, dan `curl -sk -o /dev/null -w "%{http_code}\n" https://$P/portaal/dvwa/` | `404` | ☐ |
+
 ## 5. Route Partners (SFTP)
 
 | ID | Test | Commando | Verwacht | ✓ |
@@ -112,6 +126,20 @@ Verbonden als **tom**, op mgmt.
 | S4 | Sleutel alleen leesbaar voor root | `ssh 192.168.4.4 'sudo stat -c "%a %U" /etc/smbcredentials/stzkoosensitive01.cred'` | `600 root` | ✓ |
 | S5 | Een andere VM kan **niet** bij de share | `ssh 192.168.4.5 'timeout 5 bash -c "</dev/tcp/192.168.14.4/445" && echo open \|\| echo geblokkeerd'` | `geblokkeerd` (nsg-pep) | ✓ |
 | S6 | Geen publieke toegang | Laptop, VPN **uit**: `nc -vz -G 5 stzkoosensitive01.file.core.windows.net 445` | Mislukt (publieke toegang staat uit) | ✓ |
+
+## 6c. Trainingsvideo's (Jellyfin)
+
+Vanaf je laptop (VPN mag uit) en als **tom** op mgmt.
+
+| ID | Test | Commando | Verwacht | ✓ |
+|---|---|---|---|---|
+| M1 | Wizard is afgerond | `curl -sk https://$P/media/System/Info/Public` | JSON met `"StartupWizardCompleted":true` | ☐ |
+| M2 | Wachtwoord in Key Vault | `az keyvault secret show --vault-name $KV --name jellyfin-admin-password --query value -o tsv` | Wachtwoord van 24 tekens | ☐ |
+| M3 | Inloggen via de WAF | Browser: `https://$P/media/`, inloggen als `zkoo-admin` | Startpagina met de bibliotheek *Training* | ☐ |
+| M4 | Doorverwijzing zonder slash | `curl -sk -o /dev/null -w "%{http_code} %{redirect_url}\n" https://$P/media` | `301` naar `/media/` | ☐ |
+| M5 | Niet rechtstreeks bereikbaar | Laptop, VPN als tom: `nc -vz -G 5 192.168.4.6 8096`. Op mgmt: `timeout 5 bash -c "</dev/tcp/192.168.4.6/8096" && echo open \|\| echo geblokkeerd` | Timeout en `geblokkeerd`: alleen de proxy mag naar 8096 | ☐ |
+| M6 | Aanval op /media/ | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/media/?id=1'%20OR%20'1'='1"` | `403` van de WAF | ☐ |
+| M7 | Video afspelen | Op mgmt een testvideo naar `/opt/zkoo/media/library` op vm-media-01 kopiëren, in Jellyfin *Scan All Libraries*, video afspelen | Video speelt af via `/media/` | ☐ |
 
 ## 7. Intrusion detection
 

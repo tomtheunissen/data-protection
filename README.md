@@ -57,7 +57,7 @@ Only `vm-proxy-01` and `vm-vpn-01` have a public IP address.
 | vm-vpn-01 | OpenVPN + dnsmasq DNS forwarder | Native |
 | vm-mgmt-01 | Jump host and Ansible control node | Native |
 | vm-ids-01 | Suricata IDS, fed by a software TAP from the proxy and the VPN server | Native |
-| vm-media-01 | Media server on 8096 (planned) | Docker |
+| vm-media-01 | Jellyfin with training videos, reached at `/media/` through the WAF | Docker |
 
 Services run in containers for isolation and reproducibility. The VPN, the jump host and the IDS stay native because they need host networking (tun device, routing, packet capture), so a container would add a layer without adding isolation. SFTP uses the host's own sshd, which already listens on port 22.
 
@@ -200,8 +200,10 @@ Always on `vm-mgmt-01`:
 cd ~/data-protection && git pull
 cd ansible
 ansible-galaxy collection install -r requirements.yml
-ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,sftp,appserver,fileserver,ids,vpn
+ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,media,sftp,appserver,fileserver,ids,vpn
 ```
+
+The media play runs before the proxy play: it finishes Jellyfin's setup wizard (admin account `zkoo-admin`, password in Key Vault as `jellyfin-admin-password`) before the proxy publishes `/media/`, so nobody can claim the admin account.
 
 The bootstrap already configured `vpn` and `mgmt`; including `vpn` again is harmless and adds the traffic mirror if it is missing. Use `/var/lib/zkoo/inventory.ini`: the bootstrap writes its own copy there, so `git pull` never conflicts with it. Add `--check` for a dry run.
 
@@ -239,6 +241,19 @@ ssh 192.168.13.5 'sudo tail -5 /var/log/suricata/fast.log'       # GPL ATTACK_RE
 
 A port scan from a laptop (`nmap -Pn <proxy-ip>`) should also show up in `fast.log`.
 
+### DVWA (deliberately vulnerable test target)
+
+DVWA runs next to the patient portal on `vm-web-01`, but only while `web_dvwa_enabled: true` in `ansible/host_vars/vm-web-01.yml`. Keep it off outside tests and the demo. Its database password is generated on the first run and kept in Key Vault (`dvwa-db-password`).
+
+- **Through the WAF:** `https://<proxy-ip>/portaal/dvwa/`. DVWA is built to live in a subfolder and uses relative links, so the double prefix works. Log in with DVWA's default `admin` / `password`, click *Create / Reset Database* once, then set the security level to *Low*. Attacks such as SQL injection should now get a `403` from the WAF.
+- **Without the WAF (comparison):** an SSH tunnel through the jump host to the portal's own port 443. Nothing in the NSG or `ufw` changes, because the traffic is SSH until it reaches `vm-web-01`:
+
+  ```bash
+  ssh -i ~/.ssh/id_rsa -J azureadmin@192.168.13.4 -L 8444:127.0.0.1:443 azureadmin@192.168.4.4
+  ```
+
+  Then open `https://localhost:8444/dvwa/`. The same attack now succeeds, which shows what the WAF stops.
+
 The full step-by-step test plan is in [docs/testplan.md](docs/testplan.md).
 
 ## Common tasks
@@ -248,6 +263,8 @@ The full step-by-step test plan is in [docs/testplan.md](docs/testplan.md).
 | Add a VPN admin or employee | Add the name to `vpn_admins` or `vpn_employees` in `ansible/group_vars/all.yml`, then rerun the `vpn` and `fileserver` plays. Employees automatically get a file share account. |
 | Add an SFTP partner | Put the partner's public key in `ansible/files/sftp-keys/<name>.pub` and rerun the `sftp` play. Also add the partner's IP range to `partner_ip_ranges` (Terraform) and `proxy_sftp_allowed_from` (Ansible). |
 | Add a team member's SSH key | Put `<firstname>.pub` in `terraform/ssh-keys/` before the next `terraform apply`. Changing keys recreates the VMs. |
+| Turn DVWA on or off | Set `web_dvwa_enabled` in `ansible/host_vars/vm-web-01.yml` and rerun the `webservers` play. |
+| Add training videos | Copy the files to `/opt/zkoo/media/library` on `vm-media-01`, then *Scan All Libraries* in Jellyfin's dashboard. |
 | Look up a password or profile | `az keyvault secret list --vault-name $KV -o table` |
 | Start the VMs after the daily shutdown | `az vm start --ids $(az vm list -g 2026_KE06_KDB1_casusgroep_04 --query "[].id" -o tsv)` |
 
@@ -275,6 +292,7 @@ The full step-by-step test plan is in [docs/testplan.md](docs/testplan.md).
 | `terraform destroy` hangs on Log Analytics | Permanent delete of the workspace is disabled in `providers.tf`. |
 | `inventory.ini` shows as deleted after a destroy | Terraform removes the file with the environment. Restore it with `git restore ansible/inventory.ini`; do not commit the deletion. |
 | Suricata sees only small packets | A VXLAN copy is 50 bytes larger than the original, so full-size packets are fragmented on the way to the IDS. If fragments do not arrive, Suricata still sees handshakes, scans and DNS, but not large data packets. |
+| `/media/` gives a blank page or 404 | Jellyfin's Base URL must match `proxy_media_path`. The media play sets it once, together with the setup wizard. If the wizard was finished by hand, set *Dashboard → Networking → Base URL* to `/media` and restart the container. |
 | `$KV` or `$P` is empty | `terraform output` only works from the `terraform` folder, and shell variables only exist in the window where you set them. |
 
 ## Tearing down
