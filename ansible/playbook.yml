@@ -286,7 +286,7 @@
       args:
         creates: /etc/openvpn/server/tls-crypt.key
 
-    # Admins: fixed address in the admin pool and a TOTP secret
+    # Admins: fixed address in the admin pool. Every user (admin or employee): a TOTP secret
 
     - name: Client config directory
       ansible.builtin.file:
@@ -313,20 +313,20 @@
         group: nogroup
         mode: "0750"
 
-    - name: Generate TOTP secrets for admins
-      ansible.builtin.shell: set -o pipefail && head -c 20 /dev/urandom | base32 | tr -d '=' > /etc/openvpn/otp/{{ item.name }}
+    - name: Generate TOTP secrets
+      ansible.builtin.shell: set -o pipefail && head -c 20 /dev/urandom | base32 | tr -d '=' > /etc/openvpn/otp/{{ item }}
       args:
         executable: /bin/bash
-        creates: /etc/openvpn/otp/{{ item.name }}
-      loop: "{{ vpn_admins }}"
+        creates: /etc/openvpn/otp/{{ item }}
+      loop: "{{ vpn_users }}"
 
     - name: TOTP secret permissions
       ansible.builtin.file:
-        path: /etc/openvpn/otp/{{ item.name }}
+        path: /etc/openvpn/otp/{{ item }}
         owner: root
         group: nogroup
         mode: "0640"
-      loop: "{{ vpn_admins }}"
+      loop: "{{ vpn_users }}"
 
     - name: User verification script
       ansible.builtin.template:
@@ -413,10 +413,10 @@
       register: vpn_client_keys
       no_log: true
 
-    - name: Read admin TOTP secrets
+    - name: Read TOTP secrets
       ansible.builtin.slurp:
-        src: /etc/openvpn/otp/{{ item.name }}
-      loop: "{{ vpn_admins }}"
+        src: /etc/openvpn/otp/{{ item }}
+      loop: "{{ vpn_users }}"
       register: vpn_totp_secrets
       no_log: true
 
@@ -453,11 +453,11 @@
       become: false
       changed_when: true
 
-    - name: Store admin TOTP secrets in Key Vault
+    - name: Store TOTP secrets in Key Vault
       ansible.builtin.command: >-
         az keyvault secret set --vault-name {{ key_vault_name }}
-        --name vpn-totp-{{ item.item.name }}
-        --value otpauth://totp/ZKOO-VPN:{{ item.item.name }}?secret={{ item.content | b64decode | trim }}&issuer=ZKOO-VPN
+        --name vpn-totp-{{ item.item }}
+        --value otpauth://totp/ZKOO-VPN:{{ item.item }}?secret={{ item.content | b64decode | trim }}&issuer=ZKOO-VPN
         --output none
       loop: "{{ vpn_totp_secrets.results }}"
       delegate_to: localhost
@@ -1385,6 +1385,23 @@
         path: /etc/suricata/suricata.yaml
         regexp: '^(\s+checksum-validation:) yes(.*)$'
         replace: '\1 no\2'
+      notify: Restart suricata
+
+    # Tuning: known-good noise is suppressed so fast.log only shows what needs attention
+    - name: Suppressed hosts
+      ansible.builtin.template:
+        src: ids/threshold.config.j2
+        dest: /etc/suricata/threshold.config
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart suricata
+
+    - name: Load the suppress list
+      ansible.builtin.lineinfile:
+        path: /etc/suricata/suricata.yaml
+        regexp: '^#?\s*threshold-file:'
+        line: "threshold-file: /etc/suricata/threshold.config"
       notify: Restart suricata
 
     # Emerging Threats Open rule set

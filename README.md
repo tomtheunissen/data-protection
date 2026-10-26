@@ -39,7 +39,7 @@ VPN clients get an address from one of two pools outside the VNet. The route tab
 
 | Pool | Range | Users | Authentication |
 |---|---|---|---|
-| employee-pool | 10.8.0.0/22 | ZKOO employees | Certificate |
+| employee-pool | 10.8.0.0/22 | ZKOO employees | Certificate + TOTP (MFA) |
 | admin-pool | 10.8.4.0/24 | Administrators, fixed address per admin | Certificate + TOTP (MFA) |
 
 Only `vm-proxy-01` and `vm-vpn-01` have a public IP address.
@@ -78,7 +78,7 @@ Services run in containers for isolation and reproducibility. The VPN, the jump 
 |---|---|
 | Users | Internet → WAF (443) → web-02 (`/`) or web-01 (`/portaal/`) |
 | Partners | Partner IP → proxy (2222) → vm-ftp-01 (22), chrooted SFTP |
-| Employees | OpenVPN → employee-pool → vm-app-01 (443), vm-fs-01 (445), Azure Files (445) |
+| Employees | OpenVPN + TOTP → employee-pool → vm-app-01 (443), vm-fs-01 (445), Azure Files (445) |
 | Admins | OpenVPN + TOTP → admin-pool → vm-mgmt-01 (22) → all VMs (22) |
 | Attacker | Internet → only 443 and 1194 are open; SQLi/XSS is blocked by the WAF (403); scans and known attack patterns raise Suricata alerts |
 
@@ -134,7 +134,7 @@ ansible/
 - Contributor access to the resource group `2026_KE06_KDB1_casusgroep_04`
 - Your public SSH key in `terraform/ssh-keys/<firstname>.pub`
 - The private GitHub deploy key at `~/.ssh/zkoo_deploy` (only on the machine that runs Terraform). Its public half is a read-only deploy key on the GitHub repository.
-- OpenVPN Connect and an authenticator app (TOTP) for admins
+- OpenVPN Connect and an authenticator app (TOTP) for every VPN user
 - `qrencode` to show the TOTP QR code (`brew install qrencode`)
 
 ### Remote state
@@ -158,7 +158,7 @@ The apply takes about 15 to 20 minutes. Then `vm-mgmt-01` bootstraps itself thro
 2. reads the GitHub deploy key and its own SSH key from Key Vault;
 3. clones this repository;
 4. runs the Ansible plays for `vpn` and `mgmt`;
-5. stores a VPN profile per user and a TOTP secret per admin in Key Vault.
+5. stores a VPN profile per user and a TOTP secret per user in Key Vault.
 
 Follow the bootstrap (about 10 minutes):
 
@@ -182,7 +182,7 @@ az keyvault secret show --vault-name $KV --name vpn-totp-<user> --query value -o
 
 1. Import the `.ovpn` file in OpenVPN Connect. Remove the profile of a previous deployment first: every rebuild creates a new CA.
 2. Scan the QR code with your authenticator app (admins only).
-3. Connect with your user name. Admins enter the 6-digit TOTP code as password; employees leave it empty.
+3. Connect with your user name. Everyone, admin or employee, enters the 6-digit TOTP code as password.
 4. Log in on the jump host. Every rebuild gives it a new host key, so remove the old one first:
 
 ```bash
@@ -273,7 +273,9 @@ The full step-by-step test plan is in [docs/testplan.md](docs/testplan.md).
 - **Two entry points.** Only 443 (WAF), 1194/udp (VPN) and 2222 (SFTP, partner IPs only) are open from the internet.
 - **Least privilege per subnet.** Every NSG ends with an explicit deny-all; sources and destinations are specific VMs (ASGs) or VPN pools.
 - **Defense in depth.** Every VM also runs `ufw` with the same rules as its NSG. Docker publishes ports through the `FORWARD` chain and would bypass `ufw`, so a `DOCKER-USER` rule set sends new inbound connections to containers through `ufw route` rules.
-- **MFA for admins.** Admins need a certificate and a TOTP code; employees cannot reach the jump host.
+- **MFA for everyone on the VPN.** Every user needs a certificate and a TOTP code, so a stolen or copied `.ovpn` profile is not enough. The pool decides what a user can reach: employees cannot reach the jump host.
+- **Pinned images.** Container images use version tags (or a long-term support line), so a new deployment runs what was tested. DVWA is the exception: it publishes no version tags.
+- **No software banners.** The proxy removes the `Server` and `X-Powered-By` headers and hides the nginx version.
 - **No secrets in Git.** Passwords, VPN profiles, TOTP secrets and SSH keys live in Key Vault. The jump host reads them with its managed identity.
 - **WAF.** ModSecurity with the OWASP Core Rule Set blocks SQL injection and XSS before they reach the patient portal, which must be treated as vulnerable. The WAF container runs as an unprivileged user.
 - **Private data paths.** SQL, Azure Files and App Service are only reachable through private endpoints; their public access is disabled. Only the patient portal mounts the medical files share (SMB 3.1.1 with encryption); the storage key comes from Key Vault and is readable by root only.

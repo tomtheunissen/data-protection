@@ -1,0 +1,5 @@
+# Managed by Ansible, changes are overwritten
+# gen_id 0 and sig_id 0 mean every rule; by_either matches the address as source or destination
+{% for ip in suricata_suppress_ips %}
+suppress gen_id 0, sig_id 0, track by_either, ip {{ ip }}
+{% endfor %}

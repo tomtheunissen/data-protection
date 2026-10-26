@@ -4,3 +4,8 @@ suricata_home_net:
   - 192.168.0.0/16
   - "{{ vpn_employee_pool }}"
   - "{{ vpn_admin_pool }}"
+
+# Hosts whose alerts are suppressed. 168.63.129.16 is Azure's WireServer (DHCP, DNS, health probes):
+# its platform traffic does not follow standard TCP/HTTP and floods fast.log with stream alerts
+suricata_suppress_ips:
+  - 168.63.129.16

@@ -1,7 +1,7 @@
 ---
 # smbd only: no Avahi, WSDD2 or NetBIOS, so only port 445 is listening
-# Pin to a version tag (a<alpine>-s<samba>) once the setup is stable
-fs_image: ghcr.io/servercontainers/samba:smbd-only-latest
+# Pinned: a<alpine>-s<samba>-r<build>; check Docker Hub for newer tags when updating
+fs_image: servercontainers/samba:smbd-only-a3.24.1-s4.23.8-r0
 
 fs_share_name: zkoo-data
 fs_data_root: /srv/samba

@@ -27,7 +27,7 @@ V=$(terraform output -raw vpn_public_ip)
 |---|---|---|---|
 | T1.1 | `terraform apply` | `Apply complete!`, 0 errors | ✓ |
 | T1.2 | Bootstrap volgen met `tail -5 /var/log/zkoo-bootstrap.log` (Run Command) | `failed=0` voor vm-mgmt-01 en vm-vpn-01, daarna `Bootstrap finished` | ✓ |
-| T1.3 | VPN-profielen en TOTP ophalen uit `$KV` (tom en medewerker01) | `.ovpn`-bestanden gedownload, QR-code gescand | ✓ |
+| T1.3 | VPN-profielen en TOTP ophalen uit `$KV` (tom en medewerker01, allebei met QR-code) | `.ovpn`-bestanden gedownload, beide QR-codes gescand | ✓ |
 | T1.4 | Verbinden als tom, `ssh-keygen -R 192.168.13.4`, inloggen op mgmt, `sudo reboot` | Ingelogd; na de reboot opnieuw ingelogd | ✓ |
 | T1.5 | Op mgmt: `git pull`, collections installeren, playbook met `--limit proxy,webservers,media,sftp,appserver,fileserver,ids,vpn` | `failed=0` en `unreachable=0` voor elke VM | ✓ |
 | T1.6 | Nieuwe `ansible/inventory.ini` committen (laptop) | Gepusht | ✓ |
@@ -72,6 +72,7 @@ Vanaf je laptop, VPN **uit**. Voor H5 en H6 heb je `nmap` nodig (`brew install n
 | H6 | Open poorten op de VPN-server | `nmap -Pn -p 1-10000 $V` | Geen TCP-poorten open (OpenVPN is UDP) | ✓ |
 | H7 | SSH op de publieke IP's | `nc -vz -G 5 $P 22` en `nc -vz -G 5 $V 22` | Allebei timeout | ✓ |
 | H8 | Melding in de WAF-log | Op mgmt: `ssh 192.168.1.4 'sudo docker logs proxy-waf-1 --tail 200 2>&1 \| grep -ci modsecurity'` | Groter dan 0 (meldingen van H1 t/m H4) | ✓ |
+| H9 | Geen softwareversie zichtbaar | `curl -skI https://$P/ \| grep -iE '^(server\|x-powered-by):'` | Geen uitvoer | ☐ |
 
 ## 4b. DVWA: aanvallen met en zonder WAF
 
@@ -101,11 +102,12 @@ Alleen tijdens deze test: zet `web_dvwa_enabled: true` in `ansible/host_vars/vm-
 
 ## 6. Route Employees (VPN → app en fileserver)
 
-Verbonden als **medewerker01**. Laat het wachtwoord leeg; wil OpenVPN Connect dat niet, vul dan iets willekeurigs in. Medewerkers worden alleen op hun certificaat gecontroleerd.
+Verbonden als **medewerker01**. Net als beheerders vullen medewerkers de TOTP-code van 6 cijfers in als wachtwoord.
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| E1 | VPN zonder TOTP | Verbinden | Verbonden, adres in 10.8.0.0/22 | ✓ |
+| E1 | VPN met geldige TOTP | Verbinden met de code uit de app | Verbonden, adres in 10.8.0.0/22 | ☐ |
+| E1b | VPN met **foute** TOTP | Verbinden met code `000000` | Verbinding geweigerd (`AUTH_FAILED`) | ☐ |
 | E2 | Appserver | `curl -sk https://192.168.8.4/` | Pagina van vm-app-01 | ✓ |
 | E3 | Fileserver: verbinden | Wachtwoord: `az keyvault secret show --vault-name $KV --name smb-password-medewerker01 --query value -o tsv`. Finder → Ga → Verbind met server → `smb://192.168.8.5/zkoo-data` | Share geopend | ✓ |
 | E4 | Fileserver: schrijven | Een bestand naar de share slepen | Bestand staat erop | ✓ |
@@ -155,6 +157,7 @@ Verbonden als **tom**, op mgmt.
 | I6 | Poortscan gedetecteerd | Na H5: `ssh 192.168.13.5 "sudo grep <eigen-ip> /var/log/suricata/fast.log \| sed 's/.*\] \(.*\) \[\*\*\].*/\1/' \| sort \| uniq -c"` | Meldingen met je publieke IP als bron | ✓ (zie Bevindingen) |
 | I7 | VPN-verkeer zichtbaar | Als medewerker01 E2 en E3 doen, daarna `ssh 192.168.13.5 'sudo jq -c "select((.src_ip // \"\") \| startswith(\"10.8.0.\")) \| {timestamp, src_ip, dest_ip, dest_port, event_type}" /var/log/suricata/eve.json \| tail -5'` | Regels met bronadres 10.8.0.x naar 192.168.8.4/.5 | ✓ |
 | I8 | Alleen de toegangspunten mogen naar de tunnel | `ssh 192.168.13.5 'sudo ufw status \| grep 4789'` | 2 regels: 192.168.1.4 en 192.168.1.5 | ✓ |
+| I9 | WireServer onderdrukt | `ssh 192.168.13.5 'sudo grep -c 168.63.129.16 /var/log/suricata/fast.log'` (na de andere I-tests) | `0`, terwijl de meldingen van I5 en I6 er wel staan | ☐ |
 
 ## 8. Afronding
 
@@ -171,8 +174,8 @@ Verbonden als **tom**, op mgmt.
 |---|---|---|---|
 | I5 | testmynids.org gaf geen antwoord (`Could not resolve host`) | De dienst testmynids.org bestaat niet meer | Eigen testverzoek met dezelfde inhoud (`uid=0(root)`) in een HTTP-header; regel 2100498 matcht op die inhoud in elk pakket |
 | I4 | Risico op verloren fragmenten (VXLAN +50 bytes) | – | Getest: pakketten tot 1536 bytes komen aan, fragmentatie werkt in Azure |
-| I1–I5 | Veel meldingen van 168.63.129.16 (`SURICATA STREAM`, `HTTP unable to match`) | Intern platformverkeer van Azure (WireServer), wijkt af van standaard TCP/HTTP | Later onderdrukken met een suppress-regel (tuning) |
+| I1–I5 | Veel meldingen van 168.63.129.16 (`SURICATA STREAM`, `HTTP unable to match`) | Intern platformverkeer van Azure (WireServer), wijkt af van standaard TCP/HTTP | Opgelost: suppress-regel in `threshold.config` (zie I9) |
 | I6 | Geen ET SCAN-melding bij de nmap-scan | De NSG blokkeert 9998 van de 10.000 poorten vóór het verkeer de proxy (en dus de mirror) bereikt; Suricata ziet alleen 443 en 2222 | Scan wel gedetecteerd: 110 meldingen `SURICATA STREAM … RST invalid ack` van het scannende IP, het patroon van een nmap SYN-scan (SYN, SYN-ACK, RST). Defense in depth: NSG eerst, IDS daarna |
 | I7 | – | – | De IDS legde ook een geblokkeerde SSH-poging van medewerker01 (10.8.0.2) naar de jump host vast. Pogingen die de NSG tegenhoudt, zijn dus toch zichtbaar |
-| E1 | OpenVPN Connect eist een wachtwoord, ook voor medewerkers | De client maakt het veld verplicht; de server controleert het voor medewerkers niet | Medewerkers loggen in met alleen een certificaat (één factor). Aanbeveling: TOTP ook voor medewerkers |
+| E1 | OpenVPN Connect eist een wachtwoord, ook voor medewerkers | De client maakt het veld verplicht; de server controleert het voor medewerkers niet | Opgelost: medewerkers gebruiken nu ook TOTP (zie E1 en E1b) |
 | E3 | macOS probeert ook poort 139 (NetBIOS) | Standaardgedrag van macOS | Poort 139 is dicht; de container draait alleen smbd op 445 |

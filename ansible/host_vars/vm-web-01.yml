@@ -12,8 +12,9 @@ medical_mount_path: /mnt/medical-files
 # Key Vault secret written by Terraform (keyvault.tf)
 medical_storage_key_secret: storage-key-stzkoosensitive01
 
-# Test target images; check the latest tags before pinning
+# DVWA publishes no version tags; latest is release 2.5 (January 2025) and it only runs during tests
 dvwa_image: ghcr.io/digininja/dvwa:latest
-dvwa_db_image: mariadb:10
+# MariaDB long-term support line
+dvwa_db_image: mariadb:11.8
 # The database password is generated on the first run and kept in Key Vault (secret below), never in Git
 dvwa_db_password_secret: dvwa-db-password

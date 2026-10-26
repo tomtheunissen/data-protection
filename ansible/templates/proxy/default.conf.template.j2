@@ -3,8 +3,9 @@
 # The image still renders ${...} variables and the *_CONFIG placeholders at start-up.
 # ModSecurity is enabled for all servers in conf.d/modsecurity.conf (from the image).
 
-server_tokens ${SERVER_TOKENS};
-more_set_headers 'Server: ${SERVER_HEADER}';
+# Hide the software behind the proxy: no version on error pages, no Server or X-Powered-By header
+server_tokens off;
+more_clear_headers Server X-Powered-By;
 
 map $http_upgrade $connection_upgrade {
     default upgrade;

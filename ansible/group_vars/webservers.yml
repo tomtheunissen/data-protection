@@ -1,3 +1,4 @@
 ---
 # Placeholder site until the real web application is containerised
-web_image: nginx:1.27-alpine
+# Stable branch (even minor number); the minor tag still receives patch releases
+web_image: nginx:1.30-alpine

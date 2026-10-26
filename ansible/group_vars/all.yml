@@ -4,14 +4,15 @@ vpn_employee_pool: 10.8.0.0/22
 vpn_admin_pool: 10.8.4.0/24
 
 # VPN users, shared here because other services (file server) reuse the same accounts
-# Admins get a fixed address in the admin pool and must use TOTP (MFA)
+# Every VPN user logs in with a certificate and a TOTP code (MFA)
+# Admins get a fixed address in the admin pool
 vpn_admins:
   - name: tom
     ip: 10.8.4.10
   - name: maddox
     ip: 10.8.4.11
 
-# Employees get a dynamic address from the employee pool and log in with their certificate only
+# Employees get a dynamic address from the employee pool
 vpn_employees:
   - medewerker01
 

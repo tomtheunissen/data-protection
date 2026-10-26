@@ -39,7 +39,7 @@ VPN-clients krijgen een adres uit een van twee pools buiten het VNet. De route t
 
 | Pool | Bereik | Gebruikers | Authenticatie |
 |---|---|---|---|
-| employee-pool | 10.8.0.0/22 | Medewerkers van ZKOO | Certificaat |
+| employee-pool | 10.8.0.0/22 | Medewerkers van ZKOO | Certificaat + TOTP (MFA) |
 | admin-pool | 10.8.4.0/24 | Beheerders, vast adres per beheerder | Certificaat + TOTP (MFA) |
 
 Alleen `vm-proxy-01` en `vm-vpn-01` hebben een publiek IP-adres.
@@ -78,7 +78,7 @@ Diensten draaien in containers voor isolatie en reproduceerbaarheid. De VPN, de 
 |---|---|
 | Users | Internet → WAF (443) → web-02 (`/`) of web-01 (`/portaal/`) |
 | Partners | Partner-IP → proxy (2222) → vm-ftp-01 (22), SFTP met chroot |
-| Employees | OpenVPN → employee-pool → vm-app-01 (443), vm-fs-01 (445), Azure Files (445) |
+| Employees | OpenVPN + TOTP → employee-pool → vm-app-01 (443), vm-fs-01 (445), Azure Files (445) |
 | Admins | OpenVPN + TOTP → admin-pool → vm-mgmt-01 (22) → alle VM's (22) |
 | Hacker | Internet → alleen 443 en 1194 staan open; SQLi en XSS worden door de WAF geblokkeerd (403); scans en bekende aanvalspatronen geven Suricata-meldingen |
 
@@ -134,7 +134,7 @@ ansible/
 - Contributor-rechten op de resourcegroep `2026_KE06_KDB1_casusgroep_04`
 - Je publieke SSH-sleutel in `terraform/ssh-keys/<voornaam>.pub`
 - De private GitHub-deploy key op `~/.ssh/zkoo_deploy` (alleen op de machine die Terraform draait). Het publieke deel staat als read-only deploy key op de GitHub-repository.
-- OpenVPN Connect en een authenticator-app (TOTP) voor beheerders
+- OpenVPN Connect en een authenticator-app (TOTP) voor elke VPN-gebruiker
 - `qrencode` om de TOTP-QR-code te tonen (`brew install qrencode`)
 
 ### Remote state
@@ -158,7 +158,7 @@ De apply duurt ongeveer 15 tot 20 minuten. Daarna richt `vm-mgmt-01` zichzelf in
 2. haalt de GitHub-deploy key en zijn eigen SSH-sleutel uit de Key Vault;
 3. kloont deze repository;
 4. draait de Ansible-plays voor `vpn` en `mgmt`;
-5. zet per gebruiker een VPN-profiel en per beheerder een TOTP-geheim in de Key Vault.
+5. zet per gebruiker een VPN-profiel en per gebruiker een TOTP-geheim in de Key Vault.
 
 Volg de bootstrap (ongeveer 10 minuten):
 
@@ -182,7 +182,7 @@ az keyvault secret show --vault-name $KV --name vpn-totp-<gebruiker> --query val
 
 1. Importeer het `.ovpn`-bestand in OpenVPN Connect. Verwijder eerst het profiel van een eerdere uitrol: bij elke rebuild komt er een nieuwe CA.
 2. Scan de QR-code met je authenticator-app (alleen beheerders).
-3. Verbind met je gebruikersnaam. Beheerders vullen de TOTP-code van 6 cijfers in als wachtwoord; medewerkers laten het leeg.
+3. Verbind met je gebruikersnaam. Iedereen, beheerder of medewerker, vult de TOTP-code van 6 cijfers in als wachtwoord.
 4. Log in op de jump host. Na elke rebuild heeft die een nieuwe host key, dus verwijder eerst de oude:
 
 ```bash
@@ -273,7 +273,9 @@ Het volledige testplan, stap voor stap, staat in [docs/testplan.md](docs/testpla
 - **Twee toegangspunten.** Vanaf internet staan alleen 443 (WAF), 1194/udp (VPN) en 2222 (SFTP, alleen partner-IP's) open.
 - **Least privilege per subnet.** Elke NSG eindigt met een expliciete deny-all. Bronnen en bestemmingen zijn specifieke VM's (ASG's) of VPN-pools.
 - **Defense in depth.** Elke VM draait ook `ufw` met dezelfde regels als zijn NSG. Docker publiceert poorten via de `FORWARD`-chain en zou `ufw` omzeilen. Daarom sturen `DOCKER-USER`-regels nieuwe inkomende verbindingen naar containers langs `ufw route`-regels.
-- **MFA voor beheerders.** Beheerders hebben een certificaat én een TOTP-code nodig; medewerkers kunnen niet bij de jump host.
+- **MFA voor iedereen op de VPN.** Elke gebruiker heeft een certificaat én een TOTP-code nodig, dus een gestolen of gekopieerd `.ovpn`-profiel is niet genoeg. De pool bepaalt wat iemand mag bereiken: medewerkers kunnen niet bij de jump host.
+- **Vaste image-versies.** Containerimages gebruiken een versietag (of een long-term-support-lijn), zodat een nieuwe uitrol draait wat getest is. DVWA is de uitzondering: dat publiceert geen versietags.
+- **Geen softwarebanners.** De proxy verwijdert de headers `Server` en `X-Powered-By` en verbergt de nginx-versie.
 - **Geen geheimen in Git.** Wachtwoorden, VPN-profielen, TOTP-geheimen en SSH-sleutels staan in de Key Vault. De jump host leest ze met zijn managed identity.
 - **WAF.** ModSecurity met de OWASP Core Rule Set blokkeert SQL-injectie en XSS voordat die het patiëntportaal bereiken. Het portaal moet als kwetsbaar worden beschouwd. De WAF-container draait als gebruiker zonder rootrechten.
 - **Privé datapaden.** SQL, Azure Files en App Service zijn alleen via private endpoints bereikbaar; publieke toegang staat uit. Alleen het patiëntportaal mount de share met medische bestanden (SMB 3.1.1 met versleuteling); de storage key komt uit de Key Vault en is alleen leesbaar voor root.

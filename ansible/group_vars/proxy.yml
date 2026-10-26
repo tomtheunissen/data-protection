@@ -1,7 +1,8 @@
 ---
-# Pin these to a specific version tag once the setup is stable
-proxy_waf_image: owasp/modsecurity-crs:nginx
-proxy_stream_image: nginx:1.27-alpine
+# CRS long-term support line: security fixes only, no rule changes that could break the tests
+proxy_waf_image: owasp/modsecurity-crs:4.25-nginx-lts
+# Stable branch (even minor number); the minor tag still receives patch releases
+proxy_stream_image: nginx:1.30-alpine
 
 proxy_server_name: zkoo
 # HTTPS port inside the WAF container; the host publishes it on 443
