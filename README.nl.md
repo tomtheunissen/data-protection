@@ -181,7 +181,7 @@ az keyvault secret show --vault-name $KV --name vpn-totp-<gebruiker> --query val
 ```
 
 1. Importeer het `.ovpn`-bestand in OpenVPN Connect. Verwijder eerst het profiel van een eerdere uitrol: bij elke rebuild komt er een nieuwe CA.
-2. Scan de QR-code met je authenticator-app (alleen beheerders).
+2. Scan de QR-code met je authenticator-app (elke gebruiker).
 3. Verbind met je gebruikersnaam. Iedereen, beheerder of medewerker, vult de TOTP-code van 6 cijfers in als wachtwoord.
 4. Log in op de jump host. Na elke rebuild heeft die een nieuwe host key, dus verwijder eerst de oude:
 

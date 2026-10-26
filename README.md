@@ -181,7 +181,7 @@ az keyvault secret show --vault-name $KV --name vpn-totp-<user> --query value -o
 ```
 
 1. Import the `.ovpn` file in OpenVPN Connect. Remove the profile of a previous deployment first: every rebuild creates a new CA.
-2. Scan the QR code with your authenticator app (admins only).
+2. Scan the QR code with your authenticator app (every user).
 3. Connect with your user name. Everyone, admin or employee, enters the 6-digit TOTP code as password.
 4. Log in on the jump host. Every rebuild gives it a new host key, so remove the old one first:
 
