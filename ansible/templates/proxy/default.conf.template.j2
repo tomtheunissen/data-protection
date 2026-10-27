@@ -60,6 +60,8 @@ server {
     location {{ proxy_portal_path }} {
         client_max_body_size 10m;
         proxy_pass https://portal_backend/;
+        # The prefix is stripped, so root-relative redirects from the portal (Location: /x) must get it back
+        proxy_redirect / {{ proxy_portal_path }};
     }
 
     {% if proxy_media_enabled %}
