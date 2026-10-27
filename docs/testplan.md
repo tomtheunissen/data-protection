@@ -72,7 +72,7 @@ Vanaf je laptop, VPN **uit**. Voor H5 en H6 heb je `nmap` nodig (`brew install n
 | H6 | Open poorten op de VPN-server | `nmap -Pn -p 1-10000 $V` | Geen TCP-poorten open (OpenVPN is UDP) | ✓ |
 | H7 | SSH op de publieke IP's | `nc -vz -G 5 $P 22` en `nc -vz -G 5 $V 22` | Allebei timeout | ✓ |
 | H8 | Melding in de WAF-log | Op mgmt: `ssh 192.168.1.4 'sudo docker logs proxy-waf-1 --tail 200 2>&1 \| grep -ci modsecurity'` | Groter dan 0 (meldingen van H1 t/m H4) | ✓ |
-| H9 | Geen softwareversie zichtbaar | `curl -skI https://$P/ \| grep -iE '^(server\|x-powered-by):'` | Geen uitvoer | ☐ |
+| H9 | Geen softwareversie zichtbaar | `curl -skI https://$P/ \| grep -iE '^(server\|x-powered-by):'` | Geen uitvoer |✓ |
 
 ## 4b. DVWA: aanvallen met en zonder WAF
 
@@ -135,7 +135,7 @@ Vanaf je laptop (VPN mag uit) en als **tom** op mgmt.
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| M1 | Wizard is afgerond | `curl -sk https://$P/media/System/Info/Public` | JSON met `"StartupWizardCompleted":true` | ☐ |
+| M1 | Wizard is afgerond | `curl -sk https://$P/media/System/Info/Public` | JSON met `"StartupWizardCompleted":true` |✓ |
 | M2 | Wachtwoord in Key Vault | `az keyvault secret show --vault-name $KV --name jellyfin-admin-password --query value -o tsv` | Wachtwoord van 24 tekens | ☐ |
 | M3 | Inloggen via de WAF | Browser: `https://$P/media/`, inloggen als `zkoo-admin` | Startpagina met de bibliotheek *Training* | ☐ |
 | M4 | Doorverwijzing zonder slash | `curl -sk -o /dev/null -w "%{http_code} %{redirect_url}\n" https://$P/media` | `301` naar `/media/` | ☐ |
@@ -179,3 +179,5 @@ Verbonden als **tom**, op mgmt.
 | I7 | – | – | De IDS legde ook een geblokkeerde SSH-poging van medewerker01 (10.8.0.2) naar de jump host vast. Pogingen die de NSG tegenhoudt, zijn dus toch zichtbaar |
 | E1 | OpenVPN Connect eist een wachtwoord, ook voor medewerkers | De client maakt het veld verplicht; de server controleert het voor medewerkers niet | Opgelost: medewerkers gebruiken nu ook TOTP (zie E1 en E1b) |
 | E3 | macOS probeert ook poort 139 (NetBIOS) | Standaardgedrag van macOS | Poort 139 is dicht; de container draait alleen smbd op 445 |
+| T1.1 | Eerste `terraform apply` (27-10) faalde op het App Service-plan `asp-zkoo-01`: `409 Conflict, No available instances` | Tijdelijk capaciteitstekort bij Azure App Service in West Europe | Tweede `terraform apply` ongeveer 20 minuten later maakte alleen de 4 ontbrekende resources aan (plan, app-zkoo-02, app-zkoo-03, pep-webapp). Uitwijk als het blijft falen: andere SKU of andere regio voor het plan |
+| M1 | `/media/System/Info/Public` is zonder inloggen bereikbaar en toont de Jellyfin-versie (10.11.5), een server-ID en het interne containeradres (172.18.0.2) | Standaardgedrag van Jellyfin: de webclient heeft dit endpoint nodig om te starten | Laag risico (informatie voor een aanvaller, geen toegang). Niet blokkeren in de PoC, anders laadt Jellyfin niet. Productieadvies: `/media/` alleen via de VPN aanbieden |
