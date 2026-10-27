@@ -1,6 +1,6 @@
 ---
 # DVWA is deliberately vulnerable: keep it off except during tests and the demo
-web_dvwa_enabled: false
+web_dvwa_enabled: true
 
 # Patient portal; also hosts the deliberately vulnerable test target (DVWA)
 web_role: portal
