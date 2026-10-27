@@ -19,7 +19,7 @@ proxy_sftp_backend_port: 22
 # Keep in sync with partner_ip_ranges in terraform/variables.tf
 proxy_sftp_allowed_from:
   - 203.0.113.0/24
-  - 84.84.226.81/32   # TEMP: Tom's IP for test P4, remove after testing
+  - 145.91.240.12/32   # TEMP: Tom's IP for test P4, remove after testing
 
 # Training videos (Jellyfin); the media play sets Jellyfin's Base URL to /media
 # The media play runs before the proxy play and finishes the setup wizard, so nobody can claim the admin account
