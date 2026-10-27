@@ -17,6 +17,8 @@ server {
         proxy_pass http://dvwa:80/;
         # DVWA redirects to $_SERVER['PHP_SELF'] (Location: /setup.php); put the /dvwa/ prefix back
         proxy_redirect / /dvwa/;
+        # Keep the rewritten redirect relative, so the reverse proxy can add its own /portaal/ prefix
+        absolute_redirect off;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

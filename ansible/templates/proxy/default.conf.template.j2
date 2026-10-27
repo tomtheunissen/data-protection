@@ -60,8 +60,10 @@ server {
     location {{ proxy_portal_path }} {
         client_max_body_size 10m;
         proxy_pass https://portal_backend/;
-        # The prefix is stripped, so root-relative redirects from the portal (Location: /x) must get it back
+        # The prefix is stripped, so root-relative redirects from the portal (Location: /x) must get it back.
+        # absolute_redirect off keeps them relative; otherwise nginx adds scheme, host and the container port 8443
         proxy_redirect / {{ proxy_portal_path }};
+        absolute_redirect off;
     }
 
     {% if proxy_media_enabled %}
