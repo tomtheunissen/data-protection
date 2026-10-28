@@ -1,0 +1,5 @@
+# A2 serverlog vm-vpn-01  di 27 okt. 2026 11:40:34 CET
+$ sudo journalctl -u openvpn-server@server --since "15 min ago" | grep -i "verify-user\|AUTH_FAILED"
+Oct 27 11:38:50 vm-vpn-01 openvpn[73412]: verify-user: invalid TOTP code for 'tom'
+Oct 27 11:38:50 vm-vpn-01 openvpn[24942]: 77.63.118.109:59529 SENT CONTROL [UNDEF]: 'AUTH_FAILED' (status=1)
+Oct 27 11:38:50 vm-vpn-01 openvpn[24942]: 77.63.118.109:59529 SENT CONTROL [tom]: 'AUTH_FAILED' (status=1)

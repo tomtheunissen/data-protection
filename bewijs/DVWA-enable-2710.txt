@@ -1,0 +1,215 @@
+Updating b4df819..70b705a
+Fast-forward
+From github.com:tomtheunissen/data-protection
+   b4df819..70b705a  main       -> origin/main
+ ansible/host_vars/vm-web-01.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+PLAY [All host requirements] ***************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [System update] ***********************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Check if a reboot is required] *******************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Reboot after kernel or library updates] **********************************
+skipping: [vm-web-01]
+skipping: [vm-web-02]
+
+TASK [Timezone setup] **********************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Base packages install] ***************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Unattended-upgrades setup] ***********************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Base services startup] ***************************************************
+ok: [vm-web-01] => (item=chrony)
+ok: [vm-web-02] => (item=chrony)
+ok: [vm-web-01] => (item=auditd)
+ok: [vm-web-02] => (item=auditd)
+
+TASK [Team public keys] ********************************************************
+skipping: [vm-web-01]
+skipping: [vm-web-02]
+
+TASK [SSH hardening config] ****************************************************
+[WARNING]: Unable to find '/home/azureadmin/data-protection/ansible/files/ssh-
+keys' in expected paths (use -vvvvv to see paths)
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Ensure sshd privilege separation directory exists] ***********************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Validate SSH config before restart] **************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Allow SSH from management sources] ***************************************
+ok: [vm-web-01] => (item=192.168.13.4)
+ok: [vm-web-02] => (item=192.168.13.4)
+
+TASK [Default deny incoming] ***************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Default allow outgoing] **************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Enable ufw] **************************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+PLAY [Container hosts] *********************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Container runtime install] ***********************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Container runtime service] ***********************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Make ufw filter traffic to containers] ***********************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Apply firewall changes before containers start] **************************
+
+TASK [Apply firewall changes before containers start] **************************
+
+TASK [Container project root] **************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+PLAY [VPN server] **************************************************************
+skipping: no hosts matched
+
+PLAY [Media server] ************************************************************
+skipping: no hosts matched
+
+PLAY [Reverse proxy with WAF] **************************************************
+skipping: no hosts matched
+
+PLAY [Web servers] *************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Web directories] *********************************************************
+ok: [vm-web-01] => (item=/opt/zkoo/web)
+ok: [vm-web-02] => (item=/opt/zkoo/web)
+ok: [vm-web-01] => (item=/opt/zkoo/web/certs)
+ok: [vm-web-02] => (item=/opt/zkoo/web/certs)
+ok: [vm-web-01] => (item=/opt/zkoo/web/html)
+ok: [vm-web-02] => (item=/opt/zkoo/web/html)
+
+TASK [Self-signed TLS certificate] *********************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Private key permissions] *************************************************
+ok: [vm-web-01]
+ok: [vm-web-02]
+
+TASK [Log in to Azure with the jump host identity] *****************************
+skipping: [vm-web-02]
+ok: [vm-web-01 -> localhost]
+
+TASK [Read the DVWA database password from Key Vault] **************************
+skipping: [vm-web-02]
+ok: [vm-web-01 -> localhost]
+
+TASK [Use the existing password or generate a new one] *************************
+ok: [vm-web-01]
+skipping: [vm-web-02]
+
+TASK [Store a new DVWA database password in Key Vault] *************************
+skipping: [vm-web-02]
+changed: [vm-web-01 -> localhost]
+
+TASK [Web server configuration] ************************************************
+ok: [vm-web-02] => (item={'src': 'compose.yml.j2', 'dest': 'compose.yml', 'mode': '0600'})
+changed: [vm-web-01] => (item=None)
+ok: [vm-web-02] => (item={'src': 'default.conf.j2', 'dest': 'default.conf', 'mode': '0644'})
+changed: [vm-web-01] => (item=None)
+ok: [vm-web-02] => (item={'src': 'index.html.j2', 'dest': 'html/index.html', 'mode': '0644'})
+changed: [vm-web-01] => (item=None)
+changed: [vm-web-01]
+
+TASK [Web containers] **********************************************************
+ok: [vm-web-02]
+changed: [vm-web-01]
+
+TASK [Allow HTTPS from the reverse proxy only] *********************************
+ok: [vm-web-01] => (item=vm-proxy-01)
+ok: [vm-web-02] => (item=vm-proxy-01)
+
+RUNNING HANDLER [Restart web containers] ***************************************
+changed: [vm-web-01]
+
+PLAY [Patient portal storage] **************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [vm-web-01]
+
+TASK [SMB client install] ******************************************************
+ok: [vm-web-01]
+
+TASK [Log in to Azure with the jump host identity] *****************************
+ok: [vm-web-01 -> localhost]
+
+TASK [Read the storage account key from Key Vault] *****************************
+ok: [vm-web-01 -> localhost]
+
+TASK [Credentials directory] ***************************************************
+ok: [vm-web-01]
+
+TASK [Share credentials] *******************************************************
+ok: [vm-web-01]
+
+TASK [Mount the medical files share] *******************************************
+ok: [vm-web-01]
+
+PLAY [SFTP server] *************************************************************
+skipping: no hosts matched
+
+PLAY [Application server] ******************************************************
+skipping: no hosts matched
+
+PLAY [File server] *************************************************************
+skipping: no hosts matched
+
+PLAY [Jump host] ***************************************************************
+skipping: no hosts matched
+
+PLAY [IDS] *********************************************************************
+skipping: no hosts matched
+
+PLAY [Traffic mirror to IDS] ***************************************************
+skipping: no hosts matched
+
+PLAY RECAP *********************************************************************
+vm-web-01                  : ok=38   changed=4    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+vm-web-02                  : ok=26   changed=0    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
+

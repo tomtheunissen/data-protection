@@ -2,7 +2,8 @@
 
 Dit testplan controleert na een volledige uitrol of elke route uit de SOLL doet wat hij moet doen, ook de dingen die **niet** mogen. Vink elke test af en bewaar de output als bewijs voor het verslag, bijvoorbeeld met `| tee bewijs/<test-id>.txt` of een screenshot.
 
-**Datum:** 23 oktober 2026 **Uitgevoerd door:** Tom Theunissen
+**Datum:** 27-10-2026 (tweede ronde, voortgezet 28-10-2026) **Uitgevoerd door:** Tom (met Claude Code)
+Eerste volledige ronde: 23-10-2026 door Tom Theunissen.
 
 Gebruikte variabelen (in de map `terraform`):
 
@@ -80,13 +81,15 @@ Alleen tijdens deze test: zet `web_dvwa_enabled: true` in `ansible/host_vars/vm-
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| D1 | Wachtwoord in Key Vault, niet in Git | `az keyvault secret show --vault-name $KV --name dvwa-db-password --query value -o tsv` en `git grep -i dvwa_db_password:` | Wachtwoord bestaat; `git grep` vindt niets | ☐ |
-| D2 | Compose-bestand alleen voor root | Op mgmt: `ssh 192.168.4.4 'sudo stat -c "%a %U" /opt/zkoo/web/compose.yml'` | `600 root` | ☐ |
-| D3 | DVWA via de WAF | Browser: `https://$P/portaal/dvwa/`, inloggen met `admin` / `password`, *Create / Reset Database*, opnieuw inloggen, *DVWA Security* → *Low* | Loginpagina en menu laden, links werken | ☐ |
-| D4 | SQL-injectie via de WAF | In *SQL Injection*: `1' OR '1'='1` | `403 Forbidden` van de WAF | ☐ |
-| D5 | Tunnel zonder WAF | Laptop, VPN als tom: `ssh -i ~/.ssh/id_rsa -J azureadmin@192.168.13.4 -L 8444:127.0.0.1:443 azureadmin@192.168.4.4`, dan `https://localhost:8444/dvwa/` en weer *Low* | DVWA laadt | ☐ |
-| D6 | SQL-injectie zonder WAF | Zelfde invoer als D4 | Alle gebruikers uit de database verschijnen: de aanval lukt | ☐ |
-| D7 | DVWA weer uit | `web_dvwa_enabled: false`, play `webservers` opnieuw, dan `curl -sk -o /dev/null -w "%{http_code}\n" https://$P/portaal/dvwa/` | `404` | ☐ |
+| D1 | Wachtwoord in Key Vault, niet in Git | Lengte: `az keyvault secret show --vault-name $KV --name dvwa-db-password --query value -o tsv \| tr -d '\n' \| wc -c`. Config: `git grep -nE "dvwa_db_password:\s*\S" -- ansible/host_vars ansible/group_vars`. Historie: `git log --oneline -S <oud-wachtwoord>` | Secret = 24 tekens; `git grep` vindt niets in de config. Let op: `git log` toont het oude wachtwoord nog in de historie → bevinding | ✓ |
+| D2 | Compose-bestand alleen voor root | Op mgmt: `ssh 192.168.4.4 'sudo stat -c "%a %U" /opt/zkoo/web/compose.yml'` | `600 root` | ✓ |
+| D3 | DVWA via de WAF | Browser: `https://$P/portaal/dvwa/`, inloggen met `admin` / `password`, *Create / Reset Database*, opnieuw inloggen, *DVWA Security* → *Low* | Loginpagina en menu laden, links werken | ✓ |
+| D4 | SQL-injectie via de WAF | In *SQL Injection*: `1' OR '1'='1` | `403 Forbidden` van de WAF | ✓ |
+| D4-XSS | XSS via de WAF | In *XSS (Reflected)*: `<script>alert('xss')</script>` | `403 Forbidden` van de WAF | ✓ |
+| D5 | Tunnel zonder WAF | Laptop, VPN als tom: `ssh -i ~/.ssh/id_rsa -J azureadmin@192.168.13.4 -L 8444:127.0.0.1:443 azureadmin@192.168.4.4`, dan `https://localhost:8444/dvwa/` en weer *Low* | DVWA laadt | ✓ |
+| D6 | SQL-injectie zonder WAF | Zelfde invoer als D4 | Alle gebruikers uit de database verschijnen: de aanval lukt | ✓ |
+| D6-XSS | XSS zonder WAF | In *XSS (Reflected)*: `<script>alert('xss')</script>` | Er verschijnt een alert-venster (ongefilterd teruggekaatst): de aanval lukt | ✓ |
+| D7 | DVWA weer uit | `web_dvwa_enabled: false`, play `webservers` opnieuw, dan `curl -sk -o /dev/null -w "%{http_code}\n" https://$P/portaal/dvwa/` | `404` | ✓ |
 
 ## 5. Route Partners (SFTP)
 
@@ -106,8 +109,8 @@ Verbonden als **medewerker01**. Net als beheerders vullen medewerkers de TOTP-co
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| E1 | VPN met geldige TOTP | Verbinden met de code uit de app | Verbonden, adres in 10.8.0.0/22 | ☐ |
-| E1b | VPN met **foute** TOTP | Verbinden met code `000000` | Verbinding geweigerd (`AUTH_FAILED`) | ☐ |
+| E1 | VPN met geldige TOTP | Verbinden met de code uit de app | Verbonden, adres in 10.8.0.0/22 | ✓ |
+| E1b | VPN met **foute** TOTP | Verbinden met code `000000` | Verbinding geweigerd (`AUTH_FAILED`) | ✓ |
 | E2 | Appserver | `curl -sk https://192.168.8.4/` | Pagina van vm-app-01 | ✓ |
 | E3 | Fileserver: verbinden | Wachtwoord: `az keyvault secret show --vault-name $KV --name smb-password-medewerker01 --query value -o tsv`. Finder → Ga → Verbind met server → `smb://192.168.8.5/zkoo-data` | Share geopend | ✓ |
 | E4 | Fileserver: schrijven | Een bestand naar de share slepen | Bestand staat erop | ✓ |
@@ -136,12 +139,12 @@ Vanaf je laptop (VPN mag uit) en als **tom** op mgmt.
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
 | M1 | Wizard is afgerond | `curl -sk https://$P/media/System/Info/Public` | JSON met `"StartupWizardCompleted":true` |✓ |
-| M2 | Wachtwoord in Key Vault | `az keyvault secret show --vault-name $KV --name jellyfin-admin-password --query value -o tsv` | Wachtwoord van 24 tekens | ☐ |
-| M3 | Inloggen via de WAF | Browser: `https://$P/media/`, inloggen als `zkoo-admin` | Startpagina met de bibliotheek *Training* | ☐ |
-| M4 | Doorverwijzing zonder slash | `curl -sk -o /dev/null -w "%{http_code} %{redirect_url}\n" https://$P/media` | `301` naar `/media/` | ☐ |
-| M5 | Niet rechtstreeks bereikbaar | Laptop, VPN als tom: `nc -vz -G 5 192.168.4.6 8096`. Op mgmt: `timeout 5 bash -c "</dev/tcp/192.168.4.6/8096" && echo open \|\| echo geblokkeerd` | Timeout en `geblokkeerd`: alleen de proxy mag naar 8096 | ☐ |
-| M6 | Aanval op /media/ | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/media/?id=1'%20OR%20'1'='1"` | `403` van de WAF | ☐ |
-| M7 | Video afspelen | Op mgmt een testvideo naar `/opt/zkoo/media/library` op vm-media-01 kopiëren, in Jellyfin *Scan All Libraries*, video afspelen | Video speelt af via `/media/` | ☐ |
+| M2 | Wachtwoord in Key Vault | `az keyvault secret show --vault-name $KV --name jellyfin-admin-password --query value -o tsv` | Wachtwoord van 24 tekens | ✓ |
+| M3 | Inloggen via de WAF | Browser: `https://$P/media/`, inloggen als `zkoo-admin` | Startpagina met de bibliotheek *Training* | ✓ |
+| M4 | Doorverwijzing zonder slash | `curl -sk -o /dev/null -w "%{http_code} %{redirect_url}\n" https://$P/media` | `301` naar `/media/` | ✓ |
+| M5 | Niet rechtstreeks bereikbaar | Laptop, VPN als tom: `nc -vz -G 5 192.168.4.6 8096`. Op mgmt: `timeout 5 bash -c "</dev/tcp/192.168.4.6/8096" && echo open \|\| echo geblokkeerd` | Timeout en `geblokkeerd`: alleen de proxy mag naar 8096 | ✓ |
+| M6 | Aanval op /media/ | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/media/?id=1'%20OR%20'1'='1"` | `403` van de WAF | ✓ |
+| M7 | Video afspelen | Op mgmt een testvideo naar `/opt/zkoo/media/library` op vm-media-01 kopiëren, in Jellyfin *Scan All Libraries*, video afspelen | Video speelt af via `/media/` | ✓ |
 
 ## 7. Intrusion detection
 
@@ -157,15 +160,17 @@ Verbonden als **tom**, op mgmt.
 | I6 | Poortscan gedetecteerd | Na H5: `ssh 192.168.13.5 "sudo grep <eigen-ip> /var/log/suricata/fast.log \| sed 's/.*\] \(.*\) \[\*\*\].*/\1/' \| sort \| uniq -c"` | Meldingen met je publieke IP als bron | ✓ (zie Bevindingen) |
 | I7 | VPN-verkeer zichtbaar | Als medewerker01 E2 en E3 doen, daarna `ssh 192.168.13.5 'sudo jq -c "select((.src_ip // \"\") \| startswith(\"10.8.0.\")) \| {timestamp, src_ip, dest_ip, dest_port, event_type}" /var/log/suricata/eve.json \| tail -5'` | Regels met bronadres 10.8.0.x naar 192.168.8.4/.5 | ✓ |
 | I8 | Alleen de toegangspunten mogen naar de tunnel | `ssh 192.168.13.5 'sudo ufw status \| grep 4789'` | 2 regels: 192.168.1.4 en 192.168.1.5 | ✓ |
-| I9 | WireServer onderdrukt | `ssh 192.168.13.5 'sudo grep -c 168.63.129.16 /var/log/suricata/fast.log'` (na de andere I-tests) | `0`, terwijl de meldingen van I5 en I6 er wel staan | ☐ |
+| I9 | WireServer onderdrukt | `ssh 192.168.13.5 'sudo grep -c 168.63.129.16 /var/log/suricata/fast.log'` (na de andere I-tests) | `0`, terwijl de meldingen van I5 en I6 er wel staan | ✓ |
+
+Tests zonder wijziging in de betreffende configuratie zijn op 27-10-2026 niet herhaald; hun resultaat is van 23-10-2026.
 
 ## 8. Afronding
 
 | ID | Stap | ✓ |
 |---|---|---|
 | F1 | Eigen IP uit `partner_ip_ranges` en `proxy_sftp_allowed_from` halen (als T0.1 is gedaan), committen | ☐ |
-| F2 | Bewijsmateriaal (output, screenshots) opslaan bij het verslag | ☐ |
-| F3 | Mislukte tests noteren met oorzaak en oplossing | ☐ |
+| F2 | Bewijsmateriaal (output, screenshots) opslaan bij het verslag | ✓ |
+| F3 | Mislukte tests noteren met oorzaak en oplossing | ✓ (geen mislukte tests; afwijkingen staan bij Bevindingen) |
 | F4 | Eventueel: VPN uit, `terraform destroy`, `git restore ansible/inventory.ini` | ☐ |
 
 ## Bevindingen
@@ -181,3 +186,6 @@ Verbonden als **tom**, op mgmt.
 | E3 | macOS probeert ook poort 139 (NetBIOS) | Standaardgedrag van macOS | Poort 139 is dicht; de container draait alleen smbd op 445 |
 | T1.1 | Eerste `terraform apply` (27-10) faalde op het App Service-plan `asp-zkoo-01`: `409 Conflict, No available instances` | Tijdelijk capaciteitstekort bij Azure App Service in West Europe | Tweede `terraform apply` ongeveer 20 minuten later maakte alleen de 4 ontbrekende resources aan (plan, app-zkoo-02, app-zkoo-03, pep-webapp). Uitwijk als het blijft falen: andere SKU of andere regio voor het plan |
 | M1 | `/media/System/Info/Public` is zonder inloggen bereikbaar en toont de Jellyfin-versie (10.11.5), een server-ID en het interne containeradres (172.18.0.2) | Standaardgedrag van Jellyfin: de webclient heeft dit endpoint nodig om te starten | Laag risico (informatie voor een aanvaller, geen toegang). Niet blokkeren in de PoC, anders laadt Jellyfin niet. Productieadvies: `/media/` alleen via de VPN aanbieden |
+| D1 | Het oude DVWA-databasewachtwoord staat nog in de Git-historie (commits `6b266e0`, `acaac25`) | Het wachtwoord stond ooit hardcoded in de repo voordat het naar Key Vault verhuisde | De huidige config bevat geen geheim (waarde komt uit Key Vault, `no_log`) en de oude waarde is niet meer in gebruik. Productieadvies: historie opschonen met `git filter-repo` en secret scanning (bijv. gitleaks) in CI aanzetten |
+| D3 | *Create / Reset Database* in DVWA gaf een 404 via de WAF | DVWA stuurt een root-relatieve redirect die nginx absoluut maakte (`absolute_redirect`), zonder het `/portaal`-prefix → `https://.../dvwa/setup.php` | Opgelost: `proxy_redirect` + `absolute_redirect off` op zowel vm-web-01 als de proxy. Stap 4 geeft daarna `Location: /portaal/dvwa/setup.php` |
+| D4 / D4-XSS | De WAF-log legt alleen de blokkerende CRS-regel `949110` vast (anomaly score: SQLi 8, XSS 23), niet de individuele detectieregels (941xxx/942xxx) | `SecAuditEngine RelevantOnly` met `SecAuditLog /dev/stdout` (Serial); de audit-map is leeg en de nginx-worker-stdout wordt niet opgevangen in `docker logs` | De 403-blokkade is wél aangetoond. Productieadvies: audit-log naar een opgevangen bestand/concurrent-map sturen voor per-regel-forensics |

@@ -1,0 +1,12 @@
+# D1  di 27 okt. 2026 11:28:38 CET
+$ az keyvault secret show --vault-name kv-zkoo-d34m --name dvwa-db-password --query value -o tsv | tr -d "
+" | wc -c
+      24
+
+$ git grep -nE "dvwa_db_password:\s*\S" -- ansible/host_vars ansible/group_vars   (verwacht: niets)
+(geen uitvoer)
+
+$ git log --oneline -S <oud-dvwa-wachtwoord>   (zoekterm geredigeerd)
+6b266e0 Jellyfin tag, DVWA secret, DVWA docs, automatische jellyfin setup
+acaac25 Web containers and DVWA demo
+(einde git log)

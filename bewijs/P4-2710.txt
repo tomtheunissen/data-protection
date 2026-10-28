@@ -1,0 +1,6 @@
+# P4 SFTP-relay  di 27 okt. 2026 11:42:48 CET
+$ echo "pwd" | sftp -P 2222 -i ~/.ssh/zkoo_partner01 partner01@$P
+Warning: Permanently added '[20.160.79.1]:2222' (ED25519) to the list of known hosts.
+Connected to 20.160.79.1.
+sftp> pwd
+Remote working directory: /

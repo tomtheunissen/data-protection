@@ -1,0 +1,18 @@
+# D3 diagnose (na absolute_redirect off)  di 27 okt. 2026 12:20:57 CET
+### WAF-laag via https://20.160.79.1/portaal/dvwa/
+
+=== 1. GET login.php ===
+HTTP/2 200 
+user_token(login) = 541324dcfa5e664de5a49ad4418ddebb
+
+=== 2. POST login.php (admin/password) ===
+HTTP/2 302 
+location: index.php
+
+=== 3. GET setup.php ===
+HTTP/2 200 
+user_token(setup) = 19babb5e8c6d6fd5f6dd675d50df6d05
+
+=== 4. POST setup.php (Create / Reset Database) ===
+HTTP/2 302 
+location: /portaal/dvwa/setup.php

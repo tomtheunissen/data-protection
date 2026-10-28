@@ -1,0 +1,22 @@
+# D4 / D4-XSS WAF-regels  di 27 okt. 2026 14:23:35 CET
+# Bron: proxy-waf-1, ModSecurity v3 + OWASP CRS 4.25.2.
+# Client = thuis-IP 84.84.226.81, ~14:10 CET (13:10 UTC).
+
+## Wat de WAF-log vastlegt (nginx error-log = docker logs):
+
+=== D4  SQLi (uri /portaal/dvwa/vulnerabilities/sqli/, ?id=1' OR '1'='1 -> 403) ===
+id 949110  |  Inbound Anomaly Score Exceeded (Total Score: 8)
+
+=== D4-XSS (uri /portaal/dvwa/vulnerabilities/xss_r/, ?name=<script>alert(xss)</script> -> 403) ===
+id 949110  |  Inbound Anomaly Score Exceeded (Total Score: 23)
+
+## Toelichting
+Beide aanvallen worden geblokkeerd door CRS-regel 949110 (anomaly-scoring, phase 2):
+de som van de individuele detectieregels overschrijdt de drempel (>=5) -> HTTP 403.
+SQLi bereikte totaalscore 8, XSS totaalscore 23 (XSS triggert meer/zwaardere regels).
+
+De individuele CRS-detectieregels (942xxx SQLi / 941xxx XSS) staan NIET in de
+beschikbare logs: de nginx error-log toont alleen de blokkerende regel 949110, en
+de audit-log levert niets op (SecAuditEngine RelevantOnly, SecAuditLog /dev/stdout,
+SecAuditLogType Serial; /var/log/modsecurity/audit is leeg en de worker-stdout wordt
+niet opgevangen in docker logs). -> zie bevinding D4-log.

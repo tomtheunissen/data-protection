@@ -1,0 +1,4 @@
+# M2  di 27 okt. 2026 11:08:30 CET
+$ az keyvault secret show --vault-name kv-zkoo-d34m --name jellyfin-admin-password --query value -o tsv | tr -d "
+" | wc -c
+      24

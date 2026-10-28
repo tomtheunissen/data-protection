@@ -1,0 +1,3 @@
+# H4 scanner-UA  di 27 okt. 2026 11:42:40 CET
+$ curl -sk -o /dev/null -w %{http_code} -A "sqlmap/1.7" https://$P/
+403

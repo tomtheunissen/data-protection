@@ -1,0 +1,4 @@
+# I9 WireServer onderdrukt  di 27 okt. 2026 14:19:58 CET
+$ op ids: grep -c 168.63.129.16 /var/log/suricata/fast.log
+168.63.129.16 meldingen: 0
+totaal regels: 5235

@@ -1,0 +1,3 @@
+# D7 DVWA uit  wo 28 okt. 2026 12:28:43 CET
+$ curl -sk -o /dev/null -w %{http_code} https://$P/portaal/dvwa/
+404

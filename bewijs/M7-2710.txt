@@ -1,0 +1,9 @@
+# M7 videobestand naar vm-media-01  wo 28 okt. 2026 12:16:09 CET
+$ scp -J mgmt /Users/tomtheunissen/Downloads/0128.mp4 media-01:/tmp/
+scp ok
+$ op media: mv -> /opt/zkoo/media/library/ + chown 8096:8096
+-rw-r--r-- 1 8096 8096 189707 Oct 28 12:16 /opt/zkoo/media/library/0128.mp4
+
+## M7-verificatie (Jellyfin-log, server-side)
+Scan + afspelen bevestigd:
+[11:18:38] [INF] [35] Emby.Server.Implementations.Session.SessionManager: Playback stopped reported by app Jellyfin Web 10.11.5 playing 0128. Stopped at 1301 ms

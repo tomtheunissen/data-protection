@@ -1,0 +1,3 @@
+# H2 XSS  di 27 okt. 2026 11:42:39 CET
+$ curl -sk -o /dev/null -w %{http_code} "https://$P/?q=<script>alert(1)</script>"
+403

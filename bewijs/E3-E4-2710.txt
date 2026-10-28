@@ -1,0 +1,9 @@
+# E3/E4 fileshare medewerker01  wo 28 okt. 2026 12:33:19 CET
+$ SMBPW=$(az keyvault secret show ... smb-password-medewerker01)   (wachtwoord geredigeerd)
+$ mkdir -p /tmp/zkoo-share && mount_smbfs "//medewerker01:***@192.168.8.5/zkoo-data" /tmp/zkoo-share
+E3-ok (gemount)
+$ echo "test 28-10" > /tmp/zkoo-share/test-2710.txt && ls -l /tmp/zkoo-share
+total 8
+-rw-r--r--  1 tomtheunissen  staff  11 28 okt. 12:33 test-2710.txt
+$ umount /tmp/zkoo-share
+unmounted
