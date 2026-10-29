@@ -161,9 +161,9 @@ Verbonden als **tom**, op mgmt.
 | I7 | VPN-verkeer zichtbaar | Als medewerker01 E2 en E3 doen, daarna `ssh 192.168.13.5 'sudo jq -c "select((.src_ip // \"\") \| startswith(\"10.8.0.\")) \| {timestamp, src_ip, dest_ip, dest_port, event_type}" /var/log/suricata/eve.json \| tail -5'` | Regels met bronadres 10.8.0.x naar 192.168.8.4/.5 | ✓ |
 | I8 | Alleen de toegangspunten mogen naar de tunnel | `ssh 192.168.13.5 'sudo ufw status \| grep 4789'` | 2 regels: 192.168.1.4 en 192.168.1.5 | ✓ |
 | I9 | WireServer onderdrukt | `ssh 192.168.13.5 'sudo grep -c 168.63.129.16 /var/log/suricata/fast.log'` (na de andere I-tests) | `0`, terwijl de meldingen van I5 en I6 er wel staan | ✓ |
-| I10 | Bewaking draait | `ssh 192.168.13.5 'systemctl is-active zkoo-ids-health.timer && systemctl list-timers zkoo-ids-health.timer --no-pager'` | `active`, volgende run binnen 5 minuten | ☐ |
-| I11 | Melding als Suricata stopt | `ssh 192.168.13.5 'sudo systemctl stop suricata && sudo systemctl start zkoo-ids-health.service; sudo journalctl -t zkoo-ids-health --since "2 min ago" --no-pager'` | `ALERT: suricata is not running` (exit-status van de service is 1, dat hoort zo) | ☐ |
-| I12 | Herstelmelding | `ssh 192.168.13.5 'sudo systemctl start suricata && sleep 20 && sudo systemctl start zkoo-ids-health.service; sudo tail -3 /var/log/zkoo-ids-health.log'` | `RECOVERED: ...` na de ALERT-regels | ☐ |
+| I10 | Bewaking draait | `ssh 192.168.13.5 'systemctl is-active zkoo-ids-health.timer && systemctl list-timers zkoo-ids-health.timer --no-pager'` | `active`, volgende run binnen 5 minuten | ✓ |
+| I11 | Melding als Suricata stopt | `ssh 192.168.13.5 'sudo systemctl stop suricata && sudo systemctl start zkoo-ids-health.service; sudo journalctl -t zkoo-ids-health --since "2 min ago" --no-pager'` | `ALERT: suricata is not running` (exit-status van de service is 1, dat hoort zo) | ✓ |
+| I12 | Herstelmelding | `ssh 192.168.13.5 'sudo systemctl start suricata && sleep 20 && sudo systemctl start zkoo-ids-health.service; sudo tail -3 /var/log/zkoo-ids-health.log'` | `RECOVERED: ...` na de ALERT-regels | ✓ |
 
 Tests zonder wijziging in de betreffende configuratie zijn op 27-10-2026 niet herhaald; hun resultaat is van 23-10-2026.
 
@@ -173,11 +173,11 @@ Vanaf je laptop, VPN **uit**.
 
 | ID | Test | Commando | Verwacht | ✓ |
 |---|---|---|---|---|
-| W1 | Bereikbaar via de WAF | `curl -sk -o /dev/null -w "%{http_code}\n" https://$P/app/` en in de browser `https://<proxy-ip>/app/` | `200`, standaardpagina van App Service | ☐ |
-| W2 | Doorverwijzing zonder slash | `curl -sk -o /dev/null -w "%{http_code} %{redirect_url}\n" https://$P/app` | `301` naar `/app/` | ☐ |
-| W3 | SQL-injectie | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/app/?id=1'%20OR%20'1'='1"` | `403` van de WAF | ☐ |
-| W4 | XSS | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/app/?q=<script>alert(1)</script>"` | `403` van de WAF | ☐ |
-| W5 | Niet rechtstreeks publiek bereikbaar | `curl -s -o /dev/null -w "%{http_code}\n" https://app-zkoo-02.azurewebsites.net/` | `403` (publieke toegang staat uit) | ☐ |
+| W1 | Bereikbaar via de WAF | `curl -sk -o /dev/null -w "%{http_code}\n" https://$P/app/` en in de browser `https://<proxy-ip>/app/` | `200`, standaardpagina van App Service | ✓ |
+| W2 | Doorverwijzing zonder slash | `curl -sk -o /dev/null -w "%{http_code} %{redirect_url}\n" https://$P/app` | `301` naar `/app/` | ✓ |
+| W3 | SQL-injectie | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/app/?id=1'%20OR%20'1'='1"` | `403` van de WAF | ✓ |
+| W4 | XSS | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/app/?q=<script>alert(1)</script>"` | `403` van de WAF | ✓ |
+| W5 | Niet rechtstreeks publiek bereikbaar | `curl -s -o /dev/null -w "%{http_code}\n" https://app-zkoo-02.azurewebsites.net/` | `403` (publieke toegang staat uit) | ✓ |
 
 ## 8. Afronding
 

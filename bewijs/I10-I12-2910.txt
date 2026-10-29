@@ -1,0 +1,9 @@
+NEXT                           LEFT LAST                          PASSED UNIT                  ACTIVATES
+Thu 2026-10-29 13:22:02 CET 1min 2s Thu 2026-10-29 13:14:19 CET 6min ago zkoo-ids-health.timer zkoo-ids-health.service
+
+1 timers listed.
+Pass --all to see loaded but inactive timers, too.
+Oct 29 13:16:30 vm-ids-01 zkoo-ids-health[59629]: ALERT: suricata is not running
+Oct 29 13:17:02 vm-ids-01 zkoo-ids-health[59724]: RECOVERED: suricata, tunnel and mirrored traffic are OK again
+2026-10-29T13:16:30+01:00 ALERT: suricata is not running
+2026-10-29T13:17:02+01:00 RECOVERED: suricata, tunnel and mirrored traffic are OK again
