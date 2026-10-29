@@ -2,7 +2,7 @@
 
 Dit testplan controleert na een volledige uitrol of elke route uit de SOLL doet wat hij moet doen, ook de dingen die **niet** mogen. Vink elke test af en bewaar de output als bewijs voor het verslag, bijvoorbeeld met `| tee bewijs/<test-id>.txt` of een screenshot.
 
-**Datum:** 27-10-2026 (tweede ronde, voortgezet 28-10-2026) **Uitgevoerd door:** Tom (met Claude Code)
+**Datum:** 27-10-2026 (tweede ronde, voortgezet 28-10-2026) **Uitgevoerd door:** Tom 
 Eerste volledige ronde: 23-10-2026 door Tom Theunissen.
 
 Gebruikte variabelen (in de map `terraform`):
