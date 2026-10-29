@@ -1,0 +1,7 @@
+# Managed by Ansible
+[Unit]
+Description=IDS health check (Suricata, tunnel, mirrored traffic)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/zkoo-ids-health.sh

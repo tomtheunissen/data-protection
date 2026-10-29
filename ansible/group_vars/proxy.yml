@@ -27,3 +27,10 @@ proxy_media_enabled: true
 proxy_media_host: vm-media-01
 proxy_media_path: /media/
 proxy_media_port: 8096
+# WebAPP02 (app-zkoo-02, Azure App Service): only reachable through its private endpoint, published at /app/
+# The proxy connects to the endpoint IP but sends the app's own host name (TLS SNI and Host header)
+proxy_webapp_enabled: true
+proxy_webapp_path: /app/
+proxy_webapp_host: app-zkoo-02.azurewebsites.net
+# Keep in sync with pep_webapp_ip in terraform/locals.tf
+proxy_webapp_ip: 192.168.14.6

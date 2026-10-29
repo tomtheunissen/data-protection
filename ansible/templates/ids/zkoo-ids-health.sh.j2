@@ -1,0 +1,46 @@
+#!/bin/bash
+# Managed by Ansible
+# IDS health check: is Suricata running, is the tunnel up, and is mirrored traffic still arriving?
+# Problems go to the journal (priority crit, tag zkoo-ids-health) and to {{ ids_health_log }}.
+set -u
+
+STATE_DIR=/var/lib/zkoo/ids-health
+LOG={{ ids_health_log }}
+IFACE={{ ids_mirror_interface }}
+TAG=zkoo-ids-health
+
+mkdir -p "$STATE_DIR"
+problems=()
+
+systemctl is-active --quiet suricata || problems+=("suricata is not running")
+systemctl is-active --quiet zkoo-ids-tap || problems+=("tunnel service zkoo-ids-tap is not running")
+
+# The packet counter must grow between two checks; if it does not, the entry points stopped mirroring
+counter="/sys/class/net/$IFACE/statistics/rx_packets"
+if [ -r "$counter" ]; then
+  now=$(cat "$counter")
+  last=$(cat "$STATE_DIR/rx_packets" 2>/dev/null || echo -1)
+  echo "$now" > "$STATE_DIR/rx_packets"
+  if [ "$now" -le "$last" ]; then
+    problems+=("no mirrored packets received on $IFACE since the previous check")
+  fi
+else
+  problems+=("interface $IFACE does not exist")
+fi
+
+if [ "${#problems[@]}" -gt 0 ]; then
+  for p in "${problems[@]}"; do
+    logger -t "$TAG" -p daemon.crit "ALERT: $p"
+    echo "$(date -Is) ALERT: $p" >> "$LOG"
+  done
+  touch "$STATE_DIR/alert"
+  exit 1
+fi
+
+# Report recovery once, so the log shows how long the IDS was down
+if [ -e "$STATE_DIR/alert" ]; then
+  logger -t "$TAG" -p daemon.notice "RECOVERED: suricata, tunnel and mirrored traffic are OK again"
+  echo "$(date -Is) RECOVERED: suricata, tunnel and mirrored traffic are OK again" >> "$LOG"
+  rm -f "$STATE_DIR/alert"
+fi
+exit 0

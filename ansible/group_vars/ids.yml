@@ -9,3 +9,8 @@ suricata_home_net:
 # its platform traffic does not follow standard TCP/HTTP and floods fast.log with stream alerts
 suricata_suppress_ips:
   - 168.63.129.16
+
+# Health check: every interval it checks Suricata, the tunnel and whether mirrored packets still arrive.
+# Long enough that the entry points always send something in between (DNS, NTP, health probes)
+ids_health_interval: 5min
+ids_health_log: /var/log/zkoo-ids-health.log

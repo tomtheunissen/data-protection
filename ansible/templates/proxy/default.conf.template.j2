@@ -92,6 +92,32 @@ server {
     }
     {% endif %}
 
+    {% if proxy_webapp_enabled %}
+    # WebAPP02 (app-zkoo-02) through its private endpoint; public access to the app is disabled
+    location = {{ proxy_webapp_path | regex_replace('/$', '') }} {
+        return 301 {{ proxy_webapp_path }};
+    }
+
+    location {{ proxy_webapp_path }} {
+        client_max_body_size 1m;
+        # The endpoint IP avoids a DNS lookup at start-up; SNI and Host carry the app name
+        proxy_pass https://{{ proxy_webapp_ip }}/;
+        proxy_ssl_server_name on;
+        proxy_ssl_name {{ proxy_webapp_host }};
+
+        # Any proxy_set_header here stops inheritance from the server block, so repeat them all
+        proxy_set_header Host {{ proxy_webapp_host }};
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+
+        # Redirects from the app use its own host name or a root path; keep users under the prefix
+        proxy_redirect https://{{ proxy_webapp_host }}/ {{ proxy_webapp_path }};
+        proxy_redirect / {{ proxy_webapp_path }};
+        absolute_redirect off;
+    }
+    {% endif %}
+
     # Public company website (vm-web-02)
     location / {
         client_max_body_size 1m;

@@ -67,7 +67,7 @@ Diensten draaien in containers voor isolatie en reproduceerbaarheid. De VPN, de 
 |---|---|---|
 | Azure SQL | `sql-zkoo-01` / `sqldb-zkoo-01` | Alleen via private endpoint `pep-sql`, alleen Entra ID-authenticatie |
 | Azure Files | `stzkoosensitive01`, share `medical-files` | Alleen via private endpoint `pep-sensitivedata` |
-| App Service | `app-zkoo-02` | Alleen via private endpoint `pep-webapp` |
+| App Service | `app-zkoo-02` (WebAPP02) | Alleen via private endpoint `pep-webapp`; via de WAF gepubliceerd op `/app/` |
 | App Service | `app-zkoo-03` | Publiek endpoint, beperkt tot het publieke IP van de proxy |
 | Key Vault | `kv-zkoo-<willekeurig>` | Geheimen voor de bootstrap, VPN-profielen en share-wachtwoorden |
 | Log Analytics | – | SQL-auditing en toegangslogs van de fileshare |
@@ -76,7 +76,7 @@ Diensten draaien in containers voor isolatie en reproduceerbaarheid. De VPN, de 
 
 | Route | Pad |
 |---|---|
-| Users | Internet → WAF (443) → web-02 (`/`) of web-01 (`/portaal/`) |
+| Users | Internet → WAF (443) → web-02 (`/`), web-01 (`/portaal/`), vm-media-01 (`/media/`) of app-zkoo-02 (`/app/`, via het private endpoint) |
 | Partners | Partner-IP → proxy (2222) → vm-ftp-01 (22), SFTP met chroot |
 | Employees | OpenVPN + TOTP → employee-pool → vm-app-01 (443), vm-fs-01 (445), Azure Files (445) |
 | Admins | OpenVPN + TOTP → admin-pool → vm-mgmt-01 (22) → alle VM's (22) |
@@ -95,6 +95,7 @@ vm-vpn-01 ───┘
 - Regels: Emerging Threats Open, elke week bijgewerkt met `suricata-update`.
 - Meldingen: `/var/log/suricata/fast.log` (één regel per melding) en `/var/log/suricata/eve.json` (volledige JSON).
 - Op de VPN-server bevat de kopie ook het ontsleutelde verkeer van clients, omdat dat via `eth0` het VNet in gaat.
+- Bewaking: een systemd-timer op `vm-ids-01` controleert elke 5 minuten of Suricata en de tunnel draaien en of er nog gespiegelde pakketten binnenkomen. Problemen komen als `ALERT` in de journal (tag `zkoo-ids-health`, prioriteit crit) en in `/var/log/zkoo-ids-health.log`, gevolgd door `RECOVERED` zodra alles weer werkt.
 - HTTPS blijft voor de IDS versleuteld. De WAF dekt de applicatielaag af; Suricata het netwerk (scans, brute-force, bekende exploitpatronen, DNS).
 
 ## Opbouw van de repository

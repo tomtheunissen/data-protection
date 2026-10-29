@@ -1,0 +1,11 @@
+# Managed by Ansible
+[Unit]
+Description=Run the IDS health check every {{ ids_health_interval }}
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec={{ ids_health_interval }}
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

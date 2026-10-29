@@ -1431,6 +1431,34 @@
         state: started
         enabled: true
 
+    # Monitoring of the IDS itself: an alert when Suricata stops or no mirrored traffic arrives anymore
+
+    - name: IDS health check script
+      ansible.builtin.template:
+        src: ids/zkoo-ids-health.sh.j2
+        dest: /usr/local/sbin/zkoo-ids-health.sh
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: IDS health check service and timer
+      ansible.builtin.template:
+        src: ids/{{ item }}.j2
+        dest: /etc/systemd/system/{{ item }}
+        owner: root
+        group: root
+        mode: "0644"
+      loop:
+        - zkoo-ids-health.service
+        - zkoo-ids-health.timer
+
+    - name: IDS health check timer
+      ansible.builtin.systemd_service:
+        name: zkoo-ids-health.timer
+        state: started
+        enabled: true
+        daemon_reload: true
+
 
 # Software TAP on the two entry points: every packet on eth0 is copied to vm-ids-01 over VXLAN
 - name: Traffic mirror to IDS

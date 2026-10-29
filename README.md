@@ -67,7 +67,7 @@ Services run in containers for isolation and reproducibility. The VPN, the jump 
 |---|---|---|
 | Azure SQL | `sql-zkoo-01` / `sqldb-zkoo-01` | Private endpoint `pep-sql` only, Entra ID authentication only |
 | Azure Files | `stzkoosensitive01`, share `medical-files` | Private endpoint `pep-sensitivedata` only |
-| App Service | `app-zkoo-02` | Private endpoint `pep-webapp` only |
+| App Service | `app-zkoo-02` (WebAPP02) | Private endpoint `pep-webapp` only; published through the WAF at `/app/` |
 | App Service | `app-zkoo-03` | Public endpoint, restricted to the proxy's public IP |
 | Key Vault | `kv-zkoo-<random>` | Secrets for the bootstrap, VPN profiles and share passwords |
 | Log Analytics | – | SQL auditing and file share access logs |
@@ -76,7 +76,7 @@ Services run in containers for isolation and reproducibility. The VPN, the jump 
 
 | Route | Path |
 |---|---|
-| Users | Internet → WAF (443) → web-02 (`/`) or web-01 (`/portaal/`) |
+| Users | Internet → WAF (443) → web-02 (`/`), web-01 (`/portaal/`), vm-media-01 (`/media/`) or app-zkoo-02 (`/app/`, via the private endpoint) |
 | Partners | Partner IP → proxy (2222) → vm-ftp-01 (22), chrooted SFTP |
 | Employees | OpenVPN + TOTP → employee-pool → vm-app-01 (443), vm-fs-01 (445), Azure Files (445) |
 | Admins | OpenVPN + TOTP → admin-pool → vm-mgmt-01 (22) → all VMs (22) |
@@ -95,6 +95,7 @@ vm-vpn-01 ───┘
 - Rules: Emerging Threats Open, updated weekly with `suricata-update`.
 - Alerts: `/var/log/suricata/fast.log` (one line per alert) and `/var/log/suricata/eve.json` (full JSON).
 - On the VPN server the copy includes the decrypted client traffic, because it leaves through `eth0` into the VNet.
+- Health check: a systemd timer on `vm-ids-01` checks every 5 minutes that Suricata and the tunnel run and that mirrored packets still arrive. Problems are logged as `ALERT` (journal tag `zkoo-ids-health`, priority crit, and `/var/log/zkoo-ids-health.log`), followed by `RECOVERED` once everything works again.
 - HTTPS stays encrypted for the IDS. The WAF covers the application layer; Suricata covers the network layer (scans, brute force, known exploit patterns, DNS).
 
 ## Repository layout
