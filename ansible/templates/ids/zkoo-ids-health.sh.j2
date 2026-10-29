@@ -8,6 +8,7 @@ STATE_DIR=/var/lib/zkoo/ids-health
 LOG={{ ids_health_log }}
 IFACE={{ ids_mirror_interface }}
 TAG=zkoo-ids-health
+{% raw %}
 
 mkdir -p "$STATE_DIR"
 problems=()
@@ -44,3 +45,4 @@ if [ -e "$STATE_DIR/alert" ]; then
   rm -f "$STATE_DIR/alert"
 fi
 exit 0
+{% endraw %}
