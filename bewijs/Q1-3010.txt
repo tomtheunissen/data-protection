@@ -1,0 +1,24 @@
+# 30-10-2026 23:50:45 Q1 on vm-web-01: docker run --rm mcr.microsoft.com/mssql-tools18 sqlcmd -S tcp:sql-zkoo-01.database.windows.net,1433 -U zkoo-test -P <fake> -C -l 15 -Q 'SELECT 1'; docker rmi
+Fri Oct 30 23:50:47 CET 2026
+192.168.14.5    sql-zkoo-01.privatelink.database.windows.net sql-zkoo-01.database.windows.net
+docker: Error response from daemon: failed to resolve reference "mcr.microsoft.com/mssql-tools18:latest": mcr.microsoft.com/mssql-tools18:latest: not found
+
+Run 'docker run --help' for more information
+(sqlcmd exit 125)
+Error response from daemon: No such image: mcr.microsoft.com/mssql-tools18:latest
+Fri Oct 30 23:50:48 CET 2026
+# 30-10-2026 23:51:08 Q1 supporting config (read-only): az sql server ad-only-auth get; az sql server show --query '{publicNetworkAccess, minimalTlsVersion}'; az sql server conn-policy show
+true
+{
+  "minimalTlsVersion": "1.2",
+  "publicNetworkAccess": "Disabled"
+}
+Default
+
+# 30-10-2026 23:53:02 Q1 retry on vm-web-01 (mssql-tools18 image does not exist; approved alternative): docker run --rm --entrypoint /opt/mssql-tools18/bin/sqlcmd mcr.microsoft.com/mssql/server:2022-latest -S tcp:sql-zkoo-01.database.windows.net,1433 -U zkoo-test -P <fake> -C -l 15 -Q 'SELECT 1'; docker rmi
+image pulled
+Fri Oct 30 23:53:59 CET 2026
+Sqlcmd: Error: Microsoft ODBC Driver 18 for SQL Server : Login failed for user 'zkoo-test'. Reason: Azure Active Directory only authentication is enabled. Please contact your system administrator..
+(sqlcmd exit 1)
+Fri Oct 30 23:54:01 CET 2026
+image removed

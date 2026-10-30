@@ -1,0 +1,29 @@
+# 30-10-2026 23:44:35 nmap -Pn --script ssl-enum-ciphers -p 443 20.107.7.53
+Starting Nmap 7.992 ( https://nmap.org ) at 2026-10-30 23:44 +0100
+Nmap scan report for 20.107.7.53
+Host is up (0.013s latency).
+
+PORT    STATE SERVICE
+443/tcp open  https
+| ssl-enum-ciphers: 
+|   TLSv1.2: 
+|     ciphers: 
+|       TLS_DHE_RSA_WITH_AES_128_GCM_SHA256 (dh 2048) - A
+|       TLS_DHE_RSA_WITH_AES_256_GCM_SHA384 (dh 2048) - A
+|       TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 (secp256r1) - A
+|       TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 (secp256r1) - A
+|       TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 (secp256r1) - A
+|     compressors: 
+|       NULL
+|     cipher preference: client
+|     warnings: 
+|       Key exchange (dh 2048) of lower strength than certificate key
+|   TLSv1.3: 
+|     ciphers: 
+|       TLS_AKE_WITH_AES_128_GCM_SHA256 (X25519MLKEM768) - A
+|       TLS_AKE_WITH_AES_256_GCM_SHA384 (X25519MLKEM768) - A
+|       TLS_AKE_WITH_CHACHA20_POLY1305_SHA256 (X25519MLKEM768) - A
+|     cipher preference: client
+|_  least strength: A
+
+Nmap done: 1 IP address (1 host up) scanned in 1.40 seconds

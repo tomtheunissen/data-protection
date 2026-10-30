@@ -1,0 +1,238 @@
+# 31-10-2026 00:00:07 R2 on vm-mgmt-01: cd ~/data-protection/ansible && ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit vpn
+
+PLAY [All host requirements] ***************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [vm-vpn-01]
+
+TASK [System update] ***********************************************************
+ok: [vm-vpn-01]
+
+TASK [Check if a reboot is required] *******************************************
+ok: [vm-vpn-01]
+
+TASK [Reboot after kernel or library updates] **********************************
+skipping: [vm-vpn-01]
+
+TASK [Timezone setup] **********************************************************
+ok: [vm-vpn-01]
+
+TASK [Base packages install] ***************************************************
+ok: [vm-vpn-01]
+
+TASK [Unattended-upgrades setup] ***********************************************
+ok: [vm-vpn-01]
+
+TASK [Base services startup] ***************************************************
+ok: [vm-vpn-01] => (item=chrony)
+ok: [vm-vpn-01] => (item=auditd)
+
+TASK [Team public keys] ********************************************************
+skipping: [vm-vpn-01]
+
+TASK [SSH hardening config] ****************************************************
+[WARNING]: Unable to find '/home/azureadmin/data-protection/ansible/files/ssh-
+keys' in expected paths (use -vvvvv to see paths)
+ok: [vm-vpn-01]
+
+TASK [Ensure sshd privilege separation directory exists] ***********************
+ok: [vm-vpn-01]
+
+TASK [Validate SSH config before restart] **************************************
+ok: [vm-vpn-01]
+
+TASK [Allow SSH from management sources] ***************************************
+ok: [vm-vpn-01] => (item=192.168.13.4)
+
+TASK [Default deny incoming] ***************************************************
+ok: [vm-vpn-01]
+
+TASK [Default allow outgoing] **************************************************
+ok: [vm-vpn-01]
+
+TASK [Enable ufw] **************************************************************
+ok: [vm-vpn-01]
+
+PLAY [Container hosts] *********************************************************
+skipping: no hosts matched
+
+PLAY [VPN server] **************************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [vm-vpn-01]
+
+TASK [DNS forwarder config directory] ******************************************
+ok: [vm-vpn-01]
+
+TASK [DNS forwarder for VPN clients] *******************************************
+ok: [vm-vpn-01]
+
+TASK [VPN packages install] ****************************************************
+ok: [vm-vpn-01]
+
+TASK [Easy-RSA working directory] **********************************************
+ok: [vm-vpn-01]
+
+TASK [Initialise PKI] **********************************************************
+ok: [vm-vpn-01]
+
+TASK [Build certificate authority] *********************************************
+ok: [vm-vpn-01]
+
+TASK [Build server certificate] ************************************************
+ok: [vm-vpn-01]
+
+TASK [Build client certificates] ***********************************************
+ok: [vm-vpn-01] => (item=tom)
+ok: [vm-vpn-01] => (item=maddox)
+changed: [vm-vpn-01] => (item=medewerker01)
+
+TASK [Generate certificate revocation list] ************************************
+ok: [vm-vpn-01]
+
+TASK [Publish revocation list] *************************************************
+ok: [vm-vpn-01]
+
+TASK [Generate tls-crypt key] **************************************************
+ok: [vm-vpn-01]
+
+TASK [Client config directory] *************************************************
+ok: [vm-vpn-01]
+
+TASK [Fixed admin addresses] ***************************************************
+ok: [vm-vpn-01] => (item={'name': 'tom', 'ip': '10.8.4.10'})
+ok: [vm-vpn-01] => (item={'name': 'maddox', 'ip': '10.8.4.11'})
+
+TASK [TOTP secret directory] ***************************************************
+ok: [vm-vpn-01]
+
+TASK [Generate TOTP secrets] ***************************************************
+ok: [vm-vpn-01] => (item=tom)
+ok: [vm-vpn-01] => (item=maddox)
+ok: [vm-vpn-01] => (item=medewerker01)
+
+TASK [TOTP secret permissions] *************************************************
+ok: [vm-vpn-01] => (item=tom)
+ok: [vm-vpn-01] => (item=maddox)
+ok: [vm-vpn-01] => (item=medewerker01)
+
+TASK [User verification script] ************************************************
+ok: [vm-vpn-01]
+
+TASK [OpenVPN server config] ***************************************************
+ok: [vm-vpn-01]
+
+TASK [Enable IP forwarding] ****************************************************
+ok: [vm-vpn-01]
+
+TASK [Allow OpenVPN] ***********************************************************
+ok: [vm-vpn-01]
+
+TASK [Allow DNS from VPN clients] **********************************************
+ok: [vm-vpn-01]
+
+TASK [Allow forwarding from VPN clients into the VNet] *************************
+ok: [vm-vpn-01]
+
+TASK [OpenVPN service] *********************************************************
+ok: [vm-vpn-01]
+
+TASK [DNS forwarder service] ***************************************************
+ok: [vm-vpn-01]
+
+TASK [Read CA certificate] *****************************************************
+ok: [vm-vpn-01]
+
+TASK [Read tls-crypt key] ******************************************************
+ok: [vm-vpn-01]
+
+TASK [Read client certificates] ************************************************
+ok: [vm-vpn-01] => (item=tom)
+ok: [vm-vpn-01] => (item=maddox)
+ok: [vm-vpn-01] => (item=medewerker01)
+
+TASK [Read client keys] ********************************************************
+ok: [vm-vpn-01] => (item=None)
+ok: [vm-vpn-01] => (item=None)
+ok: [vm-vpn-01] => (item=None)
+ok: [vm-vpn-01]
+
+TASK [Read TOTP secrets] *******************************************************
+ok: [vm-vpn-01] => (item=None)
+ok: [vm-vpn-01] => (item=None)
+ok: [vm-vpn-01] => (item=None)
+ok: [vm-vpn-01]
+
+TASK [Temporary profile directory on the jump host] ****************************
+changed: [vm-vpn-01 -> localhost]
+
+TASK [Build client profiles] ***************************************************
+changed: [vm-vpn-01 -> localhost] => (item=None)
+changed: [vm-vpn-01 -> localhost] => (item=None)
+changed: [vm-vpn-01 -> localhost] => (item=None)
+changed: [vm-vpn-01 -> localhost]
+
+TASK [Log in to Azure with the jump host identity] *****************************
+ok: [vm-vpn-01 -> localhost]
+
+TASK [Store client profiles in Key Vault] **************************************
+changed: [vm-vpn-01 -> localhost] => (item=tom)
+changed: [vm-vpn-01 -> localhost] => (item=maddox)
+changed: [vm-vpn-01 -> localhost] => (item=medewerker01)
+
+TASK [Store TOTP secrets in Key Vault] *****************************************
+changed: [vm-vpn-01 -> localhost] => (item=None)
+changed: [vm-vpn-01 -> localhost] => (item=None)
+changed: [vm-vpn-01 -> localhost] => (item=None)
+changed: [vm-vpn-01 -> localhost]
+
+TASK [Remove local profile copies] *********************************************
+changed: [vm-vpn-01 -> localhost]
+
+PLAY [Media server] ************************************************************
+skipping: no hosts matched
+
+PLAY [Reverse proxy with WAF] **************************************************
+skipping: no hosts matched
+
+PLAY [Web servers] *************************************************************
+skipping: no hosts matched
+
+PLAY [Patient portal storage] **************************************************
+skipping: no hosts matched
+
+PLAY [SFTP server] *************************************************************
+skipping: no hosts matched
+
+PLAY [Application server] ******************************************************
+skipping: no hosts matched
+
+PLAY [File server] *************************************************************
+skipping: no hosts matched
+
+PLAY [Jump host] ***************************************************************
+skipping: no hosts matched
+
+PLAY [IDS] *********************************************************************
+skipping: no hosts matched
+
+PLAY [Traffic mirror to IDS] ***************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [vm-vpn-01]
+
+TASK [Mirror script] ***********************************************************
+ok: [vm-vpn-01]
+
+TASK [Mirror service] **********************************************************
+ok: [vm-vpn-01]
+
+TASK [Apply systemd changes] ***************************************************
+
+TASK [Mirror running] **********************************************************
+ok: [vm-vpn-01]
+
+PLAY RECAP *********************************************************************
+vm-vpn-01                  : ok=54   changed=6    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+
+(exit 0)

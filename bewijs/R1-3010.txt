@@ -1,0 +1,51 @@
+# 30-10-2026 23:56:41 R1 on vm-vpn-01: easyrsa --version; stat crl.pem; easyrsa --batch revoke medewerker01; easyrsa --batch gen-crl; install -m 640 -o root -g nogroup pki/crl.pem /etc/openvpn/server/crl.pem; openssl crl -text | grep Serial
+EasyRSA Version Information
+Version:     3.1.7
+640 root:nogroup
+medewerker01 serial: serial=AF4C30BEB560055AB990AD7E9C913B6A
+No Easy-RSA 'vars' configuration file exists!
+Using SSL:
+* openssl OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)
+WARNING
+=======
+This process is destructive!
+These files will be MOVED to the 'revoked' sub-directory:
+* /etc/openvpn/easy-rsa/pki/issued/medewerker01.crt
+* /etc/openvpn/easy-rsa/pki/private/medewerker01.key
+* /etc/openvpn/easy-rsa/pki/reqs/medewerker01.req
+These files will be DELETED:
+All PKCS files for commonName : medewerker01
+The inline credentials files:
+* /etc/openvpn/easy-rsa/pki/medewerker01.creds
+* /etc/openvpn/easy-rsa/pki/inline/medewerker01.inline
+The duplicate certificate:
+* /etc/openvpn/easy-rsa/pki/certs_by_serial/AF4C30BEB560055AB990AD7E9C913B6A.pem
+Using configuration from /etc/openvpn/easy-rsa/pki/openssl-easyrsa.cnf
+Revoking Certificate AF4C30BEB560055AB990AD7E9C913B6A.
+Database updated
+Notice
+------
+                    * IMPORTANT *
+Revocation was successful. You must run 'gen-crl' and upload
+a new CRL to your infrastructure in order to prevent the revoked
+certificate from being accepted.
+No Easy-RSA 'vars' configuration file exists!
+Using SSL:
+* openssl OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)
+Using configuration from /etc/openvpn/easy-rsa/pki/openssl-easyrsa.cnf
+Notice
+------
+An updated CRL has been created:
+* /etc/openvpn/easy-rsa/pki/crl.pem
+640 root:nogroup 2026-10-30 23:56:43.759319247 +0100
+    Serial Number: AF4C30BEB560055AB990AD7E9C913B6A
+        Revocation Date: Oct 30 22:56:43 2026 GMT
+(exit 0)
+
+# 30-10-2026 23:59:33 R1 server log on vm-vpn-01: journalctl -u openvpn-server@server --since '15 min ago' | grep -iE 'revoked|crl|verify error|medewerker01'
+Oct 30 23:57:41 vm-vpn-01 openvpn[888]: 84.84.226.81:60687 CRL: cannot read CRL from file /etc/openvpn/server/crl.pem
+Oct 30 23:57:41 vm-vpn-01 openvpn[888]: 84.84.226.81:60687 CRL: loaded 1 CRLs from file /etc/openvpn/server/crl.pem
+Oct 30 23:57:41 vm-vpn-01 openvpn[888]: 84.84.226.81:60687 VERIFY ERROR: depth=0, error=certificate revoked: CN=medewerker01, serial=233010502488753646590096266386503449450
+Oct 30 23:57:41 vm-vpn-01 openvpn[888]: 84.84.226.81:60687 Sent fatal SSL alert: certificate revoked
+Oct 30 23:59:22 vm-vpn-01 openvpn[888]: 84.84.226.81:59975 CRL: cannot read CRL from file /etc/openvpn/server/crl.pem
+Oct 30 23:59:22 vm-vpn-01 openvpn[888]: 84.84.226.81:59975 CRL: loaded 1 CRLs from file /etc/openvpn/server/crl.pem

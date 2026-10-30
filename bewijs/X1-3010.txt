@@ -1,0 +1,5 @@
+# 30-10-2026 23:44:37 X1 part 1 (laptop, VPN off, public IP 84.84.226.81): curl -s -o /dev/null -w '%{http_code}' https://app-zkoo-03.azurewebsites.net/
+laptop -> app-zkoo-03: 403
+# 30-10-2026 23:45:51 X1 part 2 on vm-proxy-01: curl -s -o /dev/null -w '%{http_code}' https://app-zkoo-03.azurewebsites.net/
+proxy public egress IP: 20.107.7.53
+proxy -> app-zkoo-03: 200

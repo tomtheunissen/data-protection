@@ -1,0 +1,6 @@
+# 30-10-2026 23:45:56 L1 preparation on vm-web-01: write test file to /mnt/medical-files
+Fri Oct 30 23:45:57 CET 2026
+ls: cannot open directory '/mnt/medical-files': Permission denied
+$ sudo ls -l /mnt/medical-files | tail -3
+total 0
+-rw-rw---- 1 root root 29 Oct 30 23:45 la-test-30102345.txt

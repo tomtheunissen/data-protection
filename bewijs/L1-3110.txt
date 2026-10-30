@@ -1,0 +1,22 @@
+# 31-10-2026 00:10:19 az monitor log-analytics query -w <log-zkoo-01> --analytics-query "StorageFileLogs | where TimeGenerated > ago(3h) | project TimeGenerated, OperationName, StatusText, CallerIpAddress | order by TimeGenerated desc | take 15"
+CallerIpAddress    OperationName    StatusText    TableName      TimeGenerated
+-----------------  ---------------  ------------  -------------  ----------------------------
+192.168.4.4        Close                          PrimaryResult  2026-10-30T22:46:04.6812064Z
+192.168.4.4        QueryDirectory                 PrimaryResult  2026-10-30T22:46:04.6348Z
+192.168.4.4        QueryDirectory                 PrimaryResult  2026-10-30T22:46:04.6331424Z
+192.168.4.4        Create                         PrimaryResult  2026-10-30T22:46:04.6329076Z
+192.168.4.4        Close                          PrimaryResult  2026-10-30T22:46:04.6264097Z
+192.168.4.4        QueryInfo                      PrimaryResult  2026-10-30T22:46:04.6261368Z
+192.168.4.4        Create                         PrimaryResult  2026-10-30T22:46:04.6258973Z
+192.168.4.4        Close                          PrimaryResult  2026-10-30T22:45:59.0007341Z
+192.168.4.4        Close                          PrimaryResult  2026-10-30T22:45:58.0375145Z
+192.168.4.4        QueryInfo                      PrimaryResult  2026-10-30T22:45:58.0373234Z
+192.168.4.4        Create                         PrimaryResult  2026-10-30T22:45:58.0370712Z
+192.168.4.4        Close                          PrimaryResult  2026-10-30T22:45:57.989484Z
+192.168.4.4        QueryInfo                      PrimaryResult  2026-10-30T22:45:57.9892776Z
+192.168.4.4        Create                         PrimaryResult  2026-10-30T22:45:57.9890367Z
+192.168.4.4        Write                          PrimaryResult  2026-10-30T22:45:57.9853357Z
+
+# 31-10-2026 00:10:32 L1 cleanup on vm-web-01: sudo rm /mnt/medical-files/la-test-*.txt
+removed '/mnt/medical-files/la-test-30102345.txt'
+total 0

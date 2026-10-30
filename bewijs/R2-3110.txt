@@ -1,0 +1,7 @@
+# 31-10-2026 00:12:10 R2: new certificate for medewerker01 (playbook --limit vpn, see R2-playbook-3110.txt), then connect with the new profile; ifconfig | grep 'inet 10.8'; date
+revoked cert serial: AF4C30BEB560055AB990AD7E9C913B6A
+new cert serial: serial=B18633C276B7A5CA48852E55AA1C8295
+$ ifconfig | grep 'inet 10.8'
+	inet 10.8.0.2 --> 10.8.0.1 netmask 0xfffff800
+$ date
+za 31 okt. 2026 00:12:10 CET

@@ -1,0 +1,4 @@
+# 31-10-2026 00:10:21 az monitor log-analytics query -w <log-zkoo-01> --analytics-query "AzureDiagnostics | where Category == 'SQLSecurityAuditEvents' and TimeGenerated > ago(3h) | project TimeGenerated, action_name_s, succeeded_s, server_principal_name_s, client_ip_s | order by TimeGenerated desc | take 15"
+TableName      TimeGenerated                 Action_name_s                   Client_ip_s                           Server_principal_name_s    Succeeded_s
+-------------  ----------------------------  ------------------------------  ------------------------------------  -------------------------  -------------
+PrimaryResult  2026-10-30T22:54:01.1345183Z  DATABASE AUTHENTICATION FAILED  fd40:a83c:212:6648:8212:200:c0a8:404                             false

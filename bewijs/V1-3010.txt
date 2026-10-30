@@ -1,0 +1,25 @@
+# 30-10-2026 23:45:53 bash tests/vpn-matrix.sh (laptop, VPN as tom)
+== VPN matrix, pool admin (10.8.4.10), 2026-10-30 23:45:53, timeout 3s ==
+TARGET             PORT  EXPECTED RESULT   VERDICT
+proxy-01           22    blocked  timeout  PASS
+proxy-01           443   blocked  timeout  PASS
+proxy-01           2222  blocked  timeout  PASS
+vpn-01             22    blocked  timeout  PASS
+web-01             22    blocked  timeout  PASS
+web-01             443   blocked  timeout  PASS
+web-02             22    blocked  timeout  PASS
+web-02             443   blocked  timeout  PASS
+media-01           22    blocked  timeout  PASS
+media-01           8096  blocked  timeout  PASS
+ftp-01             22    blocked  timeout  PASS
+app-01             22    blocked  timeout  PASS
+app-01             443   blocked  timeout  PASS
+fs-01              22    blocked  timeout  PASS
+fs-01              445   blocked  timeout  PASS
+mgmt-01            22    open     open     PASS
+ids-01             22    blocked  timeout  PASS
+pep-sensitivedata  445   blocked  timeout  PASS
+pep-sql            1433  blocked  timeout  PASS
+pep-webapp         443   blocked  timeout  PASS
+== VPN matrix (admin): 20 PASS, 0 FAIL ==
+(exit 0)
