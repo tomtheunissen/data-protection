@@ -1,0 +1,15 @@
+# 30-10-2026 23:29:18 N4 route smoke test from laptop (curl -sk https://20.107.7.53/...) + IDS health timer on vm-ids-01
+U2 200
+H1 403
+M4 301
+W3 403
+$ [ids-01] systemctl list-timers zkoo-ids-health.timer --no-pager; sudo tail -3 /var/log/zkoo-ids-health.log; uptime -s
+NEXT                            LEFT LAST                              PASSED UNIT                  ACTIVATES
+Fri 2026-10-30 23:32:46 CET 3min 25s Fri 2026-10-30 23:27:46 CET 1min 34s ago zkoo-ids-health.timer zkoo-ids-health.service
+
+1 timers listed.
+Pass --all to see loaded but inactive timers, too.
+2026-10-29T13:17:02+01:00 RECOVERED: suricata, tunnel and mirrored traffic are OK again
+2026-10-30T23:00:56+01:00 ALERT: no mirrored packets received on vxmirror since the previous check
+2026-10-30T23:06:10+01:00 RECOVERED: suricata, tunnel and mirrored traffic are OK again
+booted: 2026-10-30 22:55:33

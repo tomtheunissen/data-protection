@@ -1,0 +1,8 @@
+# 30-10-2026 22:58:30 N0 quick external check: curl -sk https://20.107.7.53/ | grep Served ; curl -sk -o /dev/null -w '%{http_code}' https://20.107.7.53/app/ ; curl -sk https://20.107.7.53/media/System/Info/Public
+$ curl -sk https://20.107.7.53/ | grep Served
+  <p>Served by vm-web-02</p>
+$ curl -sk -o /dev/null -w '%{http_code}
+' https://20.107.7.53/app/
+200
+$ curl -sk https://20.107.7.53/media/System/Info/Public
+{"LocalAddress":"http://172.18.0.2:8096/media","ServerName":"d507ca504cae","Version":"10.11.5","ProductName":"Jellyfin Server","OperatingSystem":"","Id":"4ef62a071dac45df9f788bad079f4a65","StartupWizardCompleted":true}

@@ -1,0 +1,12 @@
+# 30-10-2026 23:28:59 ssh azureadmin@192.168.13.4 'bash ~/data-protection/tests/connectivity.sh egress'
+== N2 egress to the internet 2026-10-30 23:28:59 ==
+proxy-01     https://www.example.com -> 200
+vpn-01       https://www.example.com -> 200
+web-01       https://www.example.com -> 200
+web-02       https://www.example.com -> 200
+media-01     https://www.example.com -> 200
+ftp-01       https://www.example.com -> 200
+app-01       https://www.example.com -> 200
+fs-01        https://www.example.com -> 200
+mgmt-01      https://www.example.com -> 200
+ids-01       https://www.example.com -> 200

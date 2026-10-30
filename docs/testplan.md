@@ -179,6 +179,18 @@ Vanaf je laptop, VPN **uit**.
 | W4 | XSS | `curl -sk -o /dev/null -w "%{http_code}\n" "https://$P/app/?q=<script>alert(1)</script>"` | `403` van de WAF | ✓ |
 | W5 | Niet rechtstreeks publiek bereikbaar | `curl -s -o /dev/null -w "%{http_code}\n" https://app-zkoo-02.azurewebsites.net/` | `403` (publieke toegang staat uit) | ✓ |
 
+## 7c. Onderlinge verbindingen (segmentatie)
+
+Op mgmt via `tests/connectivity.sh`, verbonden als **tom**. Uitgevoerd op 30-10-2026, na het opstarten van alle VM's na de dagelijkse shutdown. Bewijs: `bewijs/N*-3010.txt`.
+
+| ID | Test | Commando | Verwacht | ✓ |
+|---|---|---|---|---|
+| N0 | Alles start vanzelf na de dagelijkse shutdown | `az vm start --ids $(az vm list -g 2026_KE06_KDB1_casusgroep_04 --query "[].id" -o tsv)`, 2 minuten wachten, dan per VM `sudo docker ps --format '{{.Names}} {{.Status}}'` (proxy, web-01/02, media, app, fs), `systemctl is-active zkoo-mirror` (proxy), `systemctl is-active openvpn-server@server dnsmasq zkoo-mirror` (vpn), `findmnt /mnt/medical-files` (web-01), `systemctl is-active ssh` (ftp), `systemctl is-active zkoo-ids-tap suricata zkoo-ids-health.timer` (ids) | Alle containers `Up`, alle services `active`, share gemount via 192.168.14.4 | ✓ |
+| N1 | Segmentatiematrix (oost-west) | `bash ~/data-protection/tests/connectivity.sh matrix`: vanaf elke VM elke andere VM en elk private endpoint op 22, 443, 445, 1433, 2222, 8096 | 0 FAIL: de 16 stromen uit `ALLOWED` (NSG-regels in `terraform/security.tf`) `open`, de rest `timeout` (geen `refused`) | ✓ (183 PASS, 0 FAIL; 16 open, 167 timeout) |
+| N2 | Uitgaand verkeer naar internet | `bash ~/data-protection/tests/connectivity.sh egress` (`curl https://www.example.com` vanaf elke VM) | Bevinding: niet gefilterd | ✓ (gemeten: alle 10 VM's `200`) |
+| N3 | Private DNS vanaf elke VM | `bash ~/data-protection/tests/connectivity.sh dns` | Private IP's op elke VM: `sql-zkoo-01=192.168.14.5`, `stzkoosensitive01=192.168.14.4`, `app-zkoo-02=192.168.14.6` | ✓ |
+| N4 | Rooktest routes na herstart | Vanaf de laptop: `curl -sk -o /dev/null -w "%{http_code}\n"` op `https://$P/portaal/` (U2), `https://$P/portaal/?id=1'%20OR%20'1'='1` (H1), `https://$P/media` (M4), `https://$P/app/?id=1'%20OR%20'1'='1` (W3); op ids `systemctl list-timers zkoo-ids-health.timer --no-pager` en `sudo tail -3 /var/log/zkoo-ids-health.log` | 200/403/301/403, timer actief, geen ALERT zonder RECOVERED | ✓ |
+
 ## 8. Afronding
 
 | ID | Stap | ✓ |
@@ -203,4 +215,6 @@ Vanaf je laptop, VPN **uit**.
 | M1 | `/media/System/Info/Public` is zonder inloggen bereikbaar en toont de Jellyfin-versie (10.11.5), een server-ID en het interne containeradres (172.18.0.2) | Standaardgedrag van Jellyfin: de webclient heeft dit endpoint nodig om te starten | Laag risico (informatie voor een aanvaller, geen toegang). Niet blokkeren in de PoC, anders laadt Jellyfin niet. Productieadvies: `/media/` alleen via de VPN aanbieden |
 | D1 | Het oude DVWA-databasewachtwoord staat nog in de Git-historie (commits `6b266e0`, `acaac25`) | Het wachtwoord stond ooit hardcoded in de repo voordat het naar Key Vault verhuisde | De huidige config bevat geen geheim (waarde komt uit Key Vault, `no_log`) en de oude waarde is niet meer in gebruik. Productieadvies: historie opschonen met `git filter-repo` en secret scanning (bijv. gitleaks) in CI aanzetten |
 | D3 | *Create / Reset Database* in DVWA gaf een 404 via de WAF | DVWA stuurt een root-relatieve redirect die nginx absoluut maakte (`absolute_redirect`), zonder het `/portaal`-prefix → `https://.../dvwa/setup.php` | Opgelost: `proxy_redirect` + `absolute_redirect off` op zowel vm-web-01 als de proxy. Stap 4 geeft daarna `Location: /portaal/dvwa/setup.php` |
+| N2 | Alle 10 VM's bereiken het internet (`https://www.example.com` → `200`) | Er is geen filtering op uitgaand verkeer: de NSG's beperken alleen inkomend verkeer, uitgaand geldt de Azure-standaard (`AllowInternetOutBound`) | Geen fout in de PoC, wel een risico: een aanvaller op een server kan data naar buiten sturen (exfiltratie) of een C2-verbinding opzetten. Productieadvies: uitgaand verkeer beperken met Azure Firewall of uitgaande NSG-regels, en alleen updates, Docker-registries en Azure-diensten toestaan |
+| N4 | Na het opstarten één `ALERT: no mirrored packets received on vxmirror` (23:00), om 23:06 gevolgd door `RECOVERED` | De eerste health check draaide voordat de mirror op proxy en vpn verkeer doorstuurde | Verwacht gedrag na een herstart. Productieadvies: een korte opstartperiode in de health check of de melding pas na twee mislukte checks versturen |
 | D4 / D4-XSS | De WAF-log legt alleen de blokkerende CRS-regel `949110` vast (anomaly score: SQLi 8, XSS 23), niet de individuele detectieregels (941xxx/942xxx) | `SecAuditEngine RelevantOnly` met `SecAuditLog /dev/stdout` (Serial); de audit-map is leeg en de nginx-worker-stdout wordt niet opgevangen in `docker logs` | De 403-blokkade is wél aangetoond. Productieadvies: audit-log naar een opgevangen bestand/concurrent-map sturen voor per-regel-forensics |

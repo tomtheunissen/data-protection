@@ -1,0 +1,48 @@
+# 30-10-2026 23:28:02 N0 services after restart, via jump host vm-mgmt-01 (ssh -J azureadmin@192.168.13.4)
+$ [mgmt] hostname; cd ~/data-protection && git pull --quiet && git log --oneline -1
+vm-mgmt-01
+84bdbe3 test: add connectivity and segmentation test script
+(exit 0)
+$ [proxy] sudo docker ps --format '{{.Names}} {{.Status}}'; systemctl is-active zkoo-mirror
+Warning: Permanently added '192.168.1.4' (ED25519) to the list of known hosts.
+proxy-waf-1 Up 32 minutes (healthy)
+proxy-sftp-relay-1 Up 32 minutes
+active
+(exit 0)
+$ [vpn] systemctl is-active openvpn-server@server dnsmasq zkoo-mirror
+Warning: Permanently added '192.168.1.5' (ED25519) to the list of known hosts.
+active
+active
+active
+(exit 0)
+$ [web-01] sudo docker ps --format '{{.Names}} {{.Status}}'; findmnt /mnt/medical-files
+Warning: Permanently added '192.168.4.4' (ED25519) to the list of known hosts.
+web-site-1 Up 32 minutes
+TARGET             SOURCE                                                  FSTYPE OPTIONS
+/mnt/medical-files //stzkoosensitive01.file.core.windows.net/medical-files cifs   rw,relatime,vers=3.1.1,cache=strict,upcall_target=app,username=stzkoosensitive01,uid=0,forceuid,gid=0,forcegid,addr=192.168.14.4,file_mode=0660,dir_mode=0770,seal,soft,persistenthandles,nounix,serverino,mapposix,reparse=nfs,nativesocket,symlink=native,rsize=1048576,wsize=1048576,bsize=1048576,echo_interval=60,nosharesock,actimeo=30,closetimeo=1
+(exit 0)
+$ [web-02] sudo docker ps --format '{{.Names}} {{.Status}}'
+Warning: Permanently added '192.168.4.5' (ED25519) to the list of known hosts.
+web-site-1 Up 32 minutes
+(exit 0)
+$ [app-01] sudo docker ps --format '{{.Names}} {{.Status}}'
+Warning: Permanently added '192.168.8.4' (ED25519) to the list of known hosts.
+app-site-1 Up 32 minutes
+(exit 0)
+$ [fs-01] sudo docker ps --format '{{.Names}} {{.Status}}'
+Warning: Permanently added '192.168.8.5' (ED25519) to the list of known hosts.
+fs-samba-1 Up 32 minutes (healthy)
+(exit 0)
+$ [media-01] sudo docker ps --format '{{.Names}} {{.Status}}'
+Warning: Permanently added '192.168.4.6' (ED25519) to the list of known hosts.
+media-jellyfin-1 Up 32 minutes (healthy)
+(exit 0)
+$ [ftp-01] systemctl is-active ssh
+Warning: Permanently added '192.168.4.7' (ED25519) to the list of known hosts.
+active
+(exit 0)
+$ [ids-01] systemctl is-active zkoo-ids-tap suricata zkoo-ids-health.timer
+active
+active
+active
+(exit 0)

@@ -1,0 +1,13 @@
+# 30-10-2026 23:29:07 ssh azureadmin@192.168.13.4 'bash ~/data-protection/tests/connectivity.sh dns'
+== N3 private DNS from every VM 2026-10-30 23:29:07 ==
+expected: sql-zkoo-01 -> 192.168.14.5, stzkoosensitive01 -> 192.168.14.4, app-zkoo-02 -> 192.168.14.6
+proxy-01     sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
+vpn-01       sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
+web-01       sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
+web-02       sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
+media-01     sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
+ftp-01       sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
+app-01       sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
+fs-01        sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
+mgmt-01      sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
+ids-01       sql-zkoo-01=192.168.14.5  stzkoosensitive01=192.168.14.4  app-zkoo-02=192.168.14.6  
