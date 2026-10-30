@@ -1,0 +1,29 @@
+# 31-10-2026 00:20:49 R1 CRL warning analysis on vm-vpn-01 (read-only): openvpn --version; journalctl around the refusal; CRL load timeline
+OpenVPN 2.6.19 x86_64-pc-linux-gnu [SSL (OpenSSL)] [LZO] [LZ4] [EPOLL] [PKCS11] [MH/PKTINFO] [AEAD] [DCO]
+OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)
+$ journalctl -u openvpn-server@server --since 23:57:40 --until 23:57:42
+84.84.226.81:60687 OpenSSL: error:0308010C:digital envelope routines::unsupported:Global default library context, Algorithm (none : 0), Properties (<null>)
+84.84.226.81:60687 OpenSSL: error:0480006C:PEM routines::no start line:
+84.84.226.81:60687 CRL: cannot read CRL from file /etc/openvpn/server/crl.pem
+84.84.226.81:60687 CRL: loaded 1 CRLs from file /etc/openvpn/server/crl.pem
+$ journalctl | grep -E "CRL:|Peer Connection Initiated" (since 22:50)
+2026-10-30T22:55:50+01:00 vm-vpn-01 openvpn[888]: CRL: loaded 1 CRLs from file /etc/openvpn/server/crl.pem
+2026-10-30T23:26:58+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:58505 [tom] Peer Connection Initiated with [AF_INET]84.84.226.81:58505
+2026-10-30T23:45:07+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:59456 [tom] Peer Connection Initiated with [AF_INET]84.84.226.81:59456
+2026-10-30T23:45:23+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:55535 [tom] Peer Connection Initiated with [AF_INET]84.84.226.81:55535
+2026-10-30T23:57:41+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:60687 CRL: cannot read CRL from file /etc/openvpn/server/crl.pem
+2026-10-30T23:57:41+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:60687 CRL: loaded 1 CRLs from file /etc/openvpn/server/crl.pem
+2026-10-30T23:59:22+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:59975 CRL: cannot read CRL from file /etc/openvpn/server/crl.pem
+2026-10-30T23:59:22+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:59975 CRL: loaded 1 CRLs from file /etc/openvpn/server/crl.pem
+2026-10-30T23:59:23+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:59975 [tom] Peer Connection Initiated with [AF_INET]84.84.226.81:59975
+2026-10-31T00:06:09+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:61781 CRL: cannot read CRL from file /etc/openvpn/server/crl.pem
+2026-10-31T00:06:09+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:61781 CRL: loaded 1 CRLs from file /etc/openvpn/server/crl.pem
+2026-10-31T00:06:09+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:61781 [tom] Peer Connection Initiated with [AF_INET]84.84.226.81:61781
+2026-10-31T00:11:55+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:57299 CRL: cannot read CRL from file /etc/openvpn/server/crl.pem
+2026-10-31T00:11:55+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:57299 CRL: loaded 1 CRLs from file /etc/openvpn/server/crl.pem
+2026-10-31T00:11:55+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:57299 [medewerker01] Peer Connection Initiated with [AF_INET]84.84.226.81:57299
+2026-10-31T00:18:58+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:55998 CRL: cannot read CRL from file /etc/openvpn/server/crl.pem
+2026-10-31T00:18:58+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:55998 CRL: loaded 1 CRLs from file /etc/openvpn/server/crl.pem
+2026-10-31T00:18:58+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:55998 [tom] Peer Connection Initiated with [AF_INET]84.84.226.81:55998
+
+Upstream: OpenVPN/openvpn#1104, fix commit 15a1465f (master, 2026-10-12): 'Make CRL reload EOF detection independent of stale error queue entries'. Not in release/2.6 (checked 31-10-2026).
