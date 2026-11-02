@@ -1,0 +1,23 @@
+# 02-11-2026 18:00:58 Z4a: requests to https://20.8.94.69/portaal/dvwa/index.php with a valid DVWA session cookie (Cookie: PHPSESSID=<redacted>; security=low), laptop -> WAF
+# curl -sk -o /dev/null -w '%{http_code}' <options> -H 'Cookie: ...' https://20.8.94.69/portaal/dvwa/index.php
+-A ""                (User-Agent header absent)            200
+-H "User-Agent;"     (User-Agent header present, empty)    403
+-A "<Chrome 141>"    (browser User-Agent)                  200
+-A "" -H "Accept:"   (no User-Agent, no Accept)            200
+-A "<Chrome>" -H "Accept:" (no Accept)                     200
+
+# 02-11-2026 18:06:23 WAF access log on vm-proxy-01: the curl tests above (17:00:50-17:01:05 UTC)
+84.84.226.81 - - [02/Nov/2026:17:00:58 +0000] "GET /portaal/dvwa/index.php HTTP/2.0" 200 6411 "-" "-" "-"
+2026/11/02 17:00:58 [error] 566#566: *229 [client 84.84.226.81] ModSecurity: Access denied with code 403 (phase 2). Matched "Operator `Ge' with parameter `5' against variable `TX:BLOCKING_INBOUND_ANOMALY_SCORE' (Value: `5' ) [file
+84.84.226.81 - - [02/Nov/2026:17:00:58 +0000] "GET /portaal/dvwa/index.php HTTP/2.0" 403 146 "-" "" "-"
+84.84.226.81 - - [02/Nov/2026:17:00:58 +0000] "GET /portaal/dvwa/index.php HTTP/2.0" 200 6411 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" "-"
+84.84.226.81 - - [02/Nov/2026:17:00:58 +0000] "GET /portaal/dvwa/index.php HTTP/2.0" 200 6411 "-" "-" "-"
+84.84.226.81 - - [02/Nov/2026:17:00:58 +0000] "GET /portaal/dvwa/index.php HTTP/2.0" 200 6411 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" "-"
+
+# WAF access log: ZAP AF spider (spider-only diagnostic, 16:20:13 UTC). nginx logs "" for an empty User-Agent and "-" for an absent one
+84.84.226.81 - - [02/Nov/2026:16:20:13 +0000] "GET /portaal/dvwa/ HTTP/1.1" 200 6411 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" "-"
+84.84.226.81 - - [02/Nov/2026:16:20:13 +0000] "GET /portaal/dvwa/index.php HTTP/1.1" 403 146 "-" "" "-"
+84.84.226.81 - - [02/Nov/2026:16:20:13 +0000] "GET /portaal/dvwa/ HTTP/1.1" 403 146 "-" "" "-"
+
+# ModSecurity for the 403s at 16:20:13 (only the blocking rule is logged, see finding D4)
+      2 [id "949110"] [rev ""] [msg "Inbound Anomaly Score Exceeded (Total Score: 5)"]

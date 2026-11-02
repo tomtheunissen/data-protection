@@ -1,0 +1,13 @@
+# 02-11-2026 16:58:15 ansible-playbook -i /var/lib/zkoo/inventory.ini playbook.yml --limit proxy,webservers,media,sftp,appserver,fileserver,ids,vpn (on vm-mgmt-01, log ~/playbook-0211.log, commit 86c5d08)
+started: 2026-11-02 16:38:21, finished: 2026-11-02 16:57:59
+PLAY RECAP *********************************************************************
+vm-app-01                  : ok=29   changed=17   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+vm-fs-01                   : ok=33   changed=19   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+vm-ftp-01                  : ok=27   changed=17   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+vm-ids-01                  : ok=38   changed=26   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+vm-media-01                : ok=47   changed=19   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+vm-proxy-01                : ok=36   changed=23   unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+vm-vpn-01                  : ok=54   changed=5    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+vm-web-01                  : ok=36   changed=20   unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
+vm-web-02                  : ok=29   changed=17   unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
+

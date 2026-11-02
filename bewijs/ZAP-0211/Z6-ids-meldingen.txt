@@ -1,0 +1,32 @@
+# 02-11-2026 18:41:15 Z6 IDS on vm-ids-01: new lines in /var/log/suricata/fast.log since the baseline (17 lines at 2026-11-02T15:58:46Z), grouped by signature
+lines now: 14060
+
+   4039 SURICATA STREAM 3way handshake wrong seq wrong ack | 185.199.111.154 -> 192.168.1.4:<ephemeral>
+   3534 SURICATA STREAM 3way handshake wrong seq wrong ack | 192.168.1.4 -> 192.168.4.4:443
+   3142 SURICATA STREAM 3way handshake wrong seq wrong ack | 192.168.1.4 -> 185.199.111.154:443
+   1247 SURICATA STREAM Packet with invalid timestamp | 192.168.1.4 -> 84.84.226.81:<ephemeral>
+   1155 SURICATA STREAM 3way handshake wrong seq wrong ack | 192.168.4.4 -> 192.168.1.4:<ephemeral>
+    296 SURICATA STREAM 3way handshake wrong seq wrong ack | 192.168.1.4 -> 192.168.4.5:443
+    161 SURICATA STREAM 3way handshake wrong seq wrong ack | 192.168.4.5 -> 192.168.1.4:<ephemeral>
+    142 SURICATA STREAM Packet with invalid timestamp | 192.168.1.4 -> 192.168.13.4:<ephemeral>
+     85 SURICATA HTTP unable to match response to request | 169.254.169.254 -> 192.168.1.5:<ephemeral>
+     73 SURICATA HTTP unable to match response to request | 169.254.169.254 -> 192.168.1.4:<ephemeral>
+     20 SURICATA STREAM 3way handshake wrong seq wrong ack | 192.168.1.5 -> 169.254.169.254:80
+     18 SURICATA Applayer Wrong direction first Data | 192.168.1.4 -> 192.168.4.4:443
+     14 SURICATA STREAM Packet with invalid timestamp | 192.168.13.4 -> 10.8.4.10:<ephemeral>
+     14 SURICATA STREAM Packet with invalid ack | 192.168.1.4 -> 192.168.4.4:443
+     14 SURICATA STREAM 3way handshake wrong seq wrong ack | 192.168.1.4 -> 169.254.169.254:80
+     13 SURICATA STREAM FIN invalid ack | 192.168.1.4 -> 192.168.4.4:443
+      8 SURICATA STREAM FIN out of window | 192.168.4.4 -> 192.168.1.4:<ephemeral>
+      6 SURICATA STREAM CLOSEWAIT FIN out of window | 192.168.4.4 -> 192.168.1.4:<ephemeral>
+      6 SURICATA Applayer Wrong direction first Data | 84.84.226.81 -> 192.168.1.4:443
+      5 SURICATA STREAM Packet with invalid ack | 192.168.4.4 -> 192.168.1.4:<ephemeral>
+      5 SURICATA STREAM FIN invalid ack | 192.168.4.4 -> 192.168.1.4:<ephemeral>
+      5 SURICATA STREAM CLOSEWAIT FIN out of window | 192.168.4.5 -> 192.168.1.4:<ephemeral>
+      4 SURICATA STREAM Packet with invalid timestamp | 192.168.4.4 -> 192.168.1.4:<ephemeral>
+      4 SURICATA STREAM 3way handshake wrong seq wrong ack | 192.168.1.4 -> 84.84.226.81:<ephemeral>
+      4 SURICATA STREAM 3way handshake wrong seq wrong ack | 169.254.169.254 -> 192.168.1.5:<ephemeral>
+meldingen die geen SURICATA-protocolanomalie zijn (ET/GPL-signatures): 2
+      1 ET CINS Active Threat Intelligence Poor Reputation IP group 187
+      1 ET CINS Active Threat Intelligence Poor Reputation IP group 295
+(185.199.111.154 = cdn-185-199-111-154.github.com., het downloaden van het ZAP-image voor Z5 van ghcr.io)

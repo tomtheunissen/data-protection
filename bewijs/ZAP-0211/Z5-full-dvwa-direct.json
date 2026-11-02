@@ -1,0 +1,2025 @@
+{
+	"@programName": "ZAP",
+	"@version": "2.17.0",
+	"@generated": "Mon, 2 Nov 2026 17:35:43",
+	"created": "2026-11-02T17:35:43.093651712Z",
+	"insights":[
+		{
+			"level": "Low",
+			"reason": "Warning",
+			"site": "",
+			"key": "insight.log.error",
+			"description": "ZAP errors logged - see the zap.log file for details",
+			"statistic": "1"
+		},
+		{
+			"level": "Low",
+			"reason": "Warning",
+			"site": "",
+			"key": "insight.log.warn",
+			"description": "ZAP warnings logged - see the zap.log file for details",
+			"statistic": "24"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "",
+			"key": "insight.network.failure",
+			"description": "Percentage of network failures",
+			"statistic": "1"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.code.2xx",
+			"description": "Percentage of responses with status code 2xx",
+			"statistic": "69"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.code.3xx",
+			"description": "Percentage of responses with status code 3xx",
+			"statistic": "2"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.code.4xx",
+			"description": "Percentage of responses with status code 4xx",
+			"statistic": "27"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.ctype.application/pdf",
+			"description": "Percentage of endpoints with content type application/pdf",
+			"statistic": "1"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.ctype.application/vnd.apple.installer+xml",
+			"description": "Percentage of endpoints with content type application/vnd.apple.installer+xml",
+			"statistic": "1"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.ctype.image/png",
+			"description": "Percentage of endpoints with content type image/png",
+			"statistic": "6"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.ctype.image/vnd.microsoft.icon",
+			"description": "Percentage of endpoints with content type image/vnd.microsoft.icon",
+			"statistic": "1"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.ctype.text/css",
+			"description": "Percentage of endpoints with content type text/css",
+			"statistic": "1"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.ctype.text/html",
+			"description": "Percentage of endpoints with content type text/html",
+			"statistic": "60"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.ctype.text/javascript",
+			"description": "Percentage of endpoints with content type text/javascript",
+			"statistic": "4"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.ctype.text/markdown",
+			"description": "Percentage of endpoints with content type text/markdown",
+			"statistic": "21"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.method.GET",
+			"description": "Percentage of endpoints with method GET",
+			"statistic": "89"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.method.POST",
+			"description": "Percentage of endpoints with method POST",
+			"statistic": "10"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.endpoint.total",
+			"description": "Count of total endpoints",
+			"statistic": "64"
+		},
+		{
+			"level": "Info",
+			"reason": "Informational",
+			"site": "https://192.168.4.4",
+			"key": "insight.response.slow",
+			"description": "Percentage of slow responses",
+			"statistic": "2"
+		}
+	],
+	"site":[ 
+		{
+			"@name": "https://192.168.4.4",
+			"@host": "192.168.4.4",
+			"@port": "443",
+			"@ssl": "true",
+			"alerts": [ 
+				{
+					"pluginid": "40012",
+					"alertRef": "40012",
+					"alert": "Cross Site Scripting (Reflected)",
+					"name": "Cross Site Scripting (Reflected)",
+					"riskcode": "3",
+					"confidence": "2",
+					"riskdesc": "High (Medium)",
+					"desc": "<p>Cross-site Scripting (XSS) is an attack technique that involves echoing attacker-supplied code into a user's browser instance. A browser instance can be a standard web browser client, or a browser object embedded in a software product such as the browser within WinAmp, an RSS reader, or an email client. The code itself is usually written in HTML/JavaScript, but may also extend to VBScript, ActiveX, Java, Flash, or any other browser-supported technology.</p><p>When an attacker gets a user's browser to execute his/her code, the code will run within the security context (or zone) of the hosting web site. With this level of privilege, the code has the ability to read, modify and transmit any sensitive data accessible by the browser. A Cross-site Scripted user could have his/her account hijacked (cookie theft), their browser redirected to another location, or possibly shown fraudulent content delivered by the web site they are visiting. Cross-site Scripting attacks essentially compromise the trust relationship between a user and the web site. Applications utilizing browser object instances which load content from the file system may execute code under the local machine zone allowing for system compromise.</p><p></p><p>There are three types of Cross-site Scripting attacks: non-persistent, persistent and DOM-based.</p><p>Non-persistent attacks and DOM-based attacks require a user to either visit a specially crafted link laced with malicious code, or visit a malicious web page containing a web form, which when posted to the vulnerable site, will mount the attack. Using a malicious form will oftentimes take place when the vulnerable resource only accepts HTTP POST requests. In such a case, the form can be submitted automatically, without the victim's knowledge (e.g. by using JavaScript). Upon clicking on the malicious link or submitting the malicious form, the XSS payload will get echoed back and will get interpreted by the user's browser and execute. Another technique to send almost arbitrary requests (GET and POST) is by using an embedded client, such as Adobe Flash.</p><p>Persistent attacks occur when the malicious code is submitted to a web site where it's stored for a period of time. Examples of an attacker's favorite targets often include message board posts, web mail messages, and web chat software. The unsuspecting user is not required to interact with any additional site/link (e.g. an attacker site or a malicious link sent via email), just simply view the web page containing the code.</p>",
+					"instances":[ 
+						{
+							"id": "501",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/xss_r/?name=%3C%2Fpre%3E%3CscrIpt%3Ealert%281%29%3B%3C%2FscRipt%3E%3Cpre%3E",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/xss_r\/ (name)",
+							"method": "GET",
+							"param": "name",
+							"attack": "</pre><scrIpt>alert(1);</scRipt><pre>",
+							"evidence": "</pre><scrIpt>alert(1);</scRipt><pre>",
+							"otherinfo": ""
+						},
+						{
+							"id": "502",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/ ()(include)",
+							"method": "POST",
+							"param": "include",
+							"attack": "javascript:alert(1);",
+							"evidence": "javascript:alert(1);",
+							"otherinfo": ""
+						},
+						{
+							"id": "504",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/xss_s/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/xss_s\/ ()(btnSign,mtxMessage,txtName)",
+							"method": "POST",
+							"param": "mtxMessage",
+							"attack": "</div><scrIpt>alert(1);</scRipt><div>",
+							"evidence": "</div><scrIpt>alert(1);</scRipt><div>",
+							"otherinfo": ""
+						},
+						{
+							"id": "503",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/xss_s/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/xss_s\/ ()(btnSign,mtxMessage,txtName)",
+							"method": "POST",
+							"param": "txtName",
+							"attack": "</div><scrIpt>alert(1);</scRipt><div>",
+							"evidence": "</div><scrIpt>alert(1);</scRipt><div>",
+							"otherinfo": ""
+						}
+					],
+					"count": "4",
+					"systemic": false,
+					"solution": "<p>Phase: Architecture and Design</p><p>Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.</p><p>Examples of libraries and frameworks that make it easier to generate properly encoded output include Microsoft's Anti-XSS library, the OWASP ESAPI Encoding module, and Apache Wicket.</p><p></p><p>Phases: Implementation; Architecture and Design</p><p>Understand the context in which your data will be used and the encoding that will be expected. This is especially important when transmitting data between different components, or when generating outputs that can contain multiple encodings at the same time, such as web pages or multi-part mail messages. Study all expected communication protocols and data representations to determine the required encoding strategies.</p><p>For any data that will be output to another web page, especially any data that was received from external inputs, use the appropriate encoding on all non-alphanumeric characters.</p><p>Consult the XSS Prevention Cheat Sheet for more details on the types of encoding and escaping that are needed.</p><p></p><p>Phase: Architecture and Design</p><p>For any security checks that are performed on the client side, ensure that these checks are duplicated on the server side, in order to avoid CWE-602. Attackers can bypass the client-side checks by modifying values after the checks have been performed, or by changing the client to remove the client-side checks entirely. Then, these modified values would be submitted to the server.</p><p></p><p>If available, use structured mechanisms that automatically enforce the separation between data and code. These mechanisms may be able to provide the relevant quoting, encoding, and validation automatically, instead of relying on the developer to provide this capability at every point where output is generated.</p><p></p><p>Phase: Implementation</p><p>For every web page that is generated, use and specify a character encoding such as ISO-8859-1 or UTF-8. When an encoding is not specified, the web browser may choose a different encoding by guessing which encoding is actually being used by the web page. This can cause the web browser to treat certain sequences as special, opening up the client to subtle XSS attacks. See CWE-116 for more mitigations related to encoding/escaping.</p><p></p><p>To help mitigate XSS attacks against the user's session cookie, set the session cookie to be HttpOnly. In browsers that support the HttpOnly feature (such as more recent versions of Internet Explorer and Firefox), this attribute can prevent the user's session cookie from being accessible to malicious client-side scripts that use document.cookie. This is not a complete solution, since HttpOnly is not supported by all browsers. More importantly, XMLHTTPRequest and other powerful browser technologies provide read access to HTTP headers, including the Set-Cookie header in which the HttpOnly flag is set.</p><p></p><p>Assume all input is malicious. Use an \"accept known good\" input validation strategy, i.e., use an allow list of acceptable inputs that strictly conform to specifications. Reject any input that does not strictly conform to specifications, or transform it into something that does. Do not rely exclusively on looking for malicious or malformed inputs (i.e., do not rely on a deny list). However, deny lists can be useful for detecting potential attacks or determining which inputs are so malformed that they should be rejected outright.</p><p></p><p>When performing input validation, consider all potentially relevant properties, including length, type of input, the full range of acceptable values, missing or extra inputs, syntax, consistency across related fields, and conformance to business rules. As an example of business rule logic, \"boat\" may be syntactically valid because it only contains alphanumeric characters, but it is not valid if you are expecting colors such as \"red\" or \"blue.\"</p><p></p><p>Ensure that you perform input validation at well-defined interfaces within the application. This will help protect the application even if a component is reused or moved elsewhere.</p><p>\t</p>",
+					"otherinfo": "",
+					"reference": "<p>https://owasp.org/www-community/attacks/xss/</p><p>https://cwe.mitre.org/data/definitions/79.html</p>",
+					"cweid": "79",
+					"wascid": "8",
+					"sourceid": "205"
+				},
+				{
+					"pluginid": "20019",
+					"alertRef": "20019-1",
+					"alert": "External Redirect",
+					"name": "External Redirect",
+					"riskcode": "3",
+					"confidence": "2",
+					"riskdesc": "High (Medium)",
+					"desc": "<p>URL redirectors represent common functionality employed by web sites to forward an incoming request to an alternate resource. This can be done for a variety of reasons and is often done to allow resources to be moved within the directory structure and to avoid breaking functionality for users that request the resource at its previous location. URL redirectors may also be used to implement load balancing, leveraging abbreviated URLs or recording outgoing links. It is this last implementation which is often used in phishing attacks as described in the example below. URL redirectors do not necessarily represent a direct security vulnerability but can be abused by attackers trying to social engineer victims into believing that they are navigating to a site other than the true destination.</p>",
+					"instances":[ 
+						{
+							"id": "500",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/open_redirect/source/low.php?redirect=https%3A%2F%2F7547773496945034563.owasp.org",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/open_redirect\/source\/low.php (redirect)",
+							"method": "GET",
+							"param": "redirect",
+							"attack": "https://7547773496945034563.owasp.org",
+							"evidence": "https://7547773496945034563.owasp.org",
+							"otherinfo": "The response contains a redirect in its Location header which allows an external Url to be set."
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>Assume all input is malicious. Use an \"accept known good\" input validation strategy, i.e., use an allow list of acceptable inputs that strictly conform to specifications. Reject any input that does not strictly conform to specifications, or transform it into something that does. Do not rely exclusively on looking for malicious or malformed inputs (i.e., do not rely on a deny list). However, deny lists can be useful for detecting potential attacks or determining which inputs are so malformed that they should be rejected outright.</p><p></p><p>When performing input validation, consider all potentially relevant properties, including length, type of input, the full range of acceptable values, missing or extra inputs, syntax, consistency across related fields, and conformance to business rules. As an example of business rule logic, \"boat\" may be syntactically valid because it only contains alphanumeric characters, but it is not valid if you are expecting colors such as \"red\" or \"blue.\"</p><p></p><p>Use an allow list of approved URLs or domains to be used for redirection.</p><p></p><p>Use an intermediate disclaimer page that provides the user with a clear warning that they are leaving your site. Implement a long timeout before the redirect occurs, or force the user to click on the link. Be careful to avoid XSS problems when generating the disclaimer page.</p><p></p><p>When the set of acceptable objects, such as filenames or URLs, is limited or known, create a mapping from a set of fixed input values (such as numeric IDs) to the actual filenames or URLs, and reject all other inputs.</p><p></p><p>For example, ID 1 could map to \"/login.asp\" and ID 2 could map to \"https://www.example.com/\". Features such as the ESAPI AccessReferenceMap provide this capability.</p><p></p><p>Understand all the potential areas where untrusted inputs can enter your software: parameters or arguments, cookies, anything read from the network, environment variables, reverse DNS lookups, query results, request headers, URL components, e-mail, files, databases, and any external systems that provide data to the application. Remember that such inputs may be obtained indirectly through API calls.</p><p></p><p>Many open redirect problems occur because the programmer assumed that certain inputs could not be modified, such as cookies and hidden form fields.</p>",
+					"otherinfo": "<p>The response contains a redirect in its Location header which allows an external Url to be set.</p>",
+					"reference": "<p>https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html</p><p>https://cwe.mitre.org/data/definitions/601.html</p>",
+					"cweid": "601",
+					"wascid": "38",
+					"sourceid": "204"
+				},
+				{
+					"pluginid": "20020",
+					"alertRef": "20020-1",
+					"alert": "PHP Version with Known Vulnerabilities",
+					"name": "PHP Version with Known Vulnerabilities",
+					"riskcode": "3",
+					"confidence": "2",
+					"riskdesc": "High (Medium)",
+					"desc": "<p>The server disclosed the version of a server side technology it is running via an HTTP response header, and that version is affected by known vulnerabilities. The version, header and vulnerabilities, listed by severity, are given in the other info. See the references for the details of each.</p><p>Note that some distributions backport security fixes without changing the version number, so check whether the fixes have actually been applied before reporting these as confirmed.</p>",
+					"instances":[ 
+						{
+							"id": "9",
+							"uri": "https://192.168.4.4/dvwa/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "PHP/8.5.11",
+							"otherinfo": "The server disclosed that it is running PHP version 8.5.11 via the \"X-Powered-By\" HTTP response header.\n\n2 known vulnerabilities: 2 critical, 0 high, 0 medium, 0 low.\n\nCritical: CVE-2026-109618, CVE-2026-109619"
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>Upgrade PHP to a supported version which includes fixes for the listed vulnerabilities. Also configure the server not to disclose the PHP version, e.g. by setting \"expose_php = Off\" in php.ini and suppressing version details in the \"Server\" header.</p>",
+					"otherinfo": "<p>The server disclosed that it is running PHP version 8.5.11 via the \"X-Powered-By\" HTTP response header.</p><p></p><p>2 known vulnerabilities: 2 critical, 0 high, 0 medium, 0 low.</p><p></p><p>Critical: CVE-2026-109618, CVE-2026-109619</p>",
+					"reference": "<p>https://www.php.net/supported-versions.php</p><p>https://github.com/php/php-src/security/advisories</p><p>https://www.zaproxy.org/docs/desktop/addons/passive-scan-rules/php-known-vulnerabilities/#cve-2026-109618</p><p>https://www.zaproxy.org/docs/desktop/addons/passive-scan-rules/php-known-vulnerabilities/#cve-2026-109619</p>",
+					"cweid": "1395",
+					"wascid": "13",
+					"sourceid": "1"
+				},
+				{
+					"pluginid": "6",
+					"alertRef": "6-2",
+					"alert": "Path Traversal",
+					"name": "Path Traversal",
+					"riskcode": "3",
+					"confidence": "2",
+					"riskdesc": "High (Medium)",
+					"desc": "<p>The Path Traversal attack technique allows an attacker access to files, directories, and commands that potentially reside outside the web document root directory. An attacker may manipulate a URL in such a way that the web site will execute or reveal the contents of arbitrary files anywhere on the web server. Any device that exposes an HTTP-based interface is potentially vulnerable to Path Traversal.</p><p></p><p>Most web sites restrict user access to a specific portion of the file-system, typically called the \"web document root\" or \"CGI root\" directory. These directories contain the files intended for user access and the executable necessary to drive web application functionality. To access files or execute commands anywhere on the file-system, Path Traversal attacks will utilize the ability of special-characters sequences.</p><p></p><p>The most basic Path Traversal attack uses the \"../\" special-character sequence to alter the resource location requested in the URL. Although most popular web servers will prevent this technique from escaping the web document root, alternate encodings of the \"../\" sequence may help bypass the security filters. These method variations include valid and invalid Unicode-encoding (\"..%u2216\" or \"..%c0%af\") of the forward slash character, backslash characters (\"..\\\") on Windows-based servers, URL encoded characters \"%2e%2e%2f\"), and double URL encoding (\"..%255c\") of the backslash character.</p><p></p><p>Even if the web server properly restricts Path Traversal attempts in the URL path, a web application itself may still be vulnerable due to improper handling of user-supplied input. This is a common problem of web applications that use template mechanisms or load static text from files. In variations of the attack, the original URL parameter value is substituted with the file name of one of the web application's dynamic scripts. Consequently, the results can reveal source code because the file is interpreted as text instead of an executable script. These techniques often employ additional special characters such as the dot (\".\") to reveal the listing of the current working directory, or \"%00\" NULL characters in order to bypass rudimentary file extension checks.</p>",
+					"instances":[ 
+						{
+							"id": "498",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=%2Fetc%2Fpasswd",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "page",
+							"attack": "/etc/passwd",
+							"evidence": "root:x:0:0",
+							"otherinfo": ""
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>Assume all input is malicious. Use an \"accept known good\" input validation strategy, i.e., use an allow list of acceptable inputs that strictly conform to specifications. Reject any input that does not strictly conform to specifications, or transform it into something that does. Do not rely exclusively on looking for malicious or malformed inputs (i.e., do not rely on a deny list). However, deny lists can be useful for detecting potential attacks or determining which inputs are so malformed that they should be rejected outright.</p><p></p><p>When performing input validation, consider all potentially relevant properties, including length, type of input, the full range of acceptable values, missing or extra inputs, syntax, consistency across related fields, and conformance to business rules. As an example of business rule logic, \"boat\" may be syntactically valid because it only contains alphanumeric characters, but it is not valid if you are expecting colors such as \"red\" or \"blue.\"</p><p></p><p>For filenames, use stringent allow lists that limit the character set to be used. If feasible, only allow a single \".\" character in the filename to avoid weaknesses, and exclude directory separators such as \"/\". Use an allow list of allowable file extensions.</p><p></p><p>Warning: if you attempt to cleanse your data, then do so that the end result is not in the form that can be dangerous. A sanitizing mechanism can remove characters such as '.' and ';' which may be required for some exploits. An attacker can try to fool the sanitizing mechanism into \"cleaning\" data into a dangerous form. Suppose the attacker injects a '.' inside a filename (e.g. \"sensi.tiveFile\") and the sanitizing mechanism removes the character resulting in the valid filename, \"sensitiveFile\". If the input data are now assumed to be safe, then the file may be compromised. </p><p></p><p>Inputs should be decoded and canonicalized to the application's current internal representation before being validated. Make sure that your application does not decode the same input twice. Such errors could be used to bypass allow list schemes by introducing dangerous inputs after they have been checked.</p><p></p><p>Use a built-in path canonicalization function (such as realpath() in C) that produces the canonical version of the pathname, which effectively removes \"..\" sequences and symbolic links.</p><p></p><p>Run your code using the lowest privileges that are required to accomplish the necessary tasks. If possible, create isolated accounts with limited privileges that are only used for a single task. That way, a successful attack will not immediately give the attacker access to the rest of the software or its environment. For example, database applications rarely need to run as the database administrator, especially in day-to-day operations.</p><p></p><p>When the set of acceptable objects, such as filenames or URLs, is limited or known, create a mapping from a set of fixed input values (such as numeric IDs) to the actual filenames or URLs, and reject all other inputs.</p><p></p><p>Run your code in a \"jail\" or similar sandbox environment that enforces strict boundaries between the process and the operating system. This may effectively restrict which files can be accessed in a particular directory or which commands can be executed by your software.</p><p></p><p>OS-level examples include the Unix chroot jail, AppArmor, and SELinux. In general, managed code may provide some protection. For example, java.io.FilePermission in the Java SecurityManager allows you to specify restrictions on file operations.</p><p></p><p>This may not be a feasible solution, and it only limits the impact to the operating system; the rest of your application may still be subject to compromise.</p><p></p>",
+					"otherinfo": "",
+					"reference": "<p>https://owasp.org/www-community/attacks/Path_Traversal</p><p>https://cwe.mitre.org/data/definitions/22.html</p>",
+					"cweid": "22",
+					"wascid": "33",
+					"sourceid": "202"
+				},
+				{
+					"pluginid": "7",
+					"alertRef": "7",
+					"alert": "Remote File Inclusion",
+					"name": "Remote File Inclusion",
+					"riskcode": "3",
+					"confidence": "2",
+					"riskdesc": "High (Medium)",
+					"desc": "<p>Remote File Include (RFI) is an attack technique used to exploit \"dynamic file include\" mechanisms in web applications. When web applications take user input (URL, parameter value, etc.) and pass them into file include commands, the web application might be tricked into including remote files with malicious code.</p><p></p><p>Almost all web application frameworks support file inclusion. File inclusion is mainly used for packaging common code into separate files that are later referenced by main application modules. When a web application references an include file, the code in this file may be executed implicitly or explicitly by calling specific procedures. If the choice of module to load is based on elements from the HTTP request, the web application might be vulnerable to RFI.</p><p>An attacker can use RFI for:</p><p>    * Running malicious code on the server: any code in the included malicious files will be run by the server. If the file include is not executed using some wrapper, code in include files is executed in the context of the server user. This could lead to a complete system compromise.</p><p>    * Running malicious code on clients: the attacker's malicious code can manipulate the content of the response sent to the client. The attacker can embed malicious code in the response that will be run by the client (for example, JavaScript to steal the client session cookies).</p><p></p><p>PHP is particularly vulnerable to RFI attacks due to the extensive use of \"file includes\" in PHP programming and due to default server configurations that increase susceptibility to an RFI attack.</p>",
+					"instances":[ 
+						{
+							"id": "499",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=http%3A%2F%2Fwww.google.com%2F",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "page",
+							"attack": "http://www.google.com/",
+							"evidence": "<title>Google</title>",
+							"otherinfo": ""
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>Phase: Architecture and Design</p><p>When the set of acceptable objects, such as filenames or URLs, is limited or known, create a mapping from a set of fixed input values (such as numeric IDs) to the actual filenames or URLs, and reject all other inputs.</p><p>For example, ID 1 could map to \"inbox.txt\" and ID 2 could map to \"profile.txt\". Features such as the ESAPI AccessReferenceMap provide this capability.</p><p></p><p>Phases: Architecture and Design; Operation</p><p>Run your code in a \"jail\" or similar sandbox environment that enforces strict boundaries between the process and the operating system. This may effectively restrict which files can be accessed in a particular directory or which commands can be executed by your software.</p><p>OS-level examples include the Unix chroot jail, AppArmor, and SELinux. In general, managed code may provide some protection. For example, java.io.FilePermission in the Java SecurityManager allows you to specify restrictions on file operations.</p><p>This may not be a feasible solution, and it only limits the impact to the operating system; the rest of your application may still be subject to compromise.</p><p>Be careful to avoid CWE-243 and other weaknesses related to jails.</p><p>For PHP, the interpreter offers restrictions such as open basedir or safe mode which can make it more difficult for an attacker to escape out of the application. Also consider Suhosin, a hardened PHP extension, which includes various options that disable some of the more dangerous PHP features.</p><p></p><p>Phase: Implementation</p><p>Assume all input is malicious. Use an \"accept known good\" input validation strategy, i.e., use an allow list of acceptable inputs that strictly conform to specifications. Reject any input that does not strictly conform to specifications, or transform it into something that does. Do not rely exclusively on looking for malicious or malformed inputs (i.e., do not rely on a deny list). However, deny lists can be useful for detecting potential attacks or determining which inputs are so malformed that they should be rejected outright.</p><p>When performing input validation, consider all potentially relevant properties, including length, type of input, the full range of acceptable values, missing or extra inputs, syntax, consistency across related fields, and conformance to business rules. As an example of business rule logic, \"boat\" may be syntactically valid because it only contains alphanumeric characters, but it is not valid if you are expecting colors such as \"red\" or \"blue.\"</p><p>For filenames, use stringent allow lists that limit the character set to be used. If feasible, only allow a single \".\" character in the filename to avoid weaknesses such as CWE-23, and exclude directory separators such as \"/\" to avoid CWE-36. Use an allow list of allowable file extensions, which will help to avoid CWE-434.</p><p></p><p>Phases: Architecture and Design; Operation</p><p>Store library, include, and utility files outside of the web document root, if possible. Otherwise, store them in a separate directory and use the web server's access control capabilities to prevent attackers from directly requesting them. One common practice is to define a fixed constant in each calling program, then check for the existence of the constant in the library/include file; if the constant does not exist, then the file was directly requested, and it can exit immediately.</p><p>This significantly reduces the chance of an attacker being able to bypass any protection mechanisms that are in the base program but not in the include files. It will also reduce your attack surface.</p><p></p><p>Phases: Architecture and Design; Implementation</p><p>Understand all the potential areas where untrusted inputs can enter your software: parameters or arguments, cookies, anything read from the network, environment variables, reverse DNS lookups, query results, request headers, URL components, e-mail, files, databases, and any external systems that provide data to the application. Remember that such inputs may be obtained indirectly through API calls.</p><p>Many file inclusion problems occur because the programmer assumed that certain inputs could not be modified, especially for cookies and URL components.</p>",
+					"otherinfo": "",
+					"reference": "<p>https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/07-Input_Validation_Testing/11.2-Testing_for_Remote_File_Inclusion</p><p>https://cwe.mitre.org/data/definitions/98.html</p>",
+					"cweid": "98",
+					"wascid": "5",
+					"sourceid": "203"
+				},
+				{
+					"pluginid": "90020",
+					"alertRef": "90020",
+					"alert": "Remote OS Command Injection",
+					"name": "Remote OS Command Injection",
+					"riskcode": "3",
+					"confidence": "2",
+					"riskdesc": "High (Medium)",
+					"desc": "<p>Attack technique used for unauthorized execution of operating system commands. This attack is possible when an application accepts untrusted input to build operating system commands in an insecure manner involving improper data sanitization, and/or improper calling of external programs.</p>",
+					"instances":[ 
+						{
+							"id": "509",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/exec/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/exec\/ ()(Submit,ip)",
+							"method": "POST",
+							"param": "ip",
+							"attack": "ZAP&cat /etc/passwd&",
+							"evidence": "root:x:0:0",
+							"otherinfo": "The scan rule was able to retrieve the content of a file or command by sending [ZAP&cat /etc/passwd&] to the operating system running this application."
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>If at all possible, use library calls rather than external processes to recreate the desired functionality.</p><p></p><p>Run your code in a \"jail\" or similar sandbox environment that enforces strict boundaries between the process and the operating system. This may effectively restrict which files can be accessed in a particular directory or which commands can be executed by your software.</p><p></p><p>OS-level examples include the Unix chroot jail, AppArmor, and SELinux. In general, managed code may provide some protection. For example, java.io.FilePermission in the Java SecurityManager allows you to specify restrictions on file operations.</p><p>This may not be a feasible solution, and it only limits the impact to the operating system; the rest of your application may still be subject to compromise.</p><p></p><p>For any data that will be used to generate a command to be executed, keep as much of that data out of external control as possible. For example, in web applications, this may require storing the command locally in the session's state instead of sending it out to the client in a hidden form field.</p><p></p><p>Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.</p><p></p><p>For example, consider using the ESAPI Encoding control or a similar tool, library, or framework. These will help the programmer encode outputs in a manner less prone to error.</p><p></p><p>If you need to use dynamically-generated query strings or commands in spite of the risk, properly quote arguments and escape any special characters within those arguments. The most conservative approach is to escape or filter all characters that do not pass an extremely strict allow list (such as everything that is not alphanumeric or white space). If some special characters are still needed, such as white space, wrap each argument in quotes after the escaping/filtering step. Be careful of argument injection.</p><p></p><p>If the program to be executed allows arguments to be specified within an input file or from standard input, then consider using that mode to pass arguments instead of the command line.</p><p></p><p>If available, use structured mechanisms that automatically enforce the separation between data and code. These mechanisms may be able to provide the relevant quoting, encoding, and validation automatically, instead of relying on the developer to provide this capability at every point where output is generated.</p><p></p><p>Some languages offer multiple functions that can be used to invoke commands. Where possible, identify any function that invokes a command shell using a single string, and replace it with a function that requires individual arguments. These functions typically perform appropriate quoting and filtering of arguments. For example, in C, the system() function accepts a string that contains the entire command to be executed, whereas execl(), execve(), and others require an array of strings, one for each argument. In Windows, CreateProcess() only accepts one command at a time. In Perl, if system() is provided with an array of arguments, then it will quote each of the arguments.</p><p></p><p>Assume all input is malicious. Use an \"accept known good\" input validation strategy, i.e., use an allow list of acceptable inputs that strictly conform to specifications. Reject any input that does not strictly conform to specifications, or transform it into something that does. Do not rely exclusively on looking for malicious or malformed inputs (i.e., do not rely on a deny list). However, deny lists can be useful for detecting potential attacks or determining which inputs are so malformed that they should be rejected outright.</p><p></p><p>When performing input validation, consider all potentially relevant properties, including length, type of input, the full range of acceptable values, missing or extra inputs, syntax, consistency across related fields, and conformance to business rules. As an example of business rule logic, \"boat\" may be syntactically valid because it only contains alphanumeric characters, but it is not valid if you are expecting colors such as \"red\" or \"blue.\"</p><p></p><p>When constructing OS command strings, use stringent allow lists that limit the character set based on the expected value of the parameter in the request. This will indirectly limit the scope of an attack, but this technique is less important than proper output encoding and escaping.</p><p></p><p>Note that proper output encoding, escaping, and quoting is the most effective solution for preventing OS command injection, although input validation may provide some defense-in-depth. This is because it effectively limits what will appear in output. Input validation will not always prevent OS command injection, especially if you are required to support free-form text fields that could contain arbitrary characters. For example, when invoking a mail program, you might need to allow the subject field to contain otherwise-dangerous inputs like \";\" and \">\" characters, which would need to be escaped or otherwise handled. In this case, stripping the character might reduce the risk of OS command injection, but it would produce incorrect behavior because the subject field would not be recorded as the user intended. This might seem to be a minor inconvenience, but it could be more important when the program relies on well-structured subject lines in order to pass messages to other components.</p><p></p><p>Even if you make a mistake in your validation (such as forgetting one out of 100 input fields), appropriate encoding is still likely to protect you from injection-based attacks. As long as it is not done in isolation, input validation is still a useful technique, since it may significantly reduce your attack surface, allow you to detect some attacks, and provide other security benefits that proper encoding does not address.</p>",
+					"otherinfo": "<p>The scan rule was able to retrieve the content of a file or command by sending [ZAP&cat /etc/passwd&] to the operating system running this application.</p>",
+					"reference": "<p>https://cwe.mitre.org/data/definitions/78.html</p><p>https://owasp.org/www-community/attacks/Command_Injection</p>",
+					"cweid": "78",
+					"wascid": "31",
+					"sourceid": "213"
+				},
+				{
+					"pluginid": "90037",
+					"alertRef": "90037",
+					"alert": "Remote OS Command Injection (Time Based)",
+					"name": "Remote OS Command Injection (Time Based)",
+					"riskcode": "3",
+					"confidence": "2",
+					"riskdesc": "High (Medium)",
+					"desc": "<p>Attack technique used for unauthorized execution of operating system commands. This attack is possible when an application accepts untrusted input to build operating system commands in an insecure manner involving improper data sanitization, and/or improper calling of external programs.</p>",
+					"instances":[ 
+						{
+							"id": "511",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/ ()(include)",
+							"method": "POST",
+							"param": "include",
+							"attack": "ZAP&sleep 15&",
+							"evidence": "",
+							"otherinfo": "The scan rule was able to control the timing of the application response by sending [ZAP&sleep 15&] to the operating system running this application."
+						},
+						{
+							"id": "510",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/exec/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/exec\/ ()(Submit,ip)",
+							"method": "POST",
+							"param": "ip",
+							"attack": "ZAP&sleep 15&",
+							"evidence": "",
+							"otherinfo": "The scan rule was able to control the timing of the application response by sending [ZAP&sleep 15&] to the operating system running this application."
+						},
+						{
+							"id": "512",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/upload/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/upload\/ ()(MAX_FILE_SIZE,Upload,uploaded)",
+							"method": "POST",
+							"param": "MAX_FILE_SIZE",
+							"attack": "100000&sleep 15&",
+							"evidence": "",
+							"otherinfo": "The scan rule was able to control the timing of the application response by sending [100000&sleep 15&] to the operating system running this application."
+						}
+					],
+					"count": "3",
+					"systemic": false,
+					"solution": "<p>If at all possible, use library calls rather than external processes to recreate the desired functionality.</p><p></p><p>Run your code in a \"jail\" or similar sandbox environment that enforces strict boundaries between the process and the operating system. This may effectively restrict which files can be accessed in a particular directory or which commands can be executed by your software.</p><p></p><p>OS-level examples include the Unix chroot jail, AppArmor, and SELinux. In general, managed code may provide some protection. For example, java.io.FilePermission in the Java SecurityManager allows you to specify restrictions on file operations.</p><p>This may not be a feasible solution, and it only limits the impact to the operating system; the rest of your application may still be subject to compromise.</p><p></p><p>For any data that will be used to generate a command to be executed, keep as much of that data out of external control as possible. For example, in web applications, this may require storing the command locally in the session's state instead of sending it out to the client in a hidden form field.</p><p></p><p>Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.</p><p></p><p>For example, consider using the ESAPI Encoding control or a similar tool, library, or framework. These will help the programmer encode outputs in a manner less prone to error.</p><p></p><p>If you need to use dynamically-generated query strings or commands in spite of the risk, properly quote arguments and escape any special characters within those arguments. The most conservative approach is to escape or filter all characters that do not pass an extremely strict allow list (such as everything that is not alphanumeric or white space). If some special characters are still needed, such as white space, wrap each argument in quotes after the escaping/filtering step. Be careful of argument injection.</p><p></p><p>If the program to be executed allows arguments to be specified within an input file or from standard input, then consider using that mode to pass arguments instead of the command line.</p><p></p><p>If available, use structured mechanisms that automatically enforce the separation between data and code. These mechanisms may be able to provide the relevant quoting, encoding, and validation automatically, instead of relying on the developer to provide this capability at every point where output is generated.</p><p></p><p>Some languages offer multiple functions that can be used to invoke commands. Where possible, identify any function that invokes a command shell using a single string, and replace it with a function that requires individual arguments. These functions typically perform appropriate quoting and filtering of arguments. For example, in C, the system() function accepts a string that contains the entire command to be executed, whereas execl(), execve(), and others require an array of strings, one for each argument. In Windows, CreateProcess() only accepts one command at a time. In Perl, if system() is provided with an array of arguments, then it will quote each of the arguments.</p><p></p><p>Assume all input is malicious. Use an \"accept known good\" input validation strategy, i.e., use an allow list of acceptable inputs that strictly conform to specifications. Reject any input that does not strictly conform to specifications, or transform it into something that does. Do not rely exclusively on looking for malicious or malformed inputs (i.e., do not rely on a deny list). However, deny lists can be useful for detecting potential attacks or determining which inputs are so malformed that they should be rejected outright.</p><p></p><p>When performing input validation, consider all potentially relevant properties, including length, type of input, the full range of acceptable values, missing or extra inputs, syntax, consistency across related fields, and conformance to business rules. As an example of business rule logic, \"boat\" may be syntactically valid because it only contains alphanumeric characters, but it is not valid if you are expecting colors such as \"red\" or \"blue.\"</p><p></p><p>When constructing OS command strings, use stringent allow lists that limit the character set based on the expected value of the parameter in the request. This will indirectly limit the scope of an attack, but this technique is less important than proper output encoding and escaping.</p><p></p><p>Note that proper output encoding, escaping, and quoting is the most effective solution for preventing OS command injection, although input validation may provide some defense-in-depth. This is because it effectively limits what will appear in output. Input validation will not always prevent OS command injection, especially if you are required to support free-form text fields that could contain arbitrary characters. For example, when invoking a mail program, you might need to allow the subject field to contain otherwise-dangerous inputs like \";\" and \">\" characters, which would need to be escaped or otherwise handled. In this case, stripping the character might reduce the risk of OS command injection, but it would produce incorrect behavior because the subject field would not be recorded as the user intended. This might seem to be a minor inconvenience, but it could be more important when the program relies on well-structured subject lines in order to pass messages to other components.</p><p></p><p>Even if you make a mistake in your validation (such as forgetting one out of 100 input fields), appropriate encoding is still likely to protect you from injection-based attacks. As long as it is not done in isolation, input validation is still a useful technique, since it may significantly reduce your attack surface, allow you to detect some attacks, and provide other security benefits that proper encoding does not address.</p>",
+					"otherinfo": "<p>The scan rule was able to control the timing of the application response by sending [ZAP&sleep 15&] to the operating system running this application.</p>",
+					"reference": "<p>https://cwe.mitre.org/data/definitions/78.html</p><p>https://owasp.org/www-community/attacks/Command_Injection</p>",
+					"cweid": "78",
+					"wascid": "31",
+					"sourceid": "215"
+				},
+				{
+					"pluginid": "40018",
+					"alertRef": "40018",
+					"alert": "SQL Injection",
+					"name": "SQL Injection",
+					"riskcode": "3",
+					"confidence": "2",
+					"riskdesc": "High (Medium)",
+					"desc": "<p>SQL injection may be possible.</p>",
+					"instances":[ 
+						{
+							"id": "505",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/sqli_blind/?Submit=Submit&id=ZAP%27+AND+%271%27%3D%271%27+--+",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/sqli_blind\/ (Submit,id)",
+							"method": "GET",
+							"param": "id",
+							"attack": "ZAP' OR '1'='1' -- ",
+							"evidence": "",
+							"otherinfo": "The page results were successfully manipulated using the boolean conditions [ZAP' AND '1'='1' -- ] and [ZAP' OR '1'='1' -- ]\nThe parameter value being modified was stripped from the HTML output for the purposes of the comparison.\nData was NOT returned for the original parameter.\nThe vulnerability was detected by successfully retrieving more data than originally returned, by manipulating the parameter."
+						},
+						{
+							"id": "508",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/xss_s/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/xss_s\/ ()(btnSign,mtxMessage,txtName)",
+							"method": "POST",
+							"param": "mtxMessage",
+							"attack": "' OR '1'='1",
+							"evidence": "",
+							"otherinfo": "The page results were successfully manipulated using the boolean conditions [' AND '1'='1] and [' OR '1'='1]\nThe parameter value being modified was stripped from the HTML output for the purposes of the comparison.\nData was NOT returned for the original parameter.\nThe vulnerability was detected by successfully retrieving more data than originally returned, by manipulating the parameter."
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>Do not trust client side input, even if there is client side validation in place.</p><p>In general, type check all data on the server side.</p><p>If the application uses JDBC, use PreparedStatement or CallableStatement, with parameters passed by '?'</p><p>If the application uses ASP, use ADO Command Objects with strong type checking and parameterized queries.</p><p>If database Stored Procedures can be used, use them.</p><p>Do *not* concatenate strings into queries in the stored procedure, or use 'exec', 'exec immediate', or equivalent functionality!</p><p>Do not create dynamic SQL queries using simple string concatenation.</p><p>Escape all data received from the client.</p><p>Apply an 'allow list' of allowed characters, or a 'deny list' of disallowed characters in user input.</p><p>Apply the principle of least privilege by using the least privileged database user possible.</p><p>In particular, avoid using the 'sa' or 'db-owner' database users. This does not eliminate SQL injection, but minimizes its impact.</p><p>Grant the minimum database access that is necessary for the application.</p>",
+					"otherinfo": "<p>The page results were successfully manipulated using the boolean conditions [ZAP' AND '1'='1' -- ] and [ZAP' OR '1'='1' -- ]</p><p>The parameter value being modified was stripped from the HTML output for the purposes of the comparison.</p><p>Data was NOT returned for the original parameter.</p><p>The vulnerability was detected by successfully retrieving more data than originally returned, by manipulating the parameter.</p>",
+					"reference": "<p>https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html</p>",
+					"cweid": "89",
+					"wascid": "19",
+					"sourceid": "209"
+				},
+				{
+					"pluginid": "40018",
+					"alertRef": "40018",
+					"alert": "SQL Injection - MySQL",
+					"name": "SQL Injection - MySQL",
+					"riskcode": "3",
+					"confidence": "2",
+					"riskdesc": "High (Medium)",
+					"desc": "<p>SQL injection may be possible.</p>",
+					"instances":[ 
+						{
+							"id": "507",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/?Login=Login&password=ZAP&username=%27",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/ (Login,password,username)",
+							"method": "GET",
+							"param": "username",
+							"attack": "'",
+							"evidence": "You have an error in your SQL syntax",
+							"otherinfo": "RDBMS [MySQL] likely, given error message regular expression [\\QYou have an error in your SQL syntax\\E] matched by the HTML results.\nThe vulnerability was detected by manipulating the parameter to cause a database error message to be returned and recognised."
+						},
+						{
+							"id": "506",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/sqli/?Submit=Submit&id=%27",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/sqli\/ (Submit,id)",
+							"method": "GET",
+							"param": "id",
+							"attack": "'",
+							"evidence": "You have an error in your SQL syntax",
+							"otherinfo": "RDBMS [MySQL] likely, given error message regular expression [\\QYou have an error in your SQL syntax\\E] matched by the HTML results.\nThe vulnerability was detected by manipulating the parameter to cause a database error message to be returned and recognised."
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>Do not trust client side input, even if there is client side validation in place.</p><p>In general, type check all data on the server side.</p><p>If the application uses JDBC, use PreparedStatement or CallableStatement, with parameters passed by '?'</p><p>If the application uses ASP, use ADO Command Objects with strong type checking and parameterized queries.</p><p>If database Stored Procedures can be used, use them.</p><p>Do *not* concatenate strings into queries in the stored procedure, or use 'exec', 'exec immediate', or equivalent functionality!</p><p>Do not create dynamic SQL queries using simple string concatenation.</p><p>Escape all data received from the client.</p><p>Apply an 'allow list' of allowed characters, or a 'deny list' of disallowed characters in user input.</p><p>Apply the principle of least privilege by using the least privileged database user possible.</p><p>In particular, avoid using the 'sa' or 'db-owner' database users. This does not eliminate SQL injection, but minimizes its impact.</p><p>Grant the minimum database access that is necessary for the application.</p>",
+					"otherinfo": "<p>RDBMS [MySQL] likely, given error message regular expression [\\QYou have an error in your SQL syntax\\E] matched by the HTML results.</p><p>The vulnerability was detected by manipulating the parameter to cause a database error message to be returned and recognised.</p>",
+					"reference": "<p>https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html</p>",
+					"cweid": "89",
+					"wascid": "19",
+					"sourceid": "211"
+				},
+				{
+					"pluginid": "10202",
+					"alertRef": "10202",
+					"alert": "Absence of Anti-CSRF Tokens",
+					"name": "Absence of Anti-CSRF Tokens",
+					"riskcode": "2",
+					"confidence": "1",
+					"riskdesc": "Medium (Low)",
+					"desc": "<p>No Anti-CSRF tokens were found in a HTML submission form.</p><p>A cross-site request forgery is an attack that involves forcing a victim to send an HTTP request to a target destination without their knowledge or intent in order to perform an action as the victim. The underlying cause is application functionality using predictable URL/form actions in a repeatable way. The nature of the attack is that CSRF exploits the trust that a web site has for a user. By contrast, cross-site scripting (XSS) exploits the trust that a user has for a web site. Like XSS, CSRF attacks are not necessarily cross-site, but they can be. Cross-site request forgery is also known as CSRF, XSRF, one-click attack, session riding, confused deputy, and sea surf.</p><p></p><p>CSRF attacks are effective in a number of situations, including:</p><p>    * The victim has an active session on the target site.</p><p>    * The victim is authenticated via HTTP auth on the target site.</p><p>    * The victim is on the same local network as the target site.</p><p></p><p>CSRF has primarily been used to perform an action against a target site using the victim's privileges, but recent techniques have been discovered to disclose information by gaining access to the response. The risk of information disclosure is dramatically increased when the target site is vulnerable to XSS, because XSS can be used as a platform for CSRF, allowing the attack to operate within the bounds of the same-origin policy.</p>",
+					"instances":[ 
+						{
+							"id": "104",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<form name=\"csp\" method=\"POST\">",
+							"otherinfo": "No known Anti-CSRF token [anticsrf, CSRFToken, __RequestVerificationToken, csrfmiddlewaretoken, authenticity_token, OWASP_CSRFTOKEN, anoncsrf, csrf_token, _csrf, _csrfSecret, __csrf_magic, CSRF, _token, _csrf_token, _csrfToken] was found in the following HTML form: [Form 1: \"include\" ]."
+						},
+						{
+							"id": "55",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/exec/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/exec\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<form name=\"ping\" action=\"#\" method=\"post\">",
+							"otherinfo": "No known Anti-CSRF token [anticsrf, CSRFToken, __RequestVerificationToken, csrfmiddlewaretoken, authenticity_token, OWASP_CSRFTOKEN, anoncsrf, csrf_token, _csrf, _csrfSecret, __csrf_magic, CSRF, _token, _csrf_token, _csrfToken] was found in the following HTML form: [Form 1: \"ip\" \"Submit\" ]."
+						},
+						{
+							"id": "63",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/upload/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/upload\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<form enctype=\"multipart/form-data\" action=\"#\" method=\"POST\">",
+							"otherinfo": "No known Anti-CSRF token [anticsrf, CSRFToken, __RequestVerificationToken, csrfmiddlewaretoken, authenticity_token, OWASP_CSRFTOKEN, anoncsrf, csrf_token, _csrf, _csrfSecret, __csrf_magic, CSRF, _token, _csrf_token, _csrfToken] was found in the following HTML form: [Form 1: \"MAX_FILE_SIZE\" \"Upload\" \"uploaded\" ]."
+						},
+						{
+							"id": "71",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/weak_id/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/weak_id\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<form method=\"post\">",
+							"otherinfo": "No known Anti-CSRF token [anticsrf, CSRFToken, __RequestVerificationToken, csrfmiddlewaretoken, authenticity_token, OWASP_CSRFTOKEN, anoncsrf, csrf_token, _csrf, _csrfSecret, __csrf_magic, CSRF, _token, _csrf_token, _csrfToken] was found in the following HTML form: [Form 1: \"\" ]."
+						},
+						{
+							"id": "93",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/xss_s/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/xss_s\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<form method=\"post\" name=\"guestform\" \">",
+							"otherinfo": "No known Anti-CSRF token [anticsrf, CSRFToken, __RequestVerificationToken, csrfmiddlewaretoken, authenticity_token, OWASP_CSRFTOKEN, anoncsrf, csrf_token, _csrf, _csrfSecret, __csrf_magic, CSRF, _token, _csrf_token, _csrfToken] was found in the following HTML form: [Form 1: \"btnClear\" \"btnSign\" \"txtName\" ]."
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>Phase: Architecture and Design</p><p>Use a vetted library or framework that does not allow this weakness to occur or provides constructs that make this weakness easier to avoid.</p><p>For example, use anti-CSRF packages such as the OWASP CSRFGuard.</p><p></p><p>Phase: Implementation</p><p>Ensure that your application is free of cross-site scripting issues, because most CSRF defenses can be bypassed using attacker-controlled script.</p><p></p><p>Phase: Architecture and Design</p><p>Generate a unique nonce for each form, place the nonce into the form, and verify the nonce upon receipt of the form. Be sure that the nonce is not predictable (CWE-330).</p><p>Note that this can be bypassed using XSS.</p><p></p><p>Identify especially dangerous operations. When the user performs a dangerous operation, send a separate confirmation request to ensure that the user intended to perform that operation.</p><p>Note that this can be bypassed using XSS.</p><p></p><p>Use the ESAPI Session Management control.</p><p>This control includes a component for CSRF.</p><p></p><p>Do not use the GET method for any request that triggers a state change.</p><p></p><p>Phase: Implementation</p><p>Check the HTTP Referer header to see if the request originated from an expected page. This could break legitimate functionality, because users or proxies may have disabled sending the Referer for privacy reasons.</p>",
+					"otherinfo": "<p>No known Anti-CSRF token [anticsrf, CSRFToken, __RequestVerificationToken, csrfmiddlewaretoken, authenticity_token, OWASP_CSRFTOKEN, anoncsrf, csrf_token, _csrf, _csrfSecret, __csrf_magic, CSRF, _token, _csrf_token, _csrfToken] was found in the following HTML form: [Form 1: \"include\" ].</p>",
+					"reference": "<p>https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html</p><p>https://cwe.mitre.org/data/definitions/352.html</p>",
+					"cweid": "352",
+					"wascid": "9",
+					"sourceid": "84"
+				},
+				{
+					"pluginid": "90022",
+					"alertRef": "90022",
+					"alert": "Application Error Disclosure",
+					"name": "Application Error Disclosure",
+					"riskcode": "2",
+					"confidence": "2",
+					"riskdesc": "Medium (Medium)",
+					"desc": "<p>This page contains an error/warning message that may disclose sensitive information like the location of the file that produced the unhandled exception. This information can be used to launch further attacks against the web application. The alert could be a false positive if the error message is found inside a documentation page.</p>",
+					"instances":[ 
+						{
+							"id": "237",
+							"uri": "https://192.168.4.4/dvwa/README.ar.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.ar.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "277",
+							"uri": "https://192.168.4.4/dvwa/README.es.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.es.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "262",
+							"uri": "https://192.168.4.4/dvwa/README.fa.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.fa.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "257",
+							"uri": "https://192.168.4.4/dvwa/README.fr.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.fr.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "287",
+							"uri": "https://192.168.4.4/dvwa/README.id.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.id.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "297",
+							"uri": "https://192.168.4.4/dvwa/README.it.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.it.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "266",
+							"uri": "https://192.168.4.4/dvwa/README.pl.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.pl.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "282",
+							"uri": "https://192.168.4.4/dvwa/README.pt.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.pt.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "307",
+							"uri": "https://192.168.4.4/dvwa/README.ru.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.ru.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "272",
+							"uri": "https://192.168.4.4/dvwa/README.tr.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.tr.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "302",
+							"uri": "https://192.168.4.4/dvwa/README.uk.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.uk.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "292",
+							"uri": "https://192.168.4.4/dvwa/README.vi.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.vi.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "248",
+							"uri": "https://192.168.4.4/dvwa/README.zh.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.zh.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "30",
+							"uri": "https://192.168.4.4/dvwa/instructions.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "200",
+							"uri": "https://192.168.4.4/dvwa/instructions.php?doc=readme",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php (doc)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Can't connect to local",
+							"otherinfo": ""
+						},
+						{
+							"id": "388",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/upload/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/upload\/ ()(MAX_FILE_SIZE,Upload,uploaded)",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "<b>Warning</b>:  Undefined array key \"uploaded\" in <b>/var/www/html/vulnerabilities/upload/source/low.php</b> on line <b>6</b><br />",
+							"otherinfo": ""
+						}
+					],
+					"count": "16",
+					"systemic": false,
+					"solution": "<p>Review the source code of this page. Implement custom error pages. Consider implementing a mechanism to provide a unique error reference/identifier to the client (browser) while logging the details on the server side and not exposing them to the user.</p>",
+					"otherinfo": "",
+					"reference": "",
+					"cweid": "550",
+					"wascid": "13",
+					"sourceid": "124"
+				},
+				{
+					"pluginid": "10055",
+					"alertRef": "10055-13",
+					"alert": "CSP: Failure to Define Directive with No Fallback",
+					"name": "CSP: Failure to Define Directive with No Fallback",
+					"riskcode": "2",
+					"confidence": "3",
+					"riskdesc": "Medium (High)",
+					"desc": "<p>The Content Security Policy fails to define one of the directives that has no fallback. Missing/excluding them is the same as allowing anything.</p>",
+					"instances":[ 
+						{
+							"id": "100",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/",
+							"method": "GET",
+							"param": "Content-Security-Policy",
+							"attack": "",
+							"evidence": "script-src 'self' https://pastebin.com hastebin.com www.toptal.com example.com code.jquery.com https://ssl.google-analytics.com unpkg.com cdn.jsdelivr.net digi.ninja ;",
+							"otherinfo": "The directive(s): frame-ancestors, form-action is/are among the directives that do not fallback to default-src."
+						},
+						{
+							"id": "420",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/ ()(include)",
+							"method": "POST",
+							"param": "Content-Security-Policy",
+							"attack": "",
+							"evidence": "script-src 'self' https://pastebin.com hastebin.com www.toptal.com example.com code.jquery.com https://ssl.google-analytics.com unpkg.com cdn.jsdelivr.net digi.ninja ;",
+							"otherinfo": "The directive(s): frame-ancestors, form-action is/are among the directives that do not fallback to default-src."
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>Ensure that your web server, application server, load balancer, etc. is properly configured to set the Content-Security-Policy header.</p>",
+					"otherinfo": "<p>The directive(s): frame-ancestors, form-action is/are among the directives that do not fallback to default-src.</p>",
+					"reference": "<p>https://www.w3.org/TR/CSP/</p><p>https://caniuse.com/#search=content+security+policy</p><p>https://content-security-policy.com/</p><p>https://github.com/HtmlUnit/htmlunit-csp</p><p>https://web.dev/articles/csp#resource-options</p>",
+					"cweid": "693",
+					"wascid": "15",
+					"sourceid": "84"
+				},
+				{
+					"pluginid": "10055",
+					"alertRef": "10055-4",
+					"alert": "CSP: Wildcard Directive",
+					"name": "CSP: Wildcard Directive",
+					"riskcode": "2",
+					"confidence": "3",
+					"riskdesc": "Medium (High)",
+					"desc": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks. Including (but not limited to) Cross Site Scripting (XSS), and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page \u2014 covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+					"instances":[ 
+						{
+							"id": "101",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/",
+							"method": "GET",
+							"param": "Content-Security-Policy",
+							"attack": "",
+							"evidence": "script-src 'self' https://pastebin.com hastebin.com www.toptal.com example.com code.jquery.com https://ssl.google-analytics.com unpkg.com cdn.jsdelivr.net digi.ninja ;",
+							"otherinfo": "The following directives either allow wildcard sources (or ancestors), are not defined, or are overly broadly defined:\nstyle-src, img-src, connect-src, frame-src, font-src, media-src, object-src, manifest-src"
+						},
+						{
+							"id": "421",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/ ()(include)",
+							"method": "POST",
+							"param": "Content-Security-Policy",
+							"attack": "",
+							"evidence": "script-src 'self' https://pastebin.com hastebin.com www.toptal.com example.com code.jquery.com https://ssl.google-analytics.com unpkg.com cdn.jsdelivr.net digi.ninja ;",
+							"otherinfo": "The following directives either allow wildcard sources (or ancestors), are not defined, or are overly broadly defined:\nstyle-src, img-src, connect-src, frame-src, font-src, media-src, object-src, manifest-src"
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>Ensure that your web server, application server, load balancer, etc. is properly configured to set the Content-Security-Policy header.</p>",
+					"otherinfo": "<p>The following directives either allow wildcard sources (or ancestors), are not defined, or are overly broadly defined:</p><p>style-src, img-src, connect-src, frame-src, font-src, media-src, object-src, manifest-src</p>",
+					"reference": "<p>https://www.w3.org/TR/CSP/</p><p>https://caniuse.com/#search=content+security+policy</p><p>https://content-security-policy.com/</p><p>https://github.com/HtmlUnit/htmlunit-csp</p><p>https://web.dev/articles/csp#resource-options</p>",
+					"cweid": "693",
+					"wascid": "15",
+					"sourceid": "84"
+				},
+				{
+					"pluginid": "10055",
+					"alertRef": "10055-6",
+					"alert": "CSP: style-src unsafe-inline",
+					"name": "CSP: style-src unsafe-inline",
+					"riskcode": "2",
+					"confidence": "3",
+					"riskdesc": "Medium (High)",
+					"desc": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks. Including (but not limited to) Cross Site Scripting (XSS), and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page \u2014 covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+					"instances":[ 
+						{
+							"id": "102",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/",
+							"method": "GET",
+							"param": "Content-Security-Policy",
+							"attack": "",
+							"evidence": "script-src 'self' https://pastebin.com hastebin.com www.toptal.com example.com code.jquery.com https://ssl.google-analytics.com unpkg.com cdn.jsdelivr.net digi.ninja ;",
+							"otherinfo": "style-src includes unsafe-inline."
+						},
+						{
+							"id": "422",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/ ()(include)",
+							"method": "POST",
+							"param": "Content-Security-Policy",
+							"attack": "",
+							"evidence": "script-src 'self' https://pastebin.com hastebin.com www.toptal.com example.com code.jquery.com https://ssl.google-analytics.com unpkg.com cdn.jsdelivr.net digi.ninja ;",
+							"otherinfo": "style-src includes unsafe-inline."
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>Ensure that your web server, application server, load balancer, etc. is properly configured to set the Content-Security-Policy header.</p>",
+					"otherinfo": "<p>style-src includes unsafe-inline.</p>",
+					"reference": "<p>https://www.w3.org/TR/CSP/</p><p>https://caniuse.com/#search=content+security+policy</p><p>https://content-security-policy.com/</p><p>https://github.com/HtmlUnit/htmlunit-csp</p><p>https://web.dev/articles/csp#resource-options</p>",
+					"cweid": "693",
+					"wascid": "15",
+					"sourceid": "84"
+				},
+				{
+					"pluginid": "10038",
+					"alertRef": "10038-1",
+					"alert": "Content Security Policy (CSP) Header Not Set",
+					"name": "Content Security Policy (CSP) Header Not Set",
+					"riskcode": "2",
+					"confidence": "3",
+					"riskdesc": "Medium (High)",
+					"desc": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page \u2014 covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+					"instances":[ 
+						{
+							"id": "3",
+							"uri": "https://192.168.4.4/dvwa/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "5",
+							"uri": "https://192.168.4.4/dvwa/index.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/index.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "32",
+							"uri": "https://192.168.4.4/dvwa/instructions.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "24",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "35",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=include.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header.</p>",
+					"otherinfo": "",
+					"reference": "<p>https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP</p><p>https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html</p><p>https://www.w3.org/TR/CSP/</p><p>https://w3c.github.io/webappsec-csp/</p><p>https://web.dev/articles/csp</p><p>https://caniuse.com/#feat=contentsecuritypolicy</p><p>https://content-security-policy.com/</p>",
+					"cweid": "693",
+					"wascid": "15",
+					"sourceid": "1"
+				},
+				{
+					"pluginid": "10020",
+					"alertRef": "10020-1",
+					"alert": "Missing Anti-clickjacking Header",
+					"name": "Missing Anti-clickjacking Header",
+					"riskcode": "2",
+					"confidence": "2",
+					"riskdesc": "Medium (Medium)",
+					"desc": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+					"instances":[ 
+						{
+							"id": "0",
+							"uri": "https://192.168.4.4/dvwa/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/",
+							"method": "GET",
+							"param": "x-frame-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "29",
+							"uri": "https://192.168.4.4/dvwa/instructions.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php",
+							"method": "GET",
+							"param": "x-frame-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "22",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/",
+							"method": "GET",
+							"param": "x-frame-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "33",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=include.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "x-frame-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						}
+					],
+					"count": "4",
+					"systemic": true,
+					"solution": "<p>Modern Web browsers support the Content-Security-Policy and X-Frame-Options HTTP headers. Ensure one of them is set on all web pages returned by your site/app.</p><p>If you expect the page to be framed only by pages on your server (e.g. it's part of a FRAMESET) then you'll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. Alternatively consider implementing Content Security Policy's \"frame-ancestors\" directive.</p>",
+					"otherinfo": "",
+					"reference": "<p>https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options</p>",
+					"cweid": "1021",
+					"wascid": "15",
+					"sourceid": "1"
+				},
+				{
+					"pluginid": "10010",
+					"alertRef": "10010",
+					"alert": "Cookie No HttpOnly Flag",
+					"name": "Cookie No HttpOnly Flag",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>A cookie has been set without the HttpOnly flag, which means that the cookie can be accessed by JavaScript. If a malicious script can be run on this page then the cookie will be accessible and can be transmitted to another site. If this is a session cookie then session hijacking may be possible.</p>",
+					"instances":[ 
+						{
+							"id": "378",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/weak_id/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/weak_id\/",
+							"method": "POST",
+							"param": "dvwaSession",
+							"attack": "",
+							"evidence": "Set-Cookie: dvwaSession",
+							"otherinfo": ""
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>Ensure that the HttpOnly flag is set for all cookies.</p>",
+					"otherinfo": "",
+					"reference": "<p>https://owasp.org/www-community/HttpOnly</p>",
+					"cweid": "1004",
+					"wascid": "13",
+					"sourceid": "152"
+				},
+				{
+					"pluginid": "10011",
+					"alertRef": "10011",
+					"alert": "Cookie Without Secure Flag",
+					"name": "Cookie Without Secure Flag",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>A cookie has been set without the secure flag, which means that the cookie can be accessed via unencrypted connections.</p>",
+					"instances":[ 
+						{
+							"id": "381",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/weak_id/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/weak_id\/",
+							"method": "POST",
+							"param": "dvwaSession",
+							"attack": "",
+							"evidence": "Set-Cookie: dvwaSession",
+							"otherinfo": ""
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>Whenever a cookie contains sensitive information or is a session token, then it should always be passed using an encrypted channel. Ensure that the secure flag is set for cookies containing such sensitive information.</p>",
+					"otherinfo": "",
+					"reference": "<p>https://owasp.org/www-project-web-security-testing-guide/v41/4-Web_Application_Security_Testing/06-Session_Management_Testing/02-Testing_for_Cookies_Attributes.html</p>",
+					"cweid": "614",
+					"wascid": "13",
+					"sourceid": "152"
+				},
+				{
+					"pluginid": "10054",
+					"alertRef": "10054-1",
+					"alert": "Cookie without SameSite Attribute",
+					"name": "Cookie without SameSite Attribute",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>A cookie has been set without the SameSite attribute, which means that the cookie can be sent as a result of a 'cross-site' request. The SameSite attribute is an effective counter measure to cross-site request forgery, cross-site script inclusion, and timing attacks.</p>",
+					"instances":[ 
+						{
+							"id": "380",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/weak_id/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/weak_id\/",
+							"method": "POST",
+							"param": "dvwaSession",
+							"attack": "",
+							"evidence": "Set-Cookie: dvwaSession",
+							"otherinfo": ""
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>Ensure that the SameSite attribute is set to either 'lax' or ideally 'strict' for all cookies.</p>",
+					"otherinfo": "",
+					"reference": "<p>https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-cookie-same-site</p>",
+					"cweid": "1275",
+					"wascid": "13",
+					"sourceid": "152"
+				},
+				{
+					"pluginid": "10009",
+					"alertRef": "10009",
+					"alert": "In Page Banner Information Leak",
+					"name": "In Page Banner Information Leak",
+					"riskcode": "1",
+					"confidence": "3",
+					"riskdesc": "Low (High)",
+					"desc": "<p>The server returned a version banner string in the response content. Such information leaks may allow attackers to further target specific issues impacting the product and version in use.</p>",
+					"instances":[ 
+						{
+							"id": "451",
+							"uri": "https://192.168.4.4/dvwa/DTD/xhtml1-transitional.dtd",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/DTD\/xhtml1-transitional.dtd",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Apache/2.4.68",
+							"otherinfo": "There is a chance that the highlight in the finding is on a value in the headers, versus the actual matched string in the response body."
+						},
+						{
+							"id": "316",
+							"uri": "https://192.168.4.4/dvwa/compose.yml",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/compose.yml",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Apache/2.4.68",
+							"otherinfo": "There is a chance that the highlight in the finding is on a value in the headers, versus the actual matched string in the response body."
+						},
+						{
+							"id": "487",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/ZAP",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/ZAP",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Apache/2.4.68",
+							"otherinfo": "There is a chance that the highlight in the finding is on a value in the headers, versus the actual matched string in the response body."
+						}
+					],
+					"count": "3",
+					"systemic": false,
+					"solution": "<p>Configure the server to prevent such information leaks. For example:</p><p>Under Tomcat this is done via the \"server\" directive and implementation of custom error pages.</p><p>Under Apache this is done via the \"ServerSignature\" and \"ServerTokens\" directives.</p>",
+					"otherinfo": "<p>There is a chance that the highlight in the finding is on a value in the headers, versus the actual matched string in the response body.</p>",
+					"reference": "<p>https://owasp.org/www-project-web-security-testing-guide/v41/4-Web_Application_Security_Testing/08-Testing_for_Error_Handling/</p>",
+					"cweid": "497",
+					"wascid": "13",
+					"sourceid": "169"
+				},
+				{
+					"pluginid": "10023",
+					"alertRef": "10023",
+					"alert": "Information Disclosure - Debug Error Messages",
+					"name": "Information Disclosure - Debug Error Messages",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>The response appeared to contain common error messages returned by platforms such as ASP.NET, and Web-servers such as IIS and Apache. You can configure the list of common debug messages.</p>",
+					"instances":[ 
+						{
+							"id": "239",
+							"uri": "https://192.168.4.4/dvwa/README.ar.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.ar.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "279",
+							"uri": "https://192.168.4.4/dvwa/README.es.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.es.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "264",
+							"uri": "https://192.168.4.4/dvwa/README.fa.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.fa.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "259",
+							"uri": "https://192.168.4.4/dvwa/README.fr.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.fr.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "289",
+							"uri": "https://192.168.4.4/dvwa/README.id.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.id.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "299",
+							"uri": "https://192.168.4.4/dvwa/README.it.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.it.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "254",
+							"uri": "https://192.168.4.4/dvwa/README.ko.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.ko.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "269",
+							"uri": "https://192.168.4.4/dvwa/README.pl.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.pl.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "284",
+							"uri": "https://192.168.4.4/dvwa/README.pt.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.pt.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "309",
+							"uri": "https://192.168.4.4/dvwa/README.ru.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.ru.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "274",
+							"uri": "https://192.168.4.4/dvwa/README.tr.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.tr.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "or user 'notdvwa'@'loc",
+							"otherinfo": ""
+						},
+						{
+							"id": "304",
+							"uri": "https://192.168.4.4/dvwa/README.uk.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.uk.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "294",
+							"uri": "https://192.168.4.4/dvwa/README.vi.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.vi.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "250",
+							"uri": "https://192.168.4.4/dvwa/README.zh.md",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/README.zh.md",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "40",
+							"uri": "https://192.168.4.4/dvwa/instructions.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						},
+						{
+							"id": "210",
+							"uri": "https://192.168.4.4/dvwa/instructions.php?doc=readme",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php (doc)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "Access denied for user",
+							"otherinfo": ""
+						}
+					],
+					"count": "16",
+					"systemic": false,
+					"solution": "<p>Disable debugging messages before pushing to production.</p>",
+					"otherinfo": "",
+					"reference": "",
+					"cweid": "1295",
+					"wascid": "13",
+					"sourceid": "124"
+				},
+				{
+					"pluginid": "2",
+					"alertRef": "2",
+					"alert": "Private IP Disclosure",
+					"name": "Private IP Disclosure",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>A private IP (such as 10.x.x.x, 172.x.x.x, 192.168.x.x) or an Amazon EC2 private hostname (for example, ip-10-0-56-78) has been found in the HTTP response body. This information might be helpful for further attacks targeting internal systems.</p>",
+					"instances":[ 
+						{
+							"id": "144",
+							"uri": "https://192.168.4.4/dvwa/phpinfo.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/phpinfo.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "172.18.0.4:80",
+							"otherinfo": "172.18.0.4:80\n192.168.1.4\n192.168.1.4\n172.18.0.4\n172.18.0.2\n192.168.1.4\n192.168.1.4\n192.168.1.4\n192.168.1.4\n172.18.0.4\n172.18.0.2\n"
+						},
+						{
+							"id": "342",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=file1.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "172.18.0.2",
+							"otherinfo": "172.18.0.2\n"
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>Remove the private IP address from the HTTP response body. For comments, use JSP/ASP/PHP comment instead of HTML/JavaScript comment which can be seen by client browsers.</p>",
+					"otherinfo": "<p>172.18.0.4:80</p><p>192.168.1.4</p><p>192.168.1.4</p><p>172.18.0.4</p><p>172.18.0.2</p><p>192.168.1.4</p><p>192.168.1.4</p><p>192.168.1.4</p><p>192.168.1.4</p><p>172.18.0.4</p><p>172.18.0.2</p><p></p>",
+					"reference": "<p>https://datatracker.ietf.org/doc/html/rfc1918</p>",
+					"cweid": "497",
+					"wascid": "13",
+					"sourceid": "105"
+				},
+				{
+					"pluginid": "10037",
+					"alertRef": "10037",
+					"alert": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+					"name": "Server Leaks Information via \"X-Powered-By\" HTTP Response Header Field(s)",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>The web/application server is leaking information via one or more \"X-Powered-By\" HTTP response headers. Access to such information may facilitate attackers identifying other frameworks/components your web application is reliant upon and the vulnerabilities such components may be subject to.</p>",
+					"instances":[ 
+						{
+							"id": "14",
+							"uri": "https://192.168.4.4/dvwa/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "X-Powered-By: PHP/8.5.11",
+							"otherinfo": ""
+						},
+						{
+							"id": "12",
+							"uri": "https://192.168.4.4/dvwa/index.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/index.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "X-Powered-By: PHP/8.5.11",
+							"otherinfo": ""
+						},
+						{
+							"id": "44",
+							"uri": "https://192.168.4.4/dvwa/instructions.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "X-Powered-By: PHP/8.5.11",
+							"otherinfo": ""
+						},
+						{
+							"id": "28",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "X-Powered-By: PHP/8.5.11",
+							"otherinfo": ""
+						},
+						{
+							"id": "39",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=include.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "X-Powered-By: PHP/8.5.11",
+							"otherinfo": ""
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to suppress \"X-Powered-By\" headers.</p>",
+					"otherinfo": "",
+					"reference": "<p>https://owasp.org/www-project-web-security-testing-guide/v42/4-Web_Application_Security_Testing/01-Information_Gathering/08-Fingerprint_Web_Application_Framework</p><p>https://www.troyhunt.com/shhh-dont-let-your-response-headers/</p>",
+					"cweid": "497",
+					"wascid": "13",
+					"sourceid": "1"
+				},
+				{
+					"pluginid": "10035",
+					"alertRef": "10035-1",
+					"alert": "Strict-Transport-Security Header Not Set",
+					"name": "Strict-Transport-Security Header Not Set",
+					"riskcode": "1",
+					"confidence": "3",
+					"riskdesc": "Low (High)",
+					"desc": "<p>HTTP Strict Transport Security (HSTS) is a web security policy mechanism whereby a web server declares that complying user agents (such as a web browser) are to interact with it using only secure HTTPS connections (i.e. HTTP layered over TLS/SSL). HSTS is an IETF standards track protocol and is specified in RFC 6797.</p>",
+					"instances":[ 
+						{
+							"id": "10",
+							"uri": "https://192.168.4.4/dvwa/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "8",
+							"uri": "https://192.168.4.4/dvwa/index.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/index.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "42",
+							"uri": "https://192.168.4.4/dvwa/instructions.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "26",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						},
+						{
+							"id": "37",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=include.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": ""
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to enforce Strict-Transport-Security.</p>",
+					"otherinfo": "",
+					"reference": "<p>https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html</p><p>https://owasp.org/www-community/Security_Headers</p><p>https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security</p><p>https://caniuse.com/stricttransportsecurity</p><p>https://datatracker.ietf.org/doc/html/rfc6797</p>",
+					"cweid": "319",
+					"wascid": "15",
+					"sourceid": "1"
+				},
+				{
+					"pluginid": "10096",
+					"alertRef": "10096",
+					"alert": "Timestamp Disclosure - Unix",
+					"name": "Timestamp Disclosure - Unix",
+					"riskcode": "1",
+					"confidence": "1",
+					"riskdesc": "Low (Low)",
+					"desc": "<p>A timestamp was disclosed by the application/web server. - Unix</p>",
+					"instances":[ 
+						{
+							"id": "146",
+							"uri": "https://192.168.4.4/dvwa/phpinfo.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/phpinfo.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "1793640049",
+							"otherinfo": "1793640049, which evaluates to: 2026-11-02 17:20:49."
+						},
+						{
+							"id": "156",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/javascript/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/javascript\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "1732584193",
+							"otherinfo": "1732584193, which evaluates to: 2024-11-26 01:23:13."
+						},
+						{
+							"id": "157",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/javascript/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/javascript\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "1732584194",
+							"otherinfo": "1732584194, which evaluates to: 2024-11-26 01:23:14."
+						},
+						{
+							"id": "158",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/javascript/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/javascript\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "1770035416",
+							"otherinfo": "1770035416, which evaluates to: 2026-02-02 12:30:16."
+						},
+						{
+							"id": "159",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/javascript/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/javascript\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "1958414417",
+							"otherinfo": "1958414417, which evaluates to: 2032-01-22 20:00:17."
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>Manually confirm that the timestamp data is not sensitive, and that the data cannot be aggregated to disclose exploitable patterns.</p>",
+					"otherinfo": "<p>1793640049, which evaluates to: 2026-11-02 17:20:49.</p>",
+					"reference": "<p>https://cwe.mitre.org/data/definitions/200.html</p>",
+					"cweid": "497",
+					"wascid": "13",
+					"sourceid": "105"
+				},
+				{
+					"pluginid": "10021",
+					"alertRef": "10021",
+					"alert": "X-Content-Type-Options Header Missing",
+					"name": "X-Content-Type-Options Header Missing",
+					"riskcode": "1",
+					"confidence": "2",
+					"riskdesc": "Low (Medium)",
+					"desc": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+					"instances":[ 
+						{
+							"id": "13",
+							"uri": "https://192.168.4.4/dvwa/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "11",
+							"uri": "https://192.168.4.4/dvwa/index.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/index.php",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "43",
+							"uri": "https://192.168.4.4/dvwa/instructions.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "27",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						},
+						{
+							"id": "38",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=include.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "x-content-type-options",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.\nAt \"High\" threshold this scan rule will not alert on client or server error responses."
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.</p>",
+					"otherinfo": "<p>This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.</p><p>At \"High\" threshold this scan rule will not alert on client or server error responses.</p>",
+					"reference": "<p>https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/compatibility/gg622941(v=vs.85)</p><p>https://owasp.org/www-community/Security_Headers</p>",
+					"cweid": "693",
+					"wascid": "15",
+					"sourceid": "1"
+				},
+				{
+					"pluginid": "10111",
+					"alertRef": "10111",
+					"alert": "Authentication Request Identified",
+					"name": "Authentication Request Identified",
+					"riskcode": "0",
+					"confidence": "3",
+					"riskdesc": "Informational (High)",
+					"desc": "<p>The given request has been identified as an authentication request. The 'Other Info' field contains a set of key=value lines which identify any relevant fields. If the request is in a context which has an Authentication Method set to \"Auto-Detect\" then this rule will change the authentication to match the request identified.</p>",
+					"instances":[ 
+						{
+							"id": "318",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/?Login=Login&password=ZAP&username=ZAP",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/ (Login,password,username)",
+							"method": "GET",
+							"param": "Login",
+							"attack": "",
+							"evidence": "password",
+							"otherinfo": "userParam=Login\nuserValue=Login\npasswordParam=password\nreferer=https://192.168.4.4/dvwa/vulnerabilities/brute/"
+						}
+					],
+					"count": "1",
+					"systemic": false,
+					"solution": "<p>This is an informational alert rather than a vulnerability and so there is nothing to fix.</p>",
+					"otherinfo": "<p>userParam=Login</p><p>userValue=Login</p><p>passwordParam=password</p><p>referer=https://192.168.4.4/dvwa/vulnerabilities/brute/</p>",
+					"reference": "<p>https://www.zaproxy.org/docs/desktop/addons/authentication-helper/auth-req-id/</p>",
+					"cweid": "-1",
+					"wascid": "-1",
+					"sourceid": "141"
+				},
+				{
+					"pluginid": "10024",
+					"alertRef": "10024",
+					"alert": "Information Disclosure - Sensitive Information in URL",
+					"name": "Information Disclosure - Sensitive Information in URL",
+					"riskcode": "0",
+					"confidence": "2",
+					"riskdesc": "Informational (Medium)",
+					"desc": "<p>The request appeared to contain sensitive information leaked in the URL. This can violate PCI and most organizational compliance policies. You can configure the list of strings for this check to add or remove values specific to your environment.</p>",
+					"instances":[ 
+						{
+							"id": "324",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/?Login=Login&password=ZAP&username=ZAP",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/ (Login,password,username)",
+							"method": "GET",
+							"param": "password",
+							"attack": "",
+							"evidence": "password",
+							"otherinfo": "The URL contains potentially sensitive information. The following string was found via the pattern: pass\npassword"
+						},
+						{
+							"id": "325",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/?Login=Login&password=ZAP&username=ZAP",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/ (Login,password,username)",
+							"method": "GET",
+							"param": "username",
+							"attack": "",
+							"evidence": "username",
+							"otherinfo": "The URL contains potentially sensitive information. The following string was found via the pattern: user\nusername"
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>Do not pass sensitive information in URIs.</p>",
+					"otherinfo": "<p>The URL contains potentially sensitive information. The following string was found via the pattern: pass</p><p>password</p>",
+					"reference": "",
+					"cweid": "598",
+					"wascid": "13",
+					"sourceid": "141"
+				},
+				{
+					"pluginid": "10027",
+					"alertRef": "10027",
+					"alert": "Information Disclosure - Suspicious Comments",
+					"name": "Information Disclosure - Suspicious Comments",
+					"riskcode": "0",
+					"confidence": "2",
+					"riskdesc": "Informational (Medium)",
+					"desc": "<p>The response appears to contain suspicious comments which may help an attacker.</p>",
+					"instances":[ 
+						{
+							"id": "151",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/javascript/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/javascript\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "/*\nMD5 code from here\nhttps://github",
+							"otherinfo": "The following pattern was used: \\bFROM\\b and was detected in likely comment: \"/*\nMD5 code from here\nhttps://github.com/blueimp/JavaScript-MD5\n*/\", see evidence field for the suspicious comment/snippet."
+						},
+						{
+							"id": "456",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/javascript/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/javascript\/ ()(phrase,send,token)",
+							"method": "POST",
+							"param": "",
+							"attack": "",
+							"evidence": "/*\nMD5 code from here\nhttps://github",
+							"otherinfo": "The following pattern was used: \\bFROM\\b and was detected in likely comment: \"/*\nMD5 code from here\nhttps://github.com/blueimp/JavaScript-MD5\n*/\", see evidence field for the suspicious comment/snippet."
+						}
+					],
+					"count": "2",
+					"systemic": false,
+					"solution": "<p>Remove all comments that return information that may help an attacker and fix any underlying problems they refer to.</p>",
+					"otherinfo": "<p>The following pattern was used: \\bFROM\\b and was detected in likely comment: \"/*</p><p>MD5 code from here</p><p>https://github.com/blueimp/JavaScript-MD5</p><p>*/\", see evidence field for the suspicious comment/snippet.</p>",
+					"reference": "",
+					"cweid": "615",
+					"wascid": "13",
+					"sourceid": "97"
+				},
+				{
+					"pluginid": "10109",
+					"alertRef": "10109",
+					"alert": "Modern Web Application",
+					"name": "Modern Web Application",
+					"riskcode": "0",
+					"confidence": "2",
+					"riskdesc": "Informational (Medium)",
+					"desc": "<p>The application appears to be a modern web application. If you need to explore it automatically then the Client Spider may well be more effective than the standard one.</p>",
+					"instances":[ 
+						{
+							"id": "6",
+							"uri": "https://192.168.4.4/dvwa/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a href=\"#\" onclick=\"javascript:toggleTheme();\" class=\"theme-icon\" title=\"Toggle theme between light and dark.\">\n                    <img src=\"dvwa/images/theme-light-dark.png\" alt=\"Damn Vulnerable Web Application\" />\n                </a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						},
+						{
+							"id": "7",
+							"uri": "https://192.168.4.4/dvwa/index.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/index.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a href=\"#\" onclick=\"javascript:toggleTheme();\" class=\"theme-icon\" title=\"Toggle theme between light and dark.\">\n                    <img src=\"dvwa/images/theme-light-dark.png\" alt=\"Damn Vulnerable Web Application\" />\n                </a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						},
+						{
+							"id": "41",
+							"uri": "https://192.168.4.4/dvwa/instructions.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a href=\"#\" onclick=\"javascript:toggleTheme();\" class=\"theme-icon\" title=\"Toggle theme between light and dark.\">\n                    <img src=\"dvwa/images/theme-light-dark.png\" alt=\"Damn Vulnerable Web Application\" />\n                </a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						},
+						{
+							"id": "25",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a href=\"#\" onclick=\"javascript:toggleTheme();\" class=\"theme-icon\" title=\"Toggle theme between light and dark.\">\n                    <img src=\"../../dvwa/images/theme-light-dark.png\" alt=\"Damn Vulnerable Web Application\" />\n                </a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						},
+						{
+							"id": "36",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=include.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "",
+							"attack": "",
+							"evidence": "<a href=\"#\" onclick=\"javascript:toggleTheme();\" class=\"theme-icon\" title=\"Toggle theme between light and dark.\">\n                    <img src=\"../../dvwa/images/theme-light-dark.png\" alt=\"Damn Vulnerable Web Application\" />\n                </a>",
+							"otherinfo": "Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application."
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>This is an informational alert and so no changes are required.</p>",
+					"otherinfo": "<p>Links have been found that do not have traditional href attributes, which is an indication that this is a modern web application.</p>",
+					"reference": "",
+					"cweid": "-1",
+					"wascid": "-1",
+					"sourceid": "1"
+				},
+				{
+					"pluginid": "10015",
+					"alertRef": "10015",
+					"alert": "Re-examine Cache-control Directives",
+					"name": "Re-examine Cache-control Directives",
+					"riskcode": "0",
+					"confidence": "1",
+					"riskdesc": "Informational (Low)",
+					"desc": "<p>The cache-control header has not been set properly or is missing, allowing the browser and proxies to cache content. For static assets like css, js, or image files this might be intended, however, the resources should be reviewed to ensure that no sensitive content will be cached.</p>",
+					"instances":[ 
+						{
+							"id": "2",
+							"uri": "https://192.168.4.4/dvwa/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/",
+							"method": "GET",
+							"param": "cache-control",
+							"attack": "",
+							"evidence": "no-cache, must-revalidate",
+							"otherinfo": ""
+						},
+						{
+							"id": "4",
+							"uri": "https://192.168.4.4/dvwa/index.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/index.php",
+							"method": "GET",
+							"param": "cache-control",
+							"attack": "",
+							"evidence": "no-cache, must-revalidate",
+							"otherinfo": ""
+						},
+						{
+							"id": "31",
+							"uri": "https://192.168.4.4/dvwa/instructions.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php",
+							"method": "GET",
+							"param": "cache-control",
+							"attack": "",
+							"evidence": "no-cache, must-revalidate",
+							"otherinfo": ""
+						},
+						{
+							"id": "23",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/",
+							"method": "GET",
+							"param": "cache-control",
+							"attack": "",
+							"evidence": "no-cache, must-revalidate",
+							"otherinfo": ""
+						},
+						{
+							"id": "34",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/fi/?page=include.php",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/fi\/ (page)",
+							"method": "GET",
+							"param": "cache-control",
+							"attack": "",
+							"evidence": "no-cache, must-revalidate",
+							"otherinfo": ""
+						}
+					],
+					"count": "5",
+					"systemic": true,
+					"solution": "<p>For secure content, ensure the cache-control HTTP header is set with \"no-cache, no-store, must-revalidate\". If an asset should be cached consider setting the directives \"public, max-age, immutable\".</p>",
+					"otherinfo": "",
+					"reference": "<p>https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#web-content-caching</p><p>https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control</p><p>https://grayduck.mn/2021/09/13/cache-control-recommendations/</p>",
+					"cweid": "525",
+					"wascid": "13",
+					"sourceid": "1"
+				},
+				{
+					"pluginid": "10031",
+					"alertRef": "10031",
+					"alert": "User Controllable HTML Element Attribute (Potential XSS)",
+					"name": "User Controllable HTML Element Attribute (Potential XSS)",
+					"riskcode": "0",
+					"confidence": "1",
+					"riskdesc": "Informational (Low)",
+					"desc": "<p>This check looks at user-supplied input in query string parameters and POST data to identify where certain HTML attribute values might be controlled. This provides hot-spot detection for XSS (cross-site scripting) that will require further review by a security analyst to determine exploitability.</p>",
+					"instances":[ 
+						{
+							"id": "213",
+							"uri": "https://192.168.4.4/dvwa/instructions.php?doc=readme",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/instructions.php (doc)",
+							"method": "GET",
+							"param": "doc",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/instructions.php?doc=readme\n\nappears to include user input in:\na(n) [a] tag [href] attribute\n\nThe user input found was:\ndoc=readme\n\nThe user-controlled value was:\nreadme.ar.md"
+						},
+						{
+							"id": "328",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/brute/?Login=Login&password=ZAP&username=ZAP",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/brute\/ (Login,password,username)",
+							"method": "GET",
+							"param": "Login",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/brute/?Login=Login&password=ZAP&username=ZAP\n\nappears to include user input in:\na(n) [input] tag [value] attribute\n\nThe user input found was:\nLogin=Login\n\nThe user-controlled value was:\nlogin"
+						},
+						{
+							"id": "362",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/sqli/?Submit=Submit&id=ZAP",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/sqli\/ (Submit,id)",
+							"method": "GET",
+							"param": "Submit",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/sqli/?Submit=Submit&id=ZAP\n\nappears to include user input in:\na(n) [input] tag [type] attribute\n\nThe user input found was:\nSubmit=Submit\n\nThe user-controlled value was:\nsubmit"
+						},
+						{
+							"id": "427",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/csp/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/csp\/ ()(include)",
+							"method": "POST",
+							"param": "include",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/csp/\n\nappears to include user input in:\na(n) [script] tag [src] attribute\n\nThe user input found was:\ninclude=ZAP\n\nThe user-controlled value was:\nzap"
+						},
+						{
+							"id": "373",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/exec/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/exec\/ ()(Submit,ip)",
+							"method": "POST",
+							"param": "Submit",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/exec/\n\nappears to include user input in:\na(n) [input] tag [type] attribute\n\nThe user input found was:\nSubmit=Submit\n\nThe user-controlled value was:\nsubmit"
+						},
+						{
+							"id": "481",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/javascript/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/javascript\/ ()(phrase,send,token)",
+							"method": "POST",
+							"param": "phrase",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/javascript/\n\nappears to include user input in:\na(n) [input] tag [value] attribute\n\nThe user input found was:\nphrase=ChangeMe\n\nThe user-controlled value was:\nchangeme"
+						},
+						{
+							"id": "482",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/javascript/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/javascript\/ ()(phrase,send,token)",
+							"method": "POST",
+							"param": "send",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/javascript/\n\nappears to include user input in:\na(n) [input] tag [type] attribute\n\nThe user input found was:\nsend=Submit\n\nThe user-controlled value was:\nsubmit"
+						},
+						{
+							"id": "394",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/upload/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/upload\/ ()(MAX_FILE_SIZE,Upload,uploaded)",
+							"method": "POST",
+							"param": "MAX_FILE_SIZE",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/upload/\n\nappears to include user input in:\na(n) [input] tag [value] attribute\n\nThe user input found was:\nMAX_FILE_SIZE=100000\n\nThe user-controlled value was:\n100000"
+						},
+						{
+							"id": "395",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/upload/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/upload\/ ()(MAX_FILE_SIZE,Upload,uploaded)",
+							"method": "POST",
+							"param": "Upload",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/upload/\n\nappears to include user input in:\na(n) [input] tag [name] attribute\n\nThe user input found was:\nUpload=Upload\n\nThe user-controlled value was:\nuploaded"
+						},
+						{
+							"id": "408",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/xss_s/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/xss_s\/ ()(btnClear,mtxMessage,txtName)",
+							"method": "POST",
+							"param": "btnClear",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/xss_s/\n\nappears to include user input in:\na(n) [input] tag [value] attribute\n\nThe user input found was:\nbtnClear=Clear Guestbook\n\nThe user-controlled value was:\nclear guestbook"
+						},
+						{
+							"id": "416",
+							"uri": "https://192.168.4.4/dvwa/vulnerabilities/xss_s/",
+							"nodeName": "https:\/\/192.168.4.4\/dvwa\/vulnerabilities\/xss_s\/ ()(btnSign,mtxMessage,txtName)",
+							"method": "POST",
+							"param": "btnSign",
+							"attack": "",
+							"evidence": "",
+							"otherinfo": "User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:\n\nhttps://192.168.4.4/dvwa/vulnerabilities/xss_s/\n\nappears to include user input in:\na(n) [input] tag [value] attribute\n\nThe user input found was:\nbtnSign=Sign Guestbook\n\nThe user-controlled value was:\nsign guestbook"
+						}
+					],
+					"count": "11",
+					"systemic": false,
+					"solution": "<p>Validate all input and sanitize output it before writing to any HTML attributes.</p>",
+					"otherinfo": "<p>User-controlled HTML attribute values were found. Try injecting special characters to see if XSS might be possible. The page at the following URL:</p><p></p><p>https://192.168.4.4/dvwa/instructions.php?doc=readme</p><p></p><p>appears to include user input in:</p><p>a(n) [a] tag [href] attribute</p><p></p><p>The user input found was:</p><p>doc=readme</p><p></p><p>The user-controlled value was:</p><p>readme.ar.md</p>",
+					"reference": "<p>https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html</p>",
+					"cweid": "20",
+					"wascid": "20",
+					"sourceid": "119"
+				}
+			]
+		}
+	],
+	"sequences":[
+	]
+
+}

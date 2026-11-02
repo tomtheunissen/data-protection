@@ -1,0 +1,22 @@
+# 02-11-2026 18:06:54 V3: tom's VPN session dropped. vm-vpn-01: journalctl -u openvpn-server@server (16:36-18:04 CET) + server.conf settings
+2026-11-02T16:36:37+01:00 vm-vpn-01 openvpn[25019]: 84.84.226.81:57314 VERIFY OK: depth=0, CN=tom
+2026-11-02T16:36:37+01:00 vm-vpn-01 openvpn[25019]: 84.84.226.81:57314 TLS: Username/Password authentication succeeded for username 'tom'
+2026-11-02T16:36:37+01:00 vm-vpn-01 openvpn[25019]: 84.84.226.81:57314 [tom] Peer Connection Initiated with [AF_INET]84.84.226.81:57314
+2026-11-02T17:33:17+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 TLS: soft reset sec=3400/3400 bytes=727838/-1 pkts=4292/0
+2026-11-02T17:34:17+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)
+2026-11-02T17:34:17+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 TLS Error: TLS handshake failed
+2026-11-02T17:34:17+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 TLS: move_session: dest=TM_LAME_DUCK src=TM_ACTIVE reinit_src=1
+2026-11-02T17:35:18+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)
+2026-11-02T17:35:18+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 TLS Error: TLS handshake failed
+2026-11-02T17:36:33+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)
+2026-11-02T17:36:33+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 TLS Error: TLS handshake failed
+2026-11-02T17:37:16+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 [UNDEF] Inactivity timeout (--ping-restart), restarting
+2026-11-02T17:37:16+01:00 vm-vpn-01 openvpn[25019]: tom/84.84.226.81:57314 SIGUSR1[soft,ping-restart] received, client-instance restarting
+2026-11-02T18:03:11+01:00 vm-vpn-01 openvpn[25019]: 84.84.226.81:49794 VERIFY OK: depth=0, CN=tom
+2026-11-02T18:03:11+01:00 vm-vpn-01 openvpn[25019]: 84.84.226.81:49794 TLS: Username/Password authentication succeeded for username 'tom'
+2026-11-02T18:03:11+01:00 vm-vpn-01 openvpn[25019]: 84.84.226.81:49794 [tom] Peer Connection Initiated with [AF_INET]84.84.226.81:49794
+
+$ grep -nE "^(reneg-sec|auth-gen-token|keepalive|auth-user-pass-verify)" /etc/openvpn/server/server.conf
+29:auth-user-pass-verify /etc/openvpn/server/verify-user.sh via-file
+31:keepalive 10 120
+(reneg-sec en auth-gen-token: niet aanwezig)

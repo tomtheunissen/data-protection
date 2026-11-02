@@ -1,0 +1,11 @@
+# 02-11-2026 16:58:26 stap 7 rooktest vanaf laptop (P=20.8.94.69), verwacht 200 200 403 301 200 403
+200 /
+200 /portaal/
+403 /portaal/?id=1'%20OR%20'1'='1
+301 /media
+200 /app/
+403 /app/?q=<script>alert(1)</script>
+$ [ids-01] systemctl is-active suricata zkoo-ids-tap zkoo-ids-health.timer
+active
+active
+active

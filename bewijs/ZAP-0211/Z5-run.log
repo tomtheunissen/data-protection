@@ -1,0 +1,65 @@
+ghcr.io/zaproxy/zaproxy:stable
+pulled 17:20:28
+Found Java version 17.0.21
+Available memory: 3906 MB
+Using JVM args: -Xmx976m
+914 [main] INFO  org.parosproxy.paros.Constant - Copying default configuration to /home/zap/.ZAP/config.xml
+1122 [main] INFO  org.parosproxy.paros.Constant - Creating directory /home/zap/.ZAP/session
+1122 [main] INFO  org.parosproxy.paros.Constant - Creating directory /home/zap/.ZAP/dirbuster
+1122 [main] INFO  org.parosproxy.paros.Constant - Creating directory /home/zap/.ZAP/fuzzers
+1123 [main] INFO  org.parosproxy.paros.Constant - Creating directory /home/zap/.ZAP/plugin
+Nov 02, 2026 5:20:41 PM java.util.prefs.FileSystemPreferences$1 run
+INFO: Created user preferences directory.
+Job replacer set description = DVWA session cookie
+Job replacer set url = 
+Job replacer set matchType = req_header
+Job replacer set matchString = Cookie
+Job replacer set matchRegex = false
+Job replacer set replacementString = PHPSESSID=<redacted>; security=low
+Job replacer set description = Browser User-Agent (the AF spider sends an empty one, which the WAF blocks)
+Job replacer set url = 
+Job replacer set matchType = req_header
+Job replacer set matchString = User-Agent
+Job replacer set matchRegex = false
+Job replacer set replacementString = Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36
+Job spider set context = dvwa
+Job spider set url = https://192.168.4.4/dvwa/index.php
+Job spider set maxDuration = 3
+Job passiveScan-wait set maxDuration = 2
+Job activeScan set context = dvwa
+Job activeScan set maxRuleDurationInMins = 2
+Job activeScan set maxScanDurationInMins = 14
+Job passiveScan-wait set maxDuration = 2
+Job report set template = traditional-html
+Job report set reportDir = /zap/wrk
+Job report set reportFile = Z5-full-dvwa-direct.html
+Job report set template = traditional-json
+Job report set reportDir = /zap/wrk
+Job report set reportFile = Z5-full-dvwa-direct.json
+Job report set template = traditional-md
+Job report set reportDir = /zap/wrk
+Job report set reportFile = Z5-full-dvwa-direct.md
+Job replacer started
+Job replacer finished, time taken: 00:00:00
+Job spider started
+Job spider requesting URL https://192.168.4.4/dvwa/
+Job spider found 258 URLs
+Job spider finished, time taken: 00:00:02
+Job passiveScan-wait started
+Job passiveScan-wait finished, time taken: 00:00:10
+Job activeScan started
+Job activeScan terminated
+Job activeScan finished, time taken: 00:14:06
+Job passiveScan-wait started
+Job passiveScan-wait finished, time taken: 00:00:00
+Job report started
+Job report generated report /zap/wrk/Z5-full-dvwa-direct.html
+Job report finished, time taken: 00:00:35
+Job report started
+Job report generated report /zap/wrk/Z5-full-dvwa-direct.json
+Job report finished, time taken: 00:00:03
+Job report started
+Job report generated report /zap/wrk/Z5-full-dvwa-direct.md
+Job report finished, time taken: 00:00:01
+Automation plan succeeded!
+EXIT=0 17:36:58

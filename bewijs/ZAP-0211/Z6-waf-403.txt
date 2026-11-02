@@ -1,0 +1,41 @@
+# 02-11-2026 18:40:37 Z6 WAF on vm-proxy-01: docker logs proxy-waf-1 --since 2026-11-02T15:58:46Z (scan start) ; Z4 window 2026-11-02T17:05:54Z .. 17:13:20Z
+requests since start: 8345
+403 since start: 3744
+
+403 per scan window:
+  Z1-Z3(baseline): 23 x 403 van 35 verzoeken
+  Z4(active,via-WAF): 3707 x 403 van 8253 verzoeken
+
+Status codes Z4 window:
+   3707 403
+   2371 200
+   1310 301
+    411 404
+    365 500
+     88 302
+      1 400
+
+Blocking rule / anomaly score (since start, only 949110 is logged, finding D4):
+   1209 id "949110"	Total Score: 8
+   1097 id "949110"	Total Score: 13
+    840 id "949110"	Total Score: 18
+    264 id "949110"	Total Score: 23
+    155 id "949110"	Total Score: 33
+     72 id "949110"	Total Score: 28
+     32 id "949110"	Total Score: 43
+     31 id "949110"	Total Score: 5
+     13 id "949110"	Total Score: 58
+     12 id "949110"	Total Score: 83
+     12 id "949110"	Total Score: 38
+
+Blocked DVWA pages in the Z4 window (top 10):
+    772 POST /portaal/dvwa/vulnerabilities/xss_s/
+    396 POST /portaal/dvwa/vulnerabilities/javascript/
+    395 GET /portaal/dvwa/vulnerabilities/brute/
+    274 GET /portaal/dvwa/vulnerabilities/sqli_blind/
+    272 POST /portaal/dvwa/vulnerabilities/exec/
+    266 GET /portaal/dvwa/vulnerabilities/sqli/
+    146 POST /portaal/dvwa/vulnerabilities/csp/
+    145 GET /portaal/dvwa/vulnerabilities/xss_r/
+    136 POST /portaal/dvwa/vulnerabilities/weak_id/
+    136 GET /portaal/dvwa/vulnerabilities/open_redirect/source/info.php

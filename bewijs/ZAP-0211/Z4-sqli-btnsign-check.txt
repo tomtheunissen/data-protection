@@ -1,0 +1,4 @@
+# 02-11-2026 18:41:47 Z4 SQLi check (btnSign): same POST as in the ZAP report, DVWA is off now -> 404 = WAF let it through, 403 = WAF blocked
+404  POST https://20.8.94.69/portaal/dvwa/vulnerabilities/xss_s/  body: txtName=ZAP&mtxMessage=ZAP&btnSign=Sign+Guestbook
+404  POST https://20.8.94.69/portaal/dvwa/vulnerabilities/xss_s/  body: txtName=ZAP&mtxMessage=ZAP&btnSign=Sign+Guestbook+AND+1%3D1+--+
+404  POST https://20.8.94.69/portaal/dvwa/vulnerabilities/xss_s/  body: txtName=ZAP&mtxMessage=ZAP&btnSign=Sign+Guestbook+OR+1%3D1+--+

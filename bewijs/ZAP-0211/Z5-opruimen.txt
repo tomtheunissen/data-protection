@@ -1,0 +1,7 @@
+# 02-11-2026 18:37:48 Z5 cleanup on vm-proxy-01: docker rmi ghcr.io/zaproxy/zaproxy:stable, rm -rf ~/zap-z5, docker images | grep zap, free -m
+geen zap-container
+image verwijderd
+werkmap verwijderd
+controle docker images | grep zap:
+(leeg)
+Mem:            3906         695        2972           4         494        3210

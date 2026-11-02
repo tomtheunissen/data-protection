@@ -1,0 +1,32 @@
+env:
+  contexts:
+    - name: target
+      urls:
+        - "https://20.8.94.69/app/"
+      includePaths:
+        - 'https://20\.8\.94\.69/app/.*'
+  parameters:
+    failOnError: false
+    progressToStdout: true
+jobs:
+  - type: replacer
+    rules:
+      - description: "Browser User-Agent (see Z4a)"
+        url: ""
+        matchType: req_header
+        matchString: "User-Agent"
+        matchRegex: false
+        replacementString: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+  - type: spider
+    parameters:
+      context: target
+      maxDuration: 1
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 2
+  - type: report
+    parameters: {template: traditional-html, reportDir: /zap/wrk, reportFile: Z2b-baseline-ua-app02.html}
+  - type: report
+    parameters: {template: traditional-json, reportDir: /zap/wrk, reportFile: Z2b-baseline-ua-app02.json}
+  - type: report
+    parameters: {template: traditional-md, reportDir: /zap/wrk, reportFile: Z2b-baseline-ua-app02.md}

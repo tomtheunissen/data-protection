@@ -1,0 +1,13 @@
+# ZAP-scan 02-11-2026, tijden in UTC
+zap_versie=2.17.0 (ghcr.io/zaproxy/zaproxy:stable)
+start_utc=2026-11-02T15:58:46Z
+nulmeting_ids_fastlog_regels=17
+nulmeting_waf_403_totaal=4
+# 02-11-2026 17:11:40 stap 8c: DVWA database aangemaakt (setup.php create_db), ingelogd als admin, security=low (curl via de WAF)
+# 02-11-2026 18:18:27 stap 8e voorbereiding: DVWA-database gereset (Create / Reset Database) na Z4, opnieuw ingelogd als admin, security=low; verse sessie gebruikt in het Z5-scanplan
+z1_z3_baseline_utc=2026-11-02T16:01:29Z..16:02:47Z (first attempt 15:59-16:00 scanned only the root because of a script error; reports discarded)
+z4_utc=2026-11-02T17:06:04Z..17:13:19Z (active scan 6m59s, finished by itself)
+z5_utc=2026-11-02T17:18:49Z..17:36:58Z (image pull until 17:20:28, active scan 14m06s, stopped at maxScanDurationInMins=14)
+dvwa_uit_8g_utc=2026-11-02T17:39Z..17:40:22Z
+z6_meting_utc=2026-11-02T17:40:37Z
+z1b_z3b_utc=2026-11-02T17:48:38Z..17:49:20Z (AF plan with User-Agent replacer, spider 1 min + passive scan)

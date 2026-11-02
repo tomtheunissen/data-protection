@@ -27,3 +27,4 @@ $ journalctl | grep -E "CRL:|Peer Connection Initiated" (since 22:50)
 2026-10-31T00:18:58+01:00 vm-vpn-01 openvpn[888]: 84.84.226.81:55998 [tom] Peer Connection Initiated with [AF_INET]84.84.226.81:55998
 
 Upstream: OpenVPN/openvpn#1104, fix commit 15a1465f (master, 2026-10-12): 'Make CRL reload EOF detection independent of stale error queue entries'. Not in release/2.6 (checked 31-10-2026).
+Correction 02-11-2026: #1103 is the upstream issue; #1104 is a pull request (open) for the root cause; the CRL-side fix 15a1465f is in master.
